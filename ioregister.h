@@ -38,7 +38,7 @@
  * @param type  register type
  */
 template<uint32_t addr, typename type = uint32_t>
-struct IORregister
+struct IORegister
 {
 	type operator=(type value) { *(volatile type*)addr = value; return value; }
 	void operator|=(type value) { *(volatile type*)addr |= value; }
