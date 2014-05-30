@@ -23,7 +23,8 @@
  *
  *
  *  file         : rtc_stm32f4xx.h
- *  description  : RTC module for rtc_stm32f4xx series. Used by rtc.h.
+ *  description  : RTC module for stm32f4xx series. Used by rtc.h.
+ *  created on   : 15.05.2013
  *
  */
 

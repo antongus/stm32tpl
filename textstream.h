@@ -45,9 +45,9 @@ public:
 	// abstract methods ()
 	virtual void PutChar(char ch) = 0;
 	virtual int GetChar(int timeout = 0) = 0;
-	virtual int Keypressed(void) = 0;
-	virtual int CanSend(void) = 0;
-	virtual int TxEmpty(void) = 0;
+	virtual int Keypressed() = 0;
+	virtual int CanSend() = 0;
+	virtual int TxEmpty() = 0;
 
 	static char HexChar(char ch)
 	{
