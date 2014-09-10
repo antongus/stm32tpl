@@ -134,6 +134,8 @@ enum PinConfig
 	ALT_OUTPUT_OD_PULLDOWN   ///!< alternate function output open-drain pull-down
 };
 
+typedef PinConfig direction;
+
 
 /**
  * PinMode enumeration. Defines all possible values for MODER register.
