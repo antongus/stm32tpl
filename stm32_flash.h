@@ -36,7 +36,7 @@
 /**
  * Template to define flash properties for selected chip.
  */
-template <chip_type_t chip_type> struct Stm32FlashProps;
+template <ChipType chip_type> struct Stm32FlashProps;
 
 /**
  * Specializations for different chip types
