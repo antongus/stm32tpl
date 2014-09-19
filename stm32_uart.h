@@ -399,7 +399,7 @@ public:
 	INLINE void UartIrqHandler();
 };
 
-template<typename props>
+template<class props>
 Uart<props>::Uart()
 	: TextStream()
 	, rxChannel_()
@@ -443,14 +443,14 @@ Uart<props>::Uart()
 	NVIC_EnableIRQ(USARTx_IRQn);
 }
 
-template<typename props>
+template<class props>
 void Uart<props>::PutChar(char ch)
 {
 	txChannel_.push(ch);
 	EnableTxInterrupt();
 }
 
-template<typename props>
+template<class props>
 int Uart<props>::GetChar(int timeout)
 {
 	char ch = 0;
@@ -459,7 +459,7 @@ int Uart<props>::GetChar(int timeout)
 	return -1;
 }
 
-template<typename props>
+template<class props>
 void Uart<props>::SendBuffer(const void* buf, size_t size)
 {
 	const char* ptr = reinterpret_cast<const char*>(buf);
@@ -467,7 +467,7 @@ void Uart<props>::SendBuffer(const void* buf, size_t size)
 	EnableTxInterrupt();
 }
 
-template<typename props>
+template<class props>
 void Uart<props>::UartIrqHandler()
 {
 	uint16_t status = USARTx->SR;
