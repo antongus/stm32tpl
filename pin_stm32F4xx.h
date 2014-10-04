@@ -69,8 +69,8 @@
 #ifndef PIN_STM32F4XX_H_
 #define PIN_STM32F4XX_H_
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 #ifndef INLINE
 #define INLINE __attribute__((__always_inline__)) inline

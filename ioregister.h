@@ -30,7 +30,7 @@
 
 #ifndef IOREGISTER_H_INCLUDED
 #define IOREGISTER_H_INCLUDED
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * IO (read/write accessible) register

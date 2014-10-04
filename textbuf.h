@@ -33,8 +33,6 @@
  *
  */
 
-#pragma once
-
 #ifndef TEXTBUF_H_INCLUDED
 #define TEXTBUF_H_INCLUDED
 
@@ -45,12 +43,12 @@
  * output-only text stream (writes to internal buffer)
  */
 template <size_t bufSize>
-class TextBuffer: virtual public TextStream
+class TextBuffer: public TextStream
 {
 public:
 	static const size_t SIZE = bufSize;
-	TextBuffer() : len_(0)
-	{}
+	TextBuffer()
+		: len_(0) { buf_[0] = 0; }
 	virtual void PutChar(char ch)
 	{
 		if (CanSend())
@@ -63,13 +61,12 @@ public:
 	virtual int GetChar(int ) { return -1; }
 	virtual int Keypressed() { return false; }
 	virtual int TxEmpty() { return true; }
-	int Len() { return len_; }
+	int Len() const { return len_; }
 	void Reset() { len_ = 0; }
 	operator char*() { return buf_; }
 private:
 	char buf_[SIZE];
 	size_t len_;
 };
-
 
 #endif // TEXTBUF_H_INCLUDED

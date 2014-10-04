@@ -31,7 +31,7 @@
 #ifndef STM32_H_INCLUDED
 #define STM32_H_INCLUDED
 
-#include <stdint.h>
+#include <cstdint>
 #include "ioregister.h"
 #include "cortex-m3-regs.h"
 

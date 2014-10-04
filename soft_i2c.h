@@ -31,7 +31,7 @@
 
 #ifndef SOFT_I2C_H_INCLUDED
 #define SOFT_I2C_H_INCLUDED
-#include <stdint.h>
+#include <cstdint>
 #include "pin.h"
 
 /**

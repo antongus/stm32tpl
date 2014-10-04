@@ -27,13 +27,11 @@
  *
  */
 
-#pragma once
-
 #ifndef TEXTSTREAM_H_INCLUDED
 #define TEXTSTREAM_H_INCLUDED
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 #include "ftoa.h"
 
 /**
@@ -65,7 +63,7 @@ public:
 		}
 	}
 
-	static char* Itoa(int value, char* s, int base)
+	static char* Itoa(int value, char* s, int base) __attribute__((__noinline__))
 	{
 		if (base < 2 || base > 16)
 		{
