@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32_FLASH_H_INCLUDED
-#define STM32_FLASH_H_INCLUDED
+#ifndef STM32TPL_STM32_FLASH_H_INCLUDED
+#define STM32TPL_STM32_FLASH_H_INCLUDED
 
 #include "stm32.h"
 
@@ -261,4 +261,4 @@ bool Stm32Flash<props>::massErase()
 	return wait(MASS_ERASE_TIMEOUT);
 }
 
-#endif // STM32_FLASH_H_INCLUDED
+#endif // STM32TPL_STM32_FLASH_H_INCLUDED

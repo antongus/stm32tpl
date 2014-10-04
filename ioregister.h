@@ -28,8 +28,9 @@
  *
  */
 
-#ifndef IOREGISTER_H_INCLUDED
-#define IOREGISTER_H_INCLUDED
+#ifndef STM32TPL_IOREGISTER_H_INCLUDED
+#define STM32TPL_IOREGISTER_H_INCLUDED
+
 #include <cstdint>
 
 /**
@@ -89,4 +90,4 @@ template <uint32_t addr, uint32_t bit> struct PeriphBit
 };
 
 
-#endif // IOREGISTER_H_INCLUDED
+#endif // STM32TPL_IOREGISTER_H_INCLUDED

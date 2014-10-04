@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32_UART_H_INCLUDED
-#define STM32_UART_H_INCLUDED
+#ifndef STM32TPL_STM32_UART_H_INCLUDED
+#define STM32TPL_STM32_UART_H_INCLUDED
 
 #include "stm32.h"
 #include "textstream.h"
@@ -521,4 +521,4 @@ void Uart<props>::UartIrqHandler()
 } // namespace UART
 } // namespace STM32
 
-#endif // STM32_UART_H_INCLUDED
+#endif // STM32TPL_STM32_UART_H_INCLUDED

@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef TEXTBUF_H_INCLUDED
-#define TEXTBUF_H_INCLUDED
+#ifndef STM32TPL_TEXTBUF_H_INCLUDED
+#define STM32TPL_TEXTBUF_H_INCLUDED
 
 #include "textstream.h"
 
@@ -69,4 +69,4 @@ private:
 	size_t len_;
 };
 
-#endif // TEXTBUF_H_INCLUDED
+#endif // STM32TPL_TEXTBUF_H_INCLUDED

@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef COMMANDS_H_INCLUDED
-#define COMMANDS_H_INCLUDED
+#ifndef STM32TPL_COMMANDS_H_INCLUDED
+#define STM32TPL_COMMANDS_H_INCLUDED
 
 #include "util.h"
 #include "textstream.h"
@@ -134,4 +134,4 @@ int command_##id##_handler(char * args, TextStream& stream); \
 InterpreterCommand command_##id##_object(xstr(cmd_name), command_##id##_handler);	\
 int command_##id##_handler(char * args __attribute__((unused)), TextStream& stream __attribute__((unused))) \
 
-#endif // COMMANDS_H_INCLUDED
+#endif // STM32TPL_COMMANDS_H_INCLUDED

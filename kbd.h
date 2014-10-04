@@ -27,10 +27,8 @@
  *
  */
 
-#pragma once
-
-#ifndef KBD_H_INCLUDED
-#define KBD_H_INCLUDED
+#ifndef STM32TPL_KBD_H_INCLUDED
+#define STM32TPL_KBD_H_INCLUDED
 
 #include <scmRTOS.h>
 
@@ -121,4 +119,4 @@ public:
 	}
 };
 
-#endif // KBD_H_INCLUDED
+#endif // STM32TPL_KBD_H_INCLUDED

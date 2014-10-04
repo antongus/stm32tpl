@@ -27,10 +27,8 @@
  *
  */
 
-#pragma once
-
-#ifndef FTOA_H_INCLUDED
-#define FTOA_H_INCLUDED
+#ifndef STM32TPL_FTOA_H_INCLUDED
+#define STM32TPL_FTOA_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,5 +40,5 @@ char * ftoa(double f, char * buf, int precision);
 }
 #endif
 
-#endif // FTOA_H_INCLUDED
+#endif // STM32TPL_FTOA_H_INCLUDED
 

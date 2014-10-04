@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32_DWT_H_INCLUDED
-#define STM32_DWT_H_INCLUDED
+#ifndef STM32TPL_STM32_DWT_H_INCLUDED
+#define STM32TPL_STM32_DWT_H_INCLUDED
 
 #include "stm32.h"
 
@@ -96,4 +96,4 @@ struct DWT_t
 
 extern DWT_t DWT;
 
-#endif // STM32_DWT_H_INCLUDED
+#endif // STM32TPL_STM32_DWT_H_INCLUDED

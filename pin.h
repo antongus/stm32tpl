@@ -30,8 +30,8 @@
  *
  */
 
-#ifndef PIN_H_INCLUDED
-#define PIN_H_INCLUDED
+#ifndef STM32TPL_PIN_H_INCLUDED
+#define STM32TPL_PIN_H_INCLUDED
 
 #if (defined STM32F2XX) || (defined STM32F4XX) || (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  include "pin_stm32F4xx.h"
@@ -39,4 +39,4 @@
 #  include "pin_stm32F1xx.h"
 #endif
 
-#endif // PIN_H_INCLUDED
+#endif // STM32TPL_PIN_H_INCLUDED

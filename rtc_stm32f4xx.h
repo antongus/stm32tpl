@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef RTC_STM32F4XX_H_INCLUDED
-#define RTC_STM32F4XX_H_INCLUDED
+#ifndef STM32TPL_RTC_STM32F4XX_H_INCLUDED
+#define STM32TPL_RTC_STM32F4XX_H_INCLUDED
 
 #include "stm32.h"
 
@@ -275,4 +275,4 @@ bool RtcModule<use_lse>::writeTime(time_t t)
 	return ret;
 }
 
-#endif // RTC_STM32F4XX_H_INCLUDED
+#endif // STM32TPL_RTC_STM32F4XX_H_INCLUDED

@@ -63,8 +63,8 @@
  *
  */
 
-#ifndef PIN_STM32F1XX_H_
-#define PIN_STM32F1XX_H_
+#ifndef STM32TPL_PIN_STM32F1XX_H_INCLUDED
+#define STM32TPL_PIN_STM32F1XX_H_INCLUDED
 
 #include <cstdint>
 #include <cstddef>
@@ -238,4 +238,4 @@ struct Pin
 
 };
 
-#endif // PIN_STM32F1XX_H_
+#endif // STM32TPL_PIN_STM32F1XX_H_INCLUDED

@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32_H_INCLUDED
-#define STM32_H_INCLUDED
+#ifndef STM32TPL_STM32_H_INCLUDED
+#define STM32TPL_STM32_H_INCLUDED
 
 #include <cstdint>
 #include "ioregister.h"
@@ -274,4 +274,4 @@ template<ChipType chipType> struct ChipInfo;
 #endif
 
 
-#endif // STM32_H_INCLUDED
+#endif // STM32TPL_STM32_H_INCLUDED

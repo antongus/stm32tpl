@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef UTIL_H_INCLUDED
-#define UTIL_H_INCLUDED
+#ifndef STM32TPL_UTIL_H_INCLUDED
+#define STM32TPL_UTIL_H_INCLUDED
 
 #include <stdint.h>
 

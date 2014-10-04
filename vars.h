@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef VARS_H_INCLUDED
-#define VARS_H_INCLUDED
+#ifndef STM32TPL_VARS_H_INCLUDED
+#define STM32TPL_VARS_H_INCLUDED
 
 #include "textstream.h"
 #include <string.h>
@@ -152,4 +152,4 @@ Variable variable_##varName##_object(	\
 	DEFINE_VARIABLE_RO(varName); \
 	VARIABLE_GET_HANDLER(varName)
 
-#endif // VARS_H_INCLUDED
+#endif // STM32TPL_VARS_H_INCLUDED

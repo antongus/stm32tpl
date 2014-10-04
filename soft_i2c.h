@@ -27,10 +27,9 @@
  *
  */
 
-#pragma once
+#ifndef STM32TPL_SOFT_I2C_H_INCLUDED
+#define STM32TPL_SOFT_I2C_H_INCLUDED
 
-#ifndef SOFT_I2C_H_INCLUDED
-#define SOFT_I2C_H_INCLUDED
 #include <cstdint>
 #include "pin.h"
 
@@ -212,4 +211,4 @@ void SoftI2c<props>::read(uint8_t addr, void *data, size_t length)
 	stop();
 }
 
-#endif // SOFT_I2C_H_INCLUDED
+#endif // STM32TPL_SOFT_I2C_H_INCLUDED

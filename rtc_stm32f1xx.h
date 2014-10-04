@@ -27,8 +27,8 @@
  *
  */
 
-#ifndef RTC_STM32F1XX_H_INCLUDED
-#define RTC_STM32F1XX_H_INCLUDED
+#ifndef STM32TPL_RTC_STM32F1XX_H_INCLUDED
+#define STM32TPL_RTC_STM32F1XX_H_INCLUDED
 
 #include "stm32.h"
 
@@ -182,4 +182,4 @@ void RtcModule<use_lse>::SetCorrection(uint8_t value)
 	PWR->CR &= ~PWR_CR_DBP;
 }
 
-#endif // RTC_STM32F1XX_H_INCLUDED
+#endif // STM32TPL_RTC_STM32F1XX_H_INCLUDED

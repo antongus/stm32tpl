@@ -27,8 +27,8 @@
  *
  */
 
-#ifndef TEXTSTREAM_H_INCLUDED
-#define TEXTSTREAM_H_INCLUDED
+#ifndef STM32TPL_TEXTSTREAM_H_INCLUDED
+#define STM32TPL_TEXTSTREAM_H_INCLUDED
 
 #include <cstdint>
 #include <cstdlib>
@@ -229,4 +229,4 @@ public:
 
 };
 
-#endif // TEXTSTREAM_H_INCLUDED
+#endif // STM32TPL_TEXTSTREAM_H_INCLUDED

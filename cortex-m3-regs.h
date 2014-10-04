@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef CORTEX_M3_REGS_H_INCLUDED
-#define CORTEX_M3_REGS_H_INCLUDED
+#ifndef STM32TPL_CORTEX_M3_REGS_H_INCLUDED
+#define STM32TPL_CORTEX_M3_REGS_H_INCLUDED
 
 /**
  * main stack pointer (MSP)
@@ -170,4 +170,4 @@ struct RegisterCONTROL
 };
 
 
-#endif // CORTEX_M3_REGS_H_INCLUDED
+#endif // STM32TPL_CORTEX_M3_REGS_H_INCLUDED

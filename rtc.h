@@ -27,8 +27,8 @@
  *
  */
 
-#ifndef RTC_H_INCLUDED
-#define RTC_H_INCLUDED
+#ifndef STM32TPL_RTC_H_INCLUDED
+#define STM32TPL_RTC_H_INCLUDED
 
 #include <time.h>
 
@@ -42,4 +42,4 @@ typedef RtcModule<true> RtcModuleLSE;
 typedef RtcModule<false> RtcModuleLSI;
 
 
-#endif // RTC_H_INCLUDED
+#endif // STM32TPL_RTC_H_INCLUDED
