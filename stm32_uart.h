@@ -32,8 +32,8 @@
 #define STM32TPL_STM32_UART_H_INCLUDED
 
 #include "stm32.h"
-#include "textstream.h"
 #include "stm32_uart_pins.h"
+#include "textstream.h"
 #include <scmRTOS.h>
 
 namespace STM32
@@ -71,8 +71,7 @@ struct SampleUartProps
 */
 template<typename props = SampleUartProps>
 class Uart
-	: public UartTraits<props::uartNum>
-	, public TextStream
+	: public TextStream
 {
 private:
 	typedef UartTraits<props::uartNum> Traits;
@@ -114,24 +113,25 @@ public:
 	static IOStruct<USARTx_BASE, USART_TypeDef> USARTx;
 	Uart();
 
-	INLINE static void EnableClocks()       { Traits::EnableClocks(); }
-	INLINE static void DisableClocks()      { Traits::DisableClocks(); }
-	INLINE static void Enable()             { USARTx->CR1 |= USART_CR1_UE; }
-	INLINE static void Disable()            { USARTx->CR1 &= ~USART_CR1_UE; }
-	INLINE static void StartTx()            { DE::On(); }
-	INLINE static void EndTx()              { DE::Off(); }
+	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
+	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
+	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
+	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
+	INLINE static void StartTx()         { DE::On(); }
+	INLINE static void EndTx()           { DE::Off(); }
 
-	void SetBaudrate(Baudrate value) { USARTx->BRR = (BUS_FREQ + value/2) / value; }
-	Baudrate GetBaudrate() { return BUS_FREQ / USARTx->BRR; }
+	INLINE static void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
+	INLINE static Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
 
-	void PutChar(char ch);
-	int GetChar(int timeout = 0);
-	int Keypressed() { return rxChannel_.get_count(); }
-	virtual int CanSend() { return true; };
-	virtual int TxEmpty() { return false; };
+	virtual void PutChar(char ch) override;
+	virtual int GetChar(int timeout = 0) override;
+	virtual int Keypressed() override { return rxChannel_.get_count(); }
+	virtual int CanSend() override { return txChannel_.get_free_size(); };
+	virtual int TxEmpty() override { return txChannel_.get_count() == 0; };
 
 	void SendBuffer(const void* buf, size_t size);
-	bool ReadBuffer(char* const buf, size_t size) { return rxChannel_.read(buf, size); }
+	bool ReceiveBuffer(void* buf, size_t count, timeout_t timeout);
+
 	INLINE void UartIrqHandler();
 };
 
@@ -175,7 +175,7 @@ Uart<props>::Uart()
 
 	SetBaudrate(BAUDRATE);
 
-	Enable();        // enable USART
+	Enable();        // Enable USART
 
 	NVIC_SetPriority(USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
 	NVIC_EnableIRQ(USARTx_IRQn);
@@ -203,6 +203,13 @@ void Uart<props>::SendBuffer(const void* buf, size_t size)
 	const char* ptr = reinterpret_cast<const char*>(buf);
 	txChannel_.write(ptr, size);
 	EnableTxInterrupt();
+}
+
+template<typename props>
+bool Uart<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
+{
+	char* ptr = reinterpret_cast<char*>(buf);
+	return rxChannel_.read(ptr, count, timeout);
 }
 
 template<class props>

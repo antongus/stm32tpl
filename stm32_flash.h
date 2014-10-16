@@ -175,6 +175,7 @@ bool Stm32Flash<props>::wait(uint32_t timeout)
 			return false;
 		delay();
 	}
+	__DSB();
 	return true;
 }
 

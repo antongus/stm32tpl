@@ -309,7 +309,7 @@ struct DummyDE
 	INLINE static void Off() { }
 	INLINE static void Cpl() { }
 	INLINE static void Mode(direction) { }
-	INLINE static int Latched() { return true; }
+	INLINE static int Latched() { return false; }
 };
 
 } // namespace UART
