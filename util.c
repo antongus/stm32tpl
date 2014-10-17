@@ -137,25 +137,26 @@ void pad(char * s, int width, char padder)
 	memset(s, padder, width);
 }
 
-double small_atof(char * s)
+double small_atof(const char * s)
 {
-	char buf[12];
-	char * dot;
-	char l;
-	double res;
+	char buf[16];
+	strncpy(buf, s, 16);
 
-	strcpy(buf, s);
-	dot = strchr(buf, '.');
-	if (dot == NULL) dot = strchr(buf, ',');
-	if (dot == NULL)
-		return small_atoi(s);
+	char * dot = strchr(buf, '.');
+	if (!dot) dot = strchr(buf, ',');
+	if (!dot)
+		return small_atoi(buf);
 
 	*dot++ = 0;
-	res = small_atoi(dot);
-    l = strlen(dot);
+	double res = small_atoi(dot);
+    int l = strlen(dot);
 	while (l--)
 	  res /= 10;
-	res += small_atoi(buf);
+	double intpart = small_atoi(buf);
+	if (intpart > 0.0)
+		res += intpart;
+	else
+		res = intpart - res;
 
 	return res;
 }

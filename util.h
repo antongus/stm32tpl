@@ -42,7 +42,7 @@ void strreverse(char* begin, char* end);
 char *str_upr(char *s);
 char* itoa(int value, char* s, int base);
 long small_atoi(char * s);
-double small_atof(char * s);
+double small_atof(const char * s);
 uint32_t small_atoh(char * s);
 
 char small_isxdigit (unsigned char c);
