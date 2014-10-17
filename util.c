@@ -85,7 +85,7 @@ char* itoa(int value, char* s, int base)
 long small_atoi(char * s)
 {
 	long rv=0;
-	char sign = 0;
+	int sign = 0;
 
 	// skip till we find either a digit or '+' or '-'
 	while (*s)
@@ -142,23 +142,28 @@ double small_atof(const char * s)
 	char buf[16];
 	strncpy(buf, s, 16);
 
-	char * dot = strchr(buf, '.');
-	if (!dot) dot = strchr(buf, ',');
-	if (!dot)
-		return small_atoi(buf);
+	char* ptr = buf;
+	while (*ptr)
+	{
+		if (*ptr <= '9' && *ptr >= '0') break;
+		if (*ptr == '-')	break;
+		ptr++;
+	}
+	int negative = *ptr == '-';
+	if (negative) ++ptr;
+
+	char * dot = strchr(ptr, '.');
+	if (!dot) dot = strchr(ptr, ',');
+	if (!dot) return negative ? -small_atoi(ptr) : small_atoi(ptr);
 
 	*dot++ = 0;
 	double res = small_atoi(dot);
-    int l = strlen(dot);
+	int l = strlen(dot);
 	while (l--)
-	  res /= 10;
-	double intpart = small_atoi(buf);
-	if (intpart > 0.0)
-		res += intpart;
-	else
-		res = intpart - res;
+		res /= 10;
+	res += small_atoi(ptr);
 
-	return res;
+	return negative ? -res : res;
 }
 
 char * trim(char *p)
