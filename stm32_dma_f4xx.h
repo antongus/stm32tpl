@@ -427,8 +427,8 @@ public:
 	static IORegister<CHANNEL_BASE + offsetof(DMAx_Stream_TypeDef, MAR)>  MAR;
 	static IORegister<CHANNEL_BASE + offsetof(DMAx_Stream_TypeDef, M1AR)> M1AR;
 
-	static void EnableClocks()     { RCC->AHB1ENR |= RCC_AHBENR_DMAxEN; }
-	static void DisableClocks()    { RCC->AHB1ENR &= ~RCC_AHBENR_DMAxEN; }
+	static void EnableClocks()     { RCC->AHB1ENR |= RCC_AHBENR_DMAxEN;  __DSB(); }
+	static void DisableClocks()    { RCC->AHB1ENR &= ~RCC_AHBENR_DMAxEN; __DSB(); }
 	static void Enable()           { CR |= DMA_CR_EN; }
 	static void Disable()          { CR &= ~DMA_CR_EN; }
 	static bool Enabled()          { return CR & DMA_CR_EN; }

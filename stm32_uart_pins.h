@@ -193,8 +193,8 @@ template<> struct UartTraits<UART_1>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
 #endif
-	INLINE static void EnableClocks() { RCC->APB2ENR |= RCC_APB2ENR_USART1EN; }
-	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; }
+	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART1EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; __DSB(); }
 };
 
 template<> struct UartTraits<UART_2>
@@ -214,8 +214,8 @@ template<> struct UartTraits<UART_2>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
 #endif
-	INLINE static void EnableClocks() { RCC->APB1ENR |= RCC_APB1ENR_USART2EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART2EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; __DSB(); }
 };
 
 #if (UART_COUNT > 2)
@@ -237,8 +237,8 @@ template<> struct UartTraits<UART_3>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #endif
-	INLINE static void EnableClocks() { RCC->APB1ENR |= RCC_APB1ENR_USART3EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART3EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; __DSB(); }
 };
 #endif
 
@@ -256,8 +256,8 @@ template<> struct UartTraits<UART_4>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
 #endif
-	INLINE static void EnableClocks() { RCC->APB1ENR |= RCC_APB1ENR_UART4EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART4EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
 };
 #endif
 
@@ -275,8 +275,8 @@ template<> struct UartTraits<UART_5>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART5;
 #endif
-	INLINE static void EnableClocks() { RCC->APB1ENR |= RCC_APB1ENR_UART5EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART5EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
 };
 #endif
 
@@ -294,8 +294,8 @@ template<> struct UartTraits<UART_6>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
 #endif
-	INLINE static void EnableClocks() { RCC->APB2ENR |= RCC_APB2ENR_USART6EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB2ENR_USART6EN; }
+	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART6EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; __DSB(); }
 };
 #endif
 

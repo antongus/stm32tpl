@@ -158,11 +158,11 @@ public:
 		BAUDRATE                      = props::BAUDRATE,
 		RX_BUF_SIZE                   = props::RX_BUF_SIZE,
 		TX_BUF_SIZE                   = props::TX_BUF_SIZE,
-		UART_INTERRUPT_PRIOGROUP        = props::UART_INTERRUPT_PRIOGROUP,
+		UART_INTERRUPT_PRIOGROUP      = props::UART_INTERRUPT_PRIOGROUP,
 		UART_INTERRUPT_SUBPRIO        = props::UART_INTERRUPT_SUBPRIO,
-		RXDMA_INTERRUPT_PRIOGROUP       = props::RXDMA_INTERRUPT_PRIOGROUP,
+		RXDMA_INTERRUPT_PRIOGROUP     = props::RXDMA_INTERRUPT_PRIOGROUP,
 		RXDMA_INTERRUPT_SUBPRIO       = props::RXDMA_INTERRUPT_SUBPRIO,
-		TXDMA_INTERRUPT_PRIOGROUP       = props::TXDMA_INTERRUPT_PRIOGROUP,
+		TXDMA_INTERRUPT_PRIOGROUP     = props::TXDMA_INTERRUPT_PRIOGROUP,
 		TXDMA_INTERRUPT_SUBPRIO       = props::TXDMA_INTERRUPT_SUBPRIO
 	};
 
@@ -170,7 +170,7 @@ private:
 	OS::TMutex mutex_;
 	OS::TEventFlag txDmaDone_;
 	OS::TEventFlag rxDmaDone_;
-	OS::channel<char, RX_BUF_SIZE * 2, uint32_t> rxChannel_;
+	OS::channel<char, RX_BUF_SIZE, uint32_t> rxChannel_;
 	char rxBuf_[RX_BUF_SIZE];
 
 	typedef UartPins<props::uartNum, props::remap> Pins;
