@@ -82,13 +82,13 @@ constexpr typename TypeSelector<sizeof...(T) <= 255>::type ComputeTable(int n, T
 constexpr Crc16CcittTable crc16CcittTable = ComputeTable(0);
 
 }  // anonymous namespace
-
-class Crc16Ccitt
+template <uint16_t initialValue = 0xFFFF>
+class Crc16CcittCalculator
 {
 public:
-	Crc16Ccitt(std::uint16_t initValue = 0xFFFF)
-		: crc_(initValue)
-	{}
+	static const uint16_t initValue = initialValue;
+	Crc16CcittCalculator(std::uint16_t init = initValue) { Reset(init); }
+	void Reset(std::uint16_t init = initValue) { crc_ = init; }
 	std::uint16_t Result() const { return crc_; }
 	bool Valid() const { return Result() == 0; }
 	void Add(uint8_t val)
@@ -96,7 +96,13 @@ public:
 		std::uint16_t tmp = crc_;
 		crc_ = (tmp << 8) ^ crc16CcittTable.data[(tmp >> 8) ^ val];
 	}
-	constexpr static std::uint16_t const * Table() { return crc16CcittTable.data; }
+	void Add(char *s) { while (*s) Add(*s++); }
+	void Add(void *buf, size_t size)
+	{
+		char *ptr = reinterpret_cast<char *>(buf);
+		for (size_t i = 0; i < size; ++i)
+			Add(ptr[i]);
+	}
 
 	/**
 	 *  Calculate CRC16 of zero-terminated string.
@@ -109,9 +115,11 @@ public:
 				Calc(ptr+1, (acc << 8) ^ crc16CcittTable.data[(acc >> 8) ^ *ptr])
 				: acc;
 	}
-	private:
+private:
 	std::uint16_t crc_;
 };
+
+typedef Crc16CcittCalculator<> Crc16Ccitt;
 
 static_assert (
 		Crc16Ccitt::Calc("123456789") == 0x29B1 , "CRC16-CCITT code of 123456789 should be 0x29B1"
