@@ -213,8 +213,8 @@ template<> struct SpiTraits<SPI_1>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #endif
-	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_SPI1EN; }
-	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_SPI1EN; }
+	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_SPI1EN; __DSB(); }
 };
 
 #if (defined RCC_APB1ENR_SPI2EN)
@@ -230,8 +230,8 @@ template<> struct SpiTraits<SPI_2>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
 #endif
-	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI2EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI2EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI2EN; __DSB(); }
 };
 #endif
 
@@ -252,8 +252,8 @@ template<> struct SpiTraits<SPI_3>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
 #endif
-	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI3EN; }
-	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN; }
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN; __DSB(); }
 };
 #endif
 
