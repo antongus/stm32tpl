@@ -153,7 +153,7 @@ uint8_t SoftI2c<props>::read(bool last)
 template<typename props>
 void SoftI2c<props>::write(uint8_t device, uint8_t addr, void *data, size_t length)
 {
-	uint8_t *p = data;
+	uint8_t *p = reinterpret_cast<uint8_t *>(data);
 	start();
 	write(device);
 	write(addr);
@@ -167,7 +167,7 @@ void SoftI2c<props>::write(uint8_t device, uint8_t addr, void *data, size_t leng
 template<typename props>
 void SoftI2c<props>::write(uint8_t addr, void *data, size_t length)
 {
-	uint8_t *p = data;
+	uint8_t *p = reinterpret_cast<uint8_t *>(data);
 	start();
 	write(addr);
 
@@ -180,7 +180,7 @@ void SoftI2c<props>::write(uint8_t addr, void *data, size_t length)
 template<typename props>
 void SoftI2c<props>::read(uint8_t device, uint8_t addr, void *data, size_t length)
 {
-	uint8_t * p = data;
+	uint8_t *p = reinterpret_cast<uint8_t *>(data);
 	start();
 	write(device);
 	write(addr);
@@ -200,7 +200,7 @@ void SoftI2c<props>::read(uint8_t device, uint8_t addr, void *data, size_t lengt
 template<typename props>
 void SoftI2c<props>::read(uint8_t addr, void *data, size_t length)
 {
-	uint8_t * p = data;
+	uint8_t *p = reinterpret_cast<uint8_t *>(data);
 	start();
 	write(addr | 1);
 
