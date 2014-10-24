@@ -116,7 +116,7 @@ bool SoftI2c<props>::write(uint8_t b)
 	SDA::Mode(INPUT);
 	hdel();
 	SCL::On();
-	bool ret = SDA::Signalled();
+	bool ret = !SDA::Signalled();
 	hdel();
 	SCL::Off();
 	SDA::Mode(OUTPUT_OD_2MHZ);
