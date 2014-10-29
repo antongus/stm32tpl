@@ -32,6 +32,7 @@
 #define STM32TPL_STM32_SPI_H_INCLUDED
 
 #include "stm32.h"
+#include "stm32_dma.h"
 #include <scmRTOS.h>
 
 namespace STM32
@@ -213,8 +214,24 @@ template<> struct SpiTraits<SPI_1>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #endif
+
+#if (defined F2xxF4xx)
+	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH3 };
+	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH3 };
+
+	typedef DMA::Dma2Channel2 RxDmaStream;
+	typedef DMA::Dma2Channel3 TxDmaStream;
+#else
+	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
+	enum { TX_DMA_CHANNEL = 0 };
+
+	typedef DMA::Dma1Channel2 RxDmaStream;
+	typedef DMA::Dma1Channel3 TxDmaStream;
+#endif
+
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_SPI1EN; __DSB(); }
+
 };
 
 #if (defined RCC_APB1ENR_SPI2EN)
@@ -230,6 +247,21 @@ template<> struct SpiTraits<SPI_2>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
 #endif
+
+#if (defined F2xxF4xx)
+	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
+	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
+
+	typedef DMA::Dma1Channel3 RxDmaStream;
+	typedef DMA::Dma1Channel4 TxDmaStream;
+#else
+	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
+	enum { TX_DMA_CHANNEL = 0 };
+
+	typedef DMA::Dma1Channel4 RxDmaStream;
+	typedef DMA::Dma1Channel5 TxDmaStream;
+#endif
+
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI2EN; __DSB(); }
 };
@@ -252,6 +284,21 @@ template<> struct SpiTraits<SPI_3>
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
 #endif
+
+#if (defined F2xxF4xx)
+	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
+	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
+
+	typedef DMA::Dma1Channel2 RxDmaStream;
+	typedef DMA::Dma1Channel5 TxDmaStream;
+#else
+	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
+	enum { TX_DMA_CHANNEL = 0 };
+
+	typedef DMA::Dma2Channel1 RxDmaStream;
+	typedef DMA::Dma2Channel2 TxDmaStream;
+#endif
+
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN; __DSB(); }
 };
@@ -298,6 +345,10 @@ private:
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_SPIx = Traits::ALT_FUNC_SPIx;
 #endif
+	typedef typename Traits::RxDmaStream RxDmaStream;
+	typedef typename Traits::TxDmaStream TxDmaStream;
+	enum { RX_DMA_CHANNEL   = Traits::RX_DMA_CHANNEL };
+	enum { TX_DMA_CHANNEL   = Traits::TX_DMA_CHANNEL };
 	enum
 	{
 		SPIx_BASE               = Traits::SPIx_BASE,
@@ -318,6 +369,8 @@ public:
 	{
 		active ? HwInit() : HwDeinit();
 	}
+
+	void BufRw(uint8_t * rxbuf, uint8_t * txBuf, size_t cnt);
 };
 
 template<typename props>
@@ -367,6 +420,59 @@ void Spi<props>::HwDeinit()
 	SCK::Mode(INPUT);          // configure pins as inputs
 	MOSI::Mode(INPUT);
 	MISO::Mode(INPUT);
+}
+
+template<typename props>
+void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t * txBuf, size_t cnt)
+{
+	RxDmaStream::EnableClocks();
+	TxDmaStream::EnableClocks();
+
+	// clear all interrupts on RX DMA channel
+	RxDmaStream::IFCR = RxDmaStream::DMA_MASK_ALL;
+
+	// RX DMA stream : from DR to rxBuf
+	RxDmaStream::PAR = (uint32_t)&SPIx->DR;
+	RxDmaStream::MAR = (uint32_t)rxBuf;
+	RxDmaStream::NDTR = cnt;
+	RxDmaStream::CR = 0
+			| DMA::DMA_CR_DIR_PERITH_TO_MEM  // From peripheral to memory
+			| DMA::DMA_CR_MINC               // Memory increment mode
+			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
+			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
+			| DMA::DMA_CR_PRIO_HIGH          // priority
+			| RX_DMA_CHANNEL                 // select channel (only for F4xx devices)
+			;
+
+
+	// TX DMA stream : from txBuf to DR
+	TxDmaStream::PAR = (uint32_t)&SPIx->DR;
+	TxDmaStream::MAR = (uint32_t)txBuf;
+	TxDmaStream::NDTR = cnt;
+	TxDmaStream::CR = 0
+			| DMA::DMA_CR_DIR_MEM_TO_PERITH  // From memory to peripheral
+			| DMA::DMA_CR_MINC               // Memory increment mode
+			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
+			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
+			| DMA::DMA_CR_PRIO_HIGH          // priority
+			| TX_DMA_CHANNEL                 // select channel (only for F4xx devices)
+			;
+
+	// enable DMA channels
+	RxDmaStream::Enable();
+	TxDmaStream::Enable();
+
+	// enable SPI DMA transfer
+	SPIx->CR2 |= SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN;
+
+	while (!(RxDmaStream::ISR & RxDmaStream::DMA_MASK_TCIF)) ;
+
+	// disable DMA channels
+	TxDmaStream::Disable();
+	RxDmaStream::Disable();
+
+	// disable SPI DMA transfer
+	SPIx->CR2 &= ~(SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
 }
 
 } // namespace SPI
