@@ -147,10 +147,8 @@ private:
 	OS::TMutex mutex_;
 };
 
-namespace
-{
 /**
-*  SPI Pins selector. Used internally.
+*  SPI Pins selector.
 */
 template<SpiNum spiNum, Remap remap = REMAP_NONE> struct SpiPins;
 
@@ -193,6 +191,8 @@ template<> struct SpiPins<SPI_3, REMAP_FULL>
 };
 #endif
 
+namespace
+{
 /**
 *  SPI Traits. Used internally.
 */
