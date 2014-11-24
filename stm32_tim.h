@@ -168,19 +168,19 @@ namespace
 {
 template <int ch> struct CCRxSelector;
 
-template <> struct CCRxSelector<0> {
+template <> struct CCRxSelector<1> {
 	static constexpr uint32_t ccmrOffset = offsetof(TIM_TypeDef, CCMR1);
 	static constexpr uint32_t ccrOffset = offsetof(TIM_TypeDef, CCR1);
 };
-template <> struct CCRxSelector<1> {
+template <> struct CCRxSelector<2> {
 	static constexpr uint32_t ccmrOffset = offsetof(TIM_TypeDef, CCMR1);
 	static constexpr uint32_t ccrOffset = offsetof(TIM_TypeDef, CCR2);
 };
-template <> struct CCRxSelector<2> {
+template <> struct CCRxSelector<3> {
 	static constexpr uint32_t ccmrOffset = offsetof(TIM_TypeDef, CCMR2);
 	static constexpr uint32_t ccrOffset = offsetof(TIM_TypeDef, CCR3);
 };
-template <> struct CCRxSelector<3> {
+template <> struct CCRxSelector<4> {
 	static constexpr uint32_t ccmrOffset = offsetof(TIM_TypeDef, CCMR2);
 	static constexpr uint32_t ccrOffset = offsetof(TIM_TypeDef, CCR4);
 };
@@ -222,7 +222,7 @@ public:
 	static void EnableClocks()   { Traits::EnableClocks(); }
 	static void DisableClocks()  { Traits::DisableClocks(); }
 
-	static uint32_t Count() { return TIMx->CNT; }
+	static uint16_t Count() { return TIMx->CNT; }
 
 	/**
 	 * Capture/Compare channel template
@@ -235,8 +235,8 @@ public:
 		 */
 		enum : uint16_t
 		{
-			CCMR_SHIFT = (num & 1) * 8,        // number of bits to shift for this module
-			CCMR_MASK = 0xFF << CCMR_SHIFT,    // mask for all CCMR bits of this module
+			CCMR_SHIFT = ((num - 1) & 1) * 8,        // number of bits to shift for this module
+			CCMR_MASK = 0xFF << CCMR_SHIFT,          // mask for all CCMR bits of this module
 
 			CCMR_CCS                = (3 << 0) << CCMR_SHIFT,    // capture/compare selection
 				CCMR_CCS_OUTPUT     = (0 << 0) << CCMR_SHIFT,    // output
@@ -265,9 +265,9 @@ public:
 		 */
 		enum : uint16_t
 		{
-			CCER_SHIFT = num * 4,          // number of bits to shift for this module
-			CCER_CCxE = (1 << 0) << CCER_SHIFT,   // enable
-			CCER_CCxP = (1 << 1) << CCER_SHIFT    // input/output polarity
+			CCER_SHIFT = (num - 1) * 4,            // number of bits to shift for this module
+			CCER_CCxE =  (1 << 0) << CCER_SHIFT,   // enable
+			CCER_CCxP =  (1 << 1) << CCER_SHIFT    // input/output polarity
 		};
 
 		/**
@@ -275,14 +275,14 @@ public:
 		 */
 		enum : uint16_t
 		{
-			SR_CCxIF      = 1 << (num + 1),   // module interrupt flag
-			SR_CCxOF      = 1 << (num + 9),   // capture module overflow interrupt flag
-			DIER_CCxIE    = 1 << (num + 1),   // module interrupt enable flag
-			DIER_CCxDE    = 1 << (num + 9),   // module DMA enable flag
+			SR_CCxIF      = 1 << num,         // module interrupt flag
+			SR_CCxOF      = 1 << (num + 8),   // capture module overflow interrupt flag
+			DIER_CCxIE    = 1 << num,         // module interrupt enable flag
+			DIER_CCxDE    = 1 << (num + 8),   // module DMA enable flag
 		};
 
-		static IORegister<TIMx_BASE + CCRxSelector<num>::ccmrOffset> CCMRx;
-		static IORegister<TIMx_BASE + CCRxSelector<num>::ccrOffset> CCRx;
+		static IORegister<TIMx_BASE + CCRxSelector<num>::ccmrOffset, uint16_t> CCMRx;
+		static IORegister<TIMx_BASE + CCRxSelector<num>::ccrOffset, uint16_t> CCRx;
 
 		static void Enable()              { TIMx->CCER |= CCER_CCxE; }
 		static void Disable()             { TIMx->CCER &= ~CCER_CCxE; }
@@ -294,10 +294,10 @@ public:
 		static void ClearInterrupt()      { TIMx->SR = ~SR_CCxIF; }
 	};
 
-	typedef CCModule<0> Channel1;
-	typedef CCModule<1> Channel2;
-	typedef CCModule<2> Channel3;
-	typedef CCModule<3> Channel4;
+	typedef CCModule<1> Ch1;
+	typedef CCModule<2> Ch2;
+	typedef CCModule<3> Ch3;
+	typedef CCModule<4> Ch4;
 };
 
 } // namespace TIM
