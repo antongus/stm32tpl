@@ -222,6 +222,14 @@ public:
 	static void EnableClocks()   { Traits::EnableClocks(); }
 	static void DisableClocks()  { Traits::DisableClocks(); }
 
+	struct UpdateInterrupt
+	{
+		static void Enable()    { TIMx->DIER |= TIM_DIER_UIE; }
+		static void Disable()   { TIMx->DIER &= ~TIM_DIER_UIE; }
+		static bool Triggered() { return TIMx->SR & TIM_SR_UIF; }
+		static void Clear()     { TIMx->SR = ~TIM_SR_UIF; }
+	};
+
 	static uint16_t Count() { return TIMx->CNT; }
 
 	/**
@@ -286,12 +294,19 @@ public:
 
 		static void Enable()              { TIMx->CCER |= CCER_CCxE; }
 		static void Disable()             { TIMx->CCER &= ~CCER_CCxE; }
-		static void EnableDma()           { TIMx->DIER |= DIER_CCxDE; }
-		static void DisableDma()          { TIMx->DIER &= ~DIER_CCxDE; }
-		static void EnableInterrupt()     { TIMx->DIER |= DIER_CCxIE; }
-		static void DisableInterrupt()    { TIMx->DIER &= ~DIER_CCxIE; }
-		static bool Interrupted()         { return TIMx->SR & SR_CCxIF; }
-		static void ClearInterrupt()      { TIMx->SR = ~SR_CCxIF; }
+		struct Dma
+		{
+			static void Enable()           { TIMx->DIER |= DIER_CCxDE; }
+			static void Disable()          { TIMx->DIER &= ~DIER_CCxDE; }
+		};
+		struct Interrupt
+		{
+			static void Enable()     { TIMx->DIER |= DIER_CCxIE; }
+			static void Disable()    { TIMx->DIER &= ~DIER_CCxIE; }
+			static bool Enabled()    { return TIMx->DIER & DIER_CCxIE; }
+			static bool Triggered()  { return TIMx->SR & SR_CCxIF; }
+			static void Clear()      { TIMx->SR = ~SR_CCxIF; }
+		};
 	};
 
 	typedef CCModule<1> Ch1;
