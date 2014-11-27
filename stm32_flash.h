@@ -33,10 +33,25 @@
 
 #include "stm32.h"
 
+namespace STM32
+{
+
+enum WriteResult
+{
+	wrOk = 0,
+	wrLocked,
+	wrNotErased,
+	wrWriteProtected,
+	wrVerifyError
+};
+
+namespace
+{
+
 /**
  * Template to define flash properties for selected chip.
  */
-template <ChipType chip_type> struct Stm32FlashProps;
+template <ChipType chipType> struct Stm32FlashProps;
 
 /**
  * Specializations for different chip types
@@ -83,12 +98,8 @@ template<> struct Stm32FlashProps<stm32F10X_HD_VL>
 	enum { PAGE_SIZE = 2048 };
 };
 
-/**
- * Flash properties for current chip.
- */
-typedef Stm32FlashProps<chip::type> stm32_flash_props;
 
-
+} // anon namespace
 
 /**
  * Default properties for STM32 Flash class template.
@@ -100,34 +111,40 @@ struct FlashDefaultProps
 	enum { MASS_ERASE_TIMEOUT = 0xFFFF };
 };
 
+
 /**
  * STM32 Flash class template.
  */
-template<typename props = FlashDefaultProps> class Stm32Flash;
+template<class props = FlashDefaultProps> class Stm32Flash;
 
 
-template <typename props>
+template <class props>
 class Stm32Flash
 {
 public:
-	enum { PAGE_COUNT = stm32_flash_props::PAGE_COUNT };
-	enum { PAGE_SIZE = stm32_flash_props::PAGE_SIZE };
+	enum { PAGE_COUNT = Stm32FlashProps<chip::type>::PAGE_COUNT };
+	enum { PAGE_SIZE = Stm32FlashProps<chip::type>::PAGE_SIZE };
 	enum { START_ADDRESS = 0x08000000UL };
 
-	Stm32Flash() {}
+	struct Options
+	{
+		static bool Locked()   { return !(FLASH->CR & FLASH_CR_OPTWRE); }
+		static void Lock()     { FLASH->CR &= ~FLASH_CR_OPTWRE; }
+		static void Unlock()   { FLASH->OPTKEYR = KEY1; FLASH->OPTKEYR = KEY2; }
+	};
 
-	bool isLocked()	{ return FLASH->CR & FLASH_CR_LOCK; }
-	void lock()		{ FLASH->CR |= FLASH_CR_LOCK; }
-	void unlock()		{ FLASH->KEYR = KEY1; FLASH->KEYR = KEY2; }
+	static bool Locked()   { return FLASH->CR & FLASH_CR_LOCK; }
+	static void Lock()     { FLASH->CR |= FLASH_CR_LOCK; }
+	static void Unlock()   { FLASH->KEYR = KEY1; FLASH->KEYR = KEY2; }
 
-	bool erasePage(uint32_t addr);
-	bool massErase();
+	static bool ErasePage(uint32_t addr);
+	static bool MassErase();
 
-	bool writeWord(uint32_t addr, uint32_t data);
-	bool writeHalfword(uint32_t addr, uint32_t data);
-	bool write(uint32_t addr, void* buf, uint32_t count);
-	uint32_t read(uint32_t addr) { return *(uint32_t*)addr; }
-    uint32_t operator[](uint32_t addr) { return *(uint32_t*)addr; }
+	static bool WriteWord(uint32_t addr, uint32_t data);
+	static bool WriteHalfword(uint32_t addr, uint32_t data);
+	static WriteResult Write16(uint32_t addr, uint32_t data);
+	static bool Write(uint32_t addr, const void* buf, uint32_t count);
+	static uint32_t Read(uint32_t addr) { return *(uint32_t*)addr; }
 private:
 	enum
 	{
@@ -140,14 +157,15 @@ private:
 	enum { MASS_ERASE_TIMEOUT = props::MASS_ERASE_TIMEOUT };
 
 
-	bool isPgerr()			{ return FLASH->SR & FLASH_SR_PGERR; }
-	bool isWrprterr()		{ return FLASH->SR & FLASH_SR_WRPRTERR; }
+	static bool Pgerr()      { return FLASH->SR & FLASH_SR_PGERR; }
+	static bool Wrprterr()   { return FLASH->SR & FLASH_SR_WRPRTERR; }
+	static bool Busy()       { return FLASH->SR & FLASH_SR_BSY; }
 
-	void delay();
-	void wait();
-	bool wait(uint32_t timeout);
+	static void Delay();
+	static void Wait();
+	static bool Wait(uint32_t timeout);
 
-	bool isPageErased(uint32_t addr)
+	static bool PageErased(uint32_t addr)
 	{
 		const volatile uint32_t* addr_32 = static_cast<volatile uint32_t*>(addr);
 		for (int i = 0; i < 128; i++)
@@ -158,70 +176,98 @@ private:
 };
 
 typedef Stm32Flash<> Flash;
-//extern Flash flash;
 
-template<typename props>
-void Stm32Flash<props>::wait()
+template<class props>
+void Stm32Flash<props>::Wait()
 {
-	while (FLASH->SR & FLASH_SR_BSY) ;
+	while (Busy()) ;
+	__DSB();
 }
 
-template<typename props>
-bool Stm32Flash<props>::wait(uint32_t timeout)
+template<class props>
+bool Stm32Flash<props>::Wait(uint32_t timeout)
 {
-	while (FLASH->SR & FLASH_SR_BSY)
+	while (Busy())
 	{
 		if (!--timeout)
 			return false;
-		delay();
+		Delay();
 	}
 	__DSB();
 	return true;
 }
 
-template<typename props>
-void Stm32Flash<props>::delay()
+template<class props>
+void Stm32Flash<props>::Delay()
 {
 	for (volatile int i = 0; i < 0xFF; i++) ;
 }
 
-template<typename props>
-bool Stm32Flash<props>::writeWord(uint32_t addr, uint32_t data)
+template<class props>
+bool Stm32Flash<props>::WriteWord(uint32_t addr, uint32_t data)
 {
 	TCritSect cs;
 	volatile uint16_t* addr_16 = reinterpret_cast<volatile uint16_t*>(addr);
 
 	uint32_t cr = FLASH->CR;
 	FLASH->CR = FLASH_CR_PG;
-	wait();
+	Wait();
 	addr_16[0] = data;
-	wait();
+	Wait();
 	addr_16[1] = data >> 16;
-	wait();
+	Wait();
 	FLASH->CR = cr & ~FLASH_CR_PG;
-	return (read(addr) == data);
+	return (Read(addr) == data);
 }
 
-template<typename props>
-bool Stm32Flash<props>::writeHalfword(uint32_t addr, uint32_t data)
+template<class props>
+bool Stm32Flash<props>::WriteHalfword(uint32_t addr, uint32_t data)
 {
 	TCritSect cs;
 	volatile uint16_t* addr_16 = reinterpret_cast<volatile uint16_t*>(addr);
 
 	uint32_t cr = FLASH->CR;
 	FLASH->CR = FLASH_CR_PG;
-	wait();
+	Wait();
 	addr_16[0] = data;
-	wait();
+	Wait();
 	FLASH->CR = cr & ~FLASH_CR_PG;
 //	return (*(uint16_t*)addr == data);
 	return true;
 }
 
-template<typename props>
-bool Stm32Flash<props>::write(uint32_t addr, void* buf, uint32_t count)
+template<class props>
+WriteResult Stm32Flash<props>::Write16(uint32_t addr, uint32_t data)
 {
-	uint8_t* src = static_cast<uint8_t*>(buf);
+	volatile uint16_t* flashArray = reinterpret_cast<volatile uint16_t*>(addr);
+	TCritSect cs;
+
+	if (Locked())
+		Unlock();
+
+	if (Locked())
+		return wrLocked;
+
+	FLASH->CR = FLASH_CR_PG;
+	Wait();
+	flashArray[0] = data;
+	Wait();
+
+	WriteResult ret =
+		Pgerr() ? wrNotErased :
+		Wrprterr() ? wrWriteProtected :
+		flashArray[0] != data ? wrVerifyError :
+		wrOk;
+
+	FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR; // clear errors, if any
+	FLASH->CR = 0;
+	return ret;
+}
+
+template<class props>
+bool Stm32Flash<props>::Write(uint32_t addr, const void* buf, uint32_t count)
+{
+	const uint8_t* src = reinterpret_cast<const uint8_t*>(buf);
 	uint32_t end = addr + count;
 
 	while (addr < end)
@@ -234,32 +280,34 @@ bool Stm32Flash<props>::write(uint32_t addr, void* buf, uint32_t count)
 		if (addr < end)
 			w = (w & 0xFFFF00FF) | (*src++ << 8);
 
-		if (!writeHalfword(addr, w))
+		if (!WriteHalfword(addr, w))
 			return false;
 		addr += 2;
 	}
 	return true;
 }
 
-template<typename props>
-bool Stm32Flash<props>::erasePage(uint32_t addr)
+template<class props>
+bool Stm32Flash<props>::ErasePage(uint32_t addr)
 {
 	TCritSect cs;
-	wait();
+	Wait();
 	FLASH->CR |= FLASH_CR_PER;
 	FLASH->AR = addr;
 	FLASH->CR |= FLASH_CR_STRT;
-	return wait(PAGE_ERASE_TIMEOUT);
+	return Wait(PAGE_ERASE_TIMEOUT);
 }
 
-template<typename props>
-bool Stm32Flash<props>::massErase()
+template<class props>
+bool Stm32Flash<props>::MassErase()
 {
 	TCritSect cs;
-	wait();
+	Wait();
 	FLASH->CR |= FLASH_CR_MER;
 	FLASH->CR |= FLASH_CR_STRT;
-	return wait(MASS_ERASE_TIMEOUT);
+	return Wait(MASS_ERASE_TIMEOUT);
 }
+
+} // namespace STM32
 
 #endif // STM32TPL_STM32_FLASH_H_INCLUDED
