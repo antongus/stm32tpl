@@ -31,6 +31,7 @@
 #define STM32TPL_CRC16CCITT_H_INCLUDED
 
 #include <cstdint>
+#include <cstddef>
 
 namespace
 {

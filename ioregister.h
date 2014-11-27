@@ -42,9 +42,11 @@ template<uint32_t addr, typename type = uint32_t>
 struct IORegister
 {
 	type operator=(type value) { *(volatile type*)addr = value; return value; }
-	void operator|=(type value) { *(volatile type*)addr |= value; }
-	void operator&=(type value) { *(volatile type*)addr &= value; }
-	void operator^=(type value) { *(volatile type*)addr ^= value; }
+	const IORegister& operator|=(type value) { *(volatile type*)addr |= value; return *this; }
+	const IORegister& operator&=(type value) { *(volatile type*)addr &= value; return *this; }
+	const IORegister& operator^=(type value) { *(volatile type*)addr ^= value; return *this; }
+	const IORegister& operator+=(type value) { *(volatile type*)addr += value; return *this; }
+	const IORegister& operator-=(type value) { *(volatile type*)addr -= value; return *this; }
 	operator type() { return *(volatile type*)addr; }
 };
 
