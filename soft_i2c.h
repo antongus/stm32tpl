@@ -57,75 +57,75 @@ public:
 		SCL::On();
 		SDA::On();
 	}
-	bool write(uint8_t b);
-	uint8_t read(bool last);
-	void write(uint8_t device, uint8_t addr, void *data, size_t length);
-	void write(uint8_t addr, void *data, size_t length);
-	void read(uint8_t device, uint8_t addr, void *data, size_t length);
-	void read(uint8_t addr, void *data, size_t length);
-	void start()
+	bool Write(uint8_t b);
+	uint8_t Read(bool last);
+	void Write(uint8_t device, uint8_t addr, void *data, size_t length);
+	void Write(uint8_t addr, void *data, size_t length);
+	void Read(uint8_t device, uint8_t addr, void *data, size_t length);
+	void Read(uint8_t addr, void *data, size_t length);
+	void Start()
 	{
 	    SDA::Off();
-	    qdel();
+	    Qdel();
 	    SCL::Off();
 	}
-	void stop()
+	void Stop()
 	{
 		SDA::Off();
-		hdel();
+		Hdel();
 		SCL::On();
-		qdel();
+		Qdel();
 		SDA::On();
-		hdel();
+		Hdel();
 	}
 private:
 	enum { 	NOP_COUNT = props::NOP_COUNT };
 	typedef typename props::SCL SCL;
 	typedef typename props::SDA SDA;
 
-	void qdel()
+	void Qdel()
 	{
 		for (int i = 0; i < NOP_COUNT; i++)
 			__asm__ __volatile__ ("nop");
 	}
-	void hdel()
+	void Hdel()
 	{
-		qdel();
-		qdel();
+		Qdel();
+		Qdel();
 	}
-	void toggleScl()
+	void ToggleScl()
 	{
-		hdel();
+		Hdel();
 		SCL::On();
-		hdel();
+		Hdel();
 		SCL::Off();
 	}
 };
 
 template<typename props>
-bool SoftI2c<props>::write(uint8_t b)
+bool SoftI2c<props>::Write(uint8_t b)
 {
 	for(int i=0; i<8; i++)
 	{
 		SDA::On(b & 0x80);
 		b <<= 1;
-		toggleScl();
+		ToggleScl();
 	}
 
 	SDA::On();
 	SDA::Mode(INPUT);
-	hdel();
+	Hdel();
 	SCL::On();
 	bool ret = !SDA::Signalled();
-	hdel();
+	Hdel();
 	SCL::Off();
 	SDA::Mode(OUTPUT_OD_2MHZ);
-	hdel();
+	Hdel();
 	return ret;
 }
 
 template<typename props>
-uint8_t SoftI2c<props>::read(bool last)
+uint8_t SoftI2c<props>::Read(bool last)
 {
 	uint8_t b = 0;
 
@@ -134,81 +134,81 @@ uint8_t SoftI2c<props>::read(bool last)
 
 	for(int i=0; i<8; i++)
 	{
-		hdel();
+		Hdel();
 		SCL::On();
 		b <<= 1;
 		if (SDA::Signalled())
 			b |= 1;
-		hdel();
+		Hdel();
 	    SCL::Off();
 	}
 
 	SDA::Mode(OUTPUT_OD_2MHZ);
 	SDA::On(last);
-	toggleScl();
+	ToggleScl();
 	SDA::On();
 	return b;
 }
 
 template<typename props>
-void SoftI2c<props>::write(uint8_t device, uint8_t addr, void *data, size_t length)
+void SoftI2c<props>::Write(uint8_t device, uint8_t addr, void *data, size_t length)
 {
 	uint8_t *p = reinterpret_cast<uint8_t *>(data);
-	start();
-	write(device);
-	write(addr);
+	Start();
+	Write(device);
+	Write(addr);
 
 	while (length--)
-		write(*p++);
+		Write(*p++);
 
-	stop();
+	Stop();
 }
 
 template<typename props>
-void SoftI2c<props>::write(uint8_t addr, void *data, size_t length)
+void SoftI2c<props>::Write(uint8_t addr, void *data, size_t length)
 {
 	uint8_t *p = reinterpret_cast<uint8_t *>(data);
-	start();
-	write(addr);
+	Start();
+	Write(addr);
 
 	while (length--)
-		write(*p++);
+		Write(*p++);
 
-	stop();
+	Stop();
 }
 
 template<typename props>
-void SoftI2c<props>::read(uint8_t device, uint8_t addr, void *data, size_t length)
+void SoftI2c<props>::Read(uint8_t device, uint8_t addr, void *data, size_t length)
 {
 	uint8_t *p = reinterpret_cast<uint8_t *>(data);
-	start();
-	write(device);
-	write(addr);
-	hdel();
+	Start();
+	Write(device);
+	Write(addr);
+	Hdel();
 	SCL::On();
-	start();
+	Start();
 
-	write(device | 1);
+	Write(device | 1);
 
 	// receive data bytes
 	while (length--)
-		*p++ = read(length == 0);
+		*p++ = Read(length == 0);
 
-	stop();
+	Stop();
 }
 
 template<typename props>
-void SoftI2c<props>::read(uint8_t addr, void *data, size_t length)
+void SoftI2c<props>::Read(uint8_t addr, void *data, size_t length)
 {
 	uint8_t *p = reinterpret_cast<uint8_t *>(data);
-	start();
-	write(addr | 1);
+	Start();
+	Write(addr | 1);
 
 	// receive data bytes
 	while (length--)
-		*p++ = read(length == 0);
+		*p++ = Read(length == 0);
 
-	stop();
+	Stop();
 }
 
 #endif // STM32TPL_SOFT_I2C_H_INCLUDED
