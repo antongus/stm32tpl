@@ -41,7 +41,7 @@ namespace UART
 {
 
 /**
- * sample UART+DMA properties structure
+ * sample debug UART properties structure
  */
 struct SampleUartDbgProps
 {
@@ -145,7 +145,7 @@ UartDbg<props>::UartDbg()
 template<class props>
 void UartDbg<props>::PutChar(char ch)
 {
-	while(!(USARTx->SR & USART_SR_TXE)) ;
+	while (!(USARTx->SR & USART_SR_TXE)) ;
 	USARTx->DR = ch;
 }
 
