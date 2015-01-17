@@ -100,7 +100,6 @@ public:
 	virtual int Keypressed() override { return USARTx->SR & USART_SR_RXNE; }
 	virtual int CanSend() override { return true; };
 	virtual int TxEmpty() override { return true; };
-	virtual void Puts(const char * s) override;
 };
 
 template<typename props>
@@ -159,13 +158,6 @@ int UartDbg<props>::GetChar(int timeout)
 		if (timeout && !--timeout)
 			return -1;
 	}
-}
-
-template<class props>
-void UartDbg<props>::Puts(const char * s)
-{
-	while (*s)
-		PutChar(*s++);
 }
 
 } // namespace UART
