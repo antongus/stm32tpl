@@ -125,6 +125,7 @@ public:
 	enum { PAGE_COUNT = Stm32FlashProps<chip::type>::PAGE_COUNT };
 	enum { PAGE_SIZE = Stm32FlashProps<chip::type>::PAGE_SIZE };
 	enum { START_ADDRESS = 0x08000000UL };
+	enum { SIZE = PAGE_COUNT * PAGE_SIZE };
 
 	struct Options
 	{
