@@ -140,6 +140,10 @@ public:
 
 	static bool ErasePage(uint32_t addr);
 	static bool MassErase();
+	static bool IsReadOutProtected() { return FLASH->OBR & FLASH_OBR_RDPRT; }
+	static bool ReadOutProtect();
+
+
 
 	static bool WriteWord(uint32_t addr, uint32_t data);
 	static bool WriteHalfword(uint32_t addr, uint32_t data);
@@ -240,11 +244,8 @@ bool Stm32Flash<props>::WriteHalfword(uint32_t addr, uint32_t data)
 template<class props>
 WriteResult Stm32Flash<props>::Write16(uint32_t addr, uint32_t data)
 {
-	volatile uint16_t* flashArray = reinterpret_cast<volatile uint16_t*>(addr);
 	TCritSect cs;
-
-	if (Locked())
-		Unlock();
+	volatile uint16_t* flashArray = reinterpret_cast<volatile uint16_t*>(addr);
 
 	if (Locked())
 		return wrLocked;
@@ -257,7 +258,6 @@ WriteResult Stm32Flash<props>::Write16(uint32_t addr, uint32_t data)
 	WriteResult ret =
 		Pgerr() ? wrNotErased :
 		Wrprterr() ? wrWriteProtected :
-		flashArray[0] != data ? wrVerifyError :
 		wrOk;
 
 	FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR; // clear errors, if any
@@ -281,7 +281,8 @@ bool Stm32Flash<props>::Write(uint32_t addr, const void* buf, uint32_t count)
 		if (addr < end)
 			w = (w & 0xFFFF00FF) | (*src++ << 8);
 
-		if (!WriteHalfword(addr, w))
+//		if (!WriteHalfword(addr, w))
+		if (Write16(addr, w) != wrOk)
 			return false;
 		addr += 2;
 	}
@@ -307,6 +308,33 @@ bool Stm32Flash<props>::MassErase()
 	FLASH->CR |= FLASH_CR_MER;
 	FLASH->CR |= FLASH_CR_STRT;
 	return Wait(MASS_ERASE_TIMEOUT);
+}
+
+template<class props>
+bool Stm32Flash<props>::ReadOutProtect()
+{
+	TCritSect cs;
+	Wait();
+	Unlock();
+	Options::Unlock();
+
+	// erase options byte
+	FLASH->CR |= FLASH_CR_OPTER;
+	FLASH->CR |= FLASH_CR_STRT;
+	bool ret = Wait(PAGE_ERASE_TIMEOUT);
+	FLASH->CR &= FLASH_CR_OPTER;
+	if (ret)
+	{
+		// program options byte
+		FLASH->CR &= FLASH_CR_OPTER;
+		FLASH->CR |= FLASH_CR_OPTPG;
+		OB->RDP = 0x00;
+		ret = Wait(PAGE_ERASE_TIMEOUT);
+		FLASH->CR &= FLASH_CR_OPTPG;
+		Options::Lock();
+		Lock();
+	}
+	return ret;
 }
 
 } // namespace STM32
