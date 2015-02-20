@@ -86,24 +86,26 @@ public:
 		return s;
 	}
 
-	char* Gets(char * s, int cnt) __attribute__((__noinline__))
+	char* Gets(char * s, int cnt, bool echo = true) __attribute__((__noinline__))
 	{
-		char c;
 		int count = 0;
 
 		for (;;)
 		{
-			c = GetChar();
+			char c = GetChar();
 			// make letter uppercase
-			if ( c >= 'a' && c <= 'z') c-=('a'-'A');
+			if (c >= 'a' && c <= 'z') c-=('a'-'A');
 			switch(c)
 			{
 			case '\b': // backspace
 				if (count)
 				{
-					PutChar('\b');
-					PutChar(' ');
-					PutChar('\b');
+					if (echo)
+					{
+						PutChar('\b');
+						PutChar(' ');
+						PutChar('\b');
+					}
 					s--;
 					count--;
 				}
@@ -111,19 +113,26 @@ public:
 
 			case '\n':
 			case '\r': // CR or LF
-				PutChar('\r');
-				PutChar('\n');
+				if (echo)
+				{
+					PutChar('\r');
+					PutChar('\n');
+				}
 				*s = 0;
 				return s;
 
 			default:
 				if (count==cnt)
-					PutChar(0x07); // make BEEP
+				{
+					if (echo)
+						PutChar(0x07); // make BEEP
+				}
 				else
 				{
 					*s++=c;
 					count++;
-					PutChar(c);    // make echo
+					if (echo)
+						PutChar(c);    // make echo
 				}
 				break;
 			} //switch(c)
