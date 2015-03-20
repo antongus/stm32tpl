@@ -25,6 +25,24 @@
  *  file         : crc16_ccitt.h
  *  description  : Class for CRC16-CCITT calculation (0x1021 polynomial)
  *
+ * USAGE:
+ *
+ *   I. Add definition of static class member Crc16CcittCalculator::crc16CcittTable
+ *   somewhere in *.cpp file :
+ *
+ *     template<uint16_t initialValue>
+ *     constexpr STM32TPL::Crc16CcittTable STM32TPL::Crc16CcittCalculator<initialValue>::crc16CcittTable;
+ *
+ *   II. Use:
+ *   uint16_t Calibration::CalcCrc(uint8_t const* buffer, size_t size)
+ *   {
+ *       STM32TPL::Crc16Ccitt crcCalculator;
+ *       for (size_t i = 0; i < size; ++i)
+ *           crcCalculator.Add(buffer[i]);
+ *       return crcCalculator.Result();
+ *   }
+ *
+ *
  */
 
 #ifndef STM32TPL_CRC16CCITT_H_INCLUDED
@@ -32,6 +50,14 @@
 
 #include <cstdint>
 #include <cstddef>
+
+namespace STM32TPL
+{
+
+struct Crc16CcittTable
+{
+	uint16_t data[256];
+};
 
 namespace
 {
@@ -60,11 +86,6 @@ constexpr uint16_t ComputeCell(
 			val;
 }
 
-struct Crc16CcittTable
-{
-	uint16_t data[256];
-};
-
 template<bool> struct TypeSelector { typedef Crc16CcittTable type; };
 template<> struct TypeSelector<false> { };
 
@@ -80,9 +101,11 @@ constexpr typename TypeSelector<sizeof...(T) <= 255>::type ComputeTable(int n, T
 	return ComputeTable(n+1, t..., ComputeCell(n));
 }
 
-constexpr Crc16CcittTable crc16CcittTable = ComputeTable(0);
+//constexpr Crc16CcittTable crc16CcittTable = ComputeTable(0);
 
 }  // anonymous namespace
+
+
 template <uint16_t initialValue = 0xFFFF>
 class Crc16CcittCalculator
 {
@@ -92,6 +115,7 @@ public:
 	void Reset(std::uint16_t init = initValue) { crc_ = init; }
 	std::uint16_t Result() const { return crc_; }
 	bool Valid() const { return Result() == 0; }
+	static constexpr Crc16CcittTable crc16CcittTable = ComputeTable(0);
 	void Add(uint8_t val)
 	{
 		std::uint16_t tmp = crc_;
@@ -125,5 +149,7 @@ typedef Crc16CcittCalculator<> Crc16Ccitt;
 static_assert (
 		Crc16Ccitt::Calc("123456789") == 0x29B1 , "CRC16-CCITT code of 123456789 should be 0x29B1"
 );
+
+} // namespace STM32TPL
 
 #endif // STM32TPL_CRC16CCITT_H_INCLUDED
