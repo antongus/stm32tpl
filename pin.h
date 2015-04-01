@@ -35,6 +35,8 @@
 
 #if (defined STM32F2XX) || (defined STM32F4XX) || (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  include "pin_stm32F4xx.h"
+#elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
+#  include "pin_stm32L0xx.h"
 #else
 #  include "pin_stm32F1xx.h"
 #endif
