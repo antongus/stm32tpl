@@ -76,8 +76,8 @@ private:
 	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
 	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
 	enum { BUS_FREQ               = Traits::BUS_FREQ };
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = Traits::ALT_FUNC_USARTx;
+#if (!defined STM32F1XX)
+	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
 #endif
 
 public:
@@ -97,7 +97,14 @@ public:
 
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
-	virtual int Keypressed() override { return USARTx->SR & USART_SR_RXNE; }
+	virtual int Keypressed() override
+	{
+#if (defined STM32L0XX)
+		return USARTx->ISR & USART_ISR_RXNE;
+#else
+		return USARTx->SR & USART_SR_RXNE;
+#endif
+	}
 	virtual int CanSend() override { return true; };
 	virtual int TxEmpty() override { return true; };
 };
@@ -106,7 +113,7 @@ template<typename props>
 UartDbg<props>::UartDbg()
 	: TextStream()
 {
-#if (!defined F2xxF4xx)
+#if (defined STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
 		AFIO->MAPR |= USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
@@ -115,7 +122,7 @@ UartDbg<props>::UartDbg()
 
 	EnableClocks();                 // enable UART module clock
 
-#if (!defined F2xxF4xx)             // configure pins
+#if (defined STM32F1XX)             // configure pins
 	TX::Mode(ALT_OUTPUT);
 	RX::Mode(INPUTPULLED);
 	RX::PullUp();
@@ -144,8 +151,13 @@ UartDbg<props>::UartDbg()
 template<class props>
 void UartDbg<props>::PutChar(char ch)
 {
+#if (defined STM32L0XX)
+	while (!(USARTx->ISR & USART_ISR_TXE)) ;
+	USARTx->TDR = ch;
+#else
 	while (!(USARTx->SR & USART_SR_TXE)) ;
 	USARTx->DR = ch;
+#endif
 }
 
 template<class props>
@@ -154,7 +166,11 @@ int UartDbg<props>::GetChar(int timeout)
 	for(;;)
 	{
 		if (Keypressed())
+#if (defined STM32L0XX)
+			return USARTx->RDR;
+#else
 			return USARTx->DR;
+#endif
 		if (timeout && !--timeout)
 			return -1;
 	}

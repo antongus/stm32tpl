@@ -39,6 +39,9 @@ namespace UART
 {
 typedef uint32_t Baudrate;
 
+#if (defined STM32L0XX)
+typedef IRQn_Type IRQn;
+#endif
 
 /**
  * define count of UART modules
@@ -100,24 +103,42 @@ template<> struct UartPins<UART_1>
 {
 	typedef Pin<'A', 9> PinTX;
 	typedef Pin<'A', 10> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#endif
 };
 
 template<> struct UartPins<UART_1, REMAP_FULL>
 {
 	typedef Pin<'B', 6> PinTX;
 	typedef Pin<'B', 7> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+#endif
 };
 
 template<> struct UartPins<UART_2>
 {
 	typedef Pin<'A', 2> PinTX;
 	typedef Pin<'A', 3> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#endif
 };
 
 template<> struct UartPins<UART_2, REMAP_FULL>
 {
 	typedef Pin<'D', 5> PinTX;
 	typedef Pin<'D', 6> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
+#endif
 };
 
 #if (UART_COUNT > 2)
@@ -125,18 +146,27 @@ template<> struct UartPins<UART_3>
 {
 	typedef Pin<'B', 10> PinTX;
 	typedef Pin<'B', 11> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#endif
 };
 
 template<> struct UartPins<UART_3, REMAP_PARTIAL>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#endif
 };
 
 template<> struct UartPins<UART_3, REMAP_FULL>
 {
 	typedef Pin<'D', 8> PinTX;
 	typedef Pin<'D', 9> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#endif
 };
 #endif
 
@@ -145,6 +175,9 @@ template<> struct UartPins<UART_4>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART4
+#endif
 };
 #endif
 
@@ -153,6 +186,9 @@ template<> struct UartPins<UART_5>
 {
 	typedef Pin<'C', 12> PinTX;
 	typedef Pin<'D', 2> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART5
+#endif
 };
 #endif
 
@@ -161,12 +197,18 @@ template<> struct UartPins<UART_6>
 {
 	typedef Pin<'C', 6> PinTX;
 	typedef Pin<'C', 7> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6
+#endif
 };
 
 template<> struct UartPins<UART_6, REMAP_FULL>
 {
 	typedef Pin<'G', 14> PinTX;
 	typedef Pin<'G', 9> PinRX;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6
+#endif
 };
 #endif
 
@@ -190,9 +232,6 @@ template<> struct UartTraits<UART_1>
 		USARTx_REMAP_PARTIAL      = 0,
 		BUS_FREQ                  = chip::APB2_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART1EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; __DSB(); }
 };
@@ -211,9 +250,6 @@ template<> struct UartTraits<UART_2>
 		USARTx_REMAP_PARTIAL      = 0,
 		BUS_FREQ                  = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART2EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; __DSB(); }
 };
@@ -234,9 +270,6 @@ template<> struct UartTraits<UART_3>
 #endif
 		BUS_FREQ                  = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART3EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; __DSB(); }
 };
@@ -253,9 +286,6 @@ template<> struct UartTraits<UART_4>
 		USARTx_REMAP_PARTIAL      = 0,
 		BUS_FREQ                  = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART4EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
 };
@@ -272,9 +302,6 @@ template<> struct UartTraits<UART_5>
 		USARTx_REMAP_PARTIAL      = 0,
 		BUS_FREQ                  = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART5;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART5EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
 };
@@ -291,9 +318,6 @@ template<> struct UartTraits<UART_6>
 		USARTx_REMAP_PARTIAL      = 0,
 		BUS_FREQ                  = chip::APB2_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
-#endif
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART6EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; __DSB(); }
 };

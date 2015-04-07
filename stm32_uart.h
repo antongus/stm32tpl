@@ -101,8 +101,8 @@ private:
 	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
 	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
 	enum { BUS_FREQ               = Traits::BUS_FREQ };
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = Traits::ALT_FUNC_USARTx;
+#if (!defined STM32F1XX)
+	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
 #endif
 
 	INLINE void EnableTxInterrupt()  { USARTx->CR1 |= USART_CR1_TXEIE; }
@@ -142,7 +142,7 @@ Uart<props>::Uart()
 	, txChannel_()
 	, txDone_()
 {
-#if (!defined F2xxF4xx)
+#if (defined STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
 		AFIO->MAPR |= USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
@@ -151,7 +151,7 @@ Uart<props>::Uart()
 
 	EnableClocks();                 // enable UART module clock
 
-#if (!defined F2xxF4xx)             // configure pins
+#if (defined STM32F1XX)             // configure pins
 	TX::Mode(ALT_OUTPUT);
 	RX::Mode(INPUTPULLED);
 	RX::PullUp();
@@ -177,7 +177,11 @@ Uart<props>::Uart()
 
 	Enable();        // Enable USART
 
+#if (!defined STM32L0XX)
 	NVIC_SetPriority(USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
+#else
+	NVIC_SetPriority(USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
+#endif
 	NVIC_EnableIRQ(USARTx_IRQn);
 }
 
@@ -215,6 +219,54 @@ bool Uart<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
 template<class props>
 void Uart<props>::UartIrqHandler()
 {
+#if (defined STM32L0XX)
+	uint16_t status = USARTx->ISR;
+	uint8_t data = USARTx->RDR;
+
+	// RX NOT EMPTY INTERRUPT
+	if (status & USART_ISR_RXNE)
+	{
+		if (rxChannel_.get_free_size())
+			rxChannel_.push(data);
+	}
+
+	// TX EMPTY INTERRUPT
+	if ((status & USART_ISR_TXE) && (USARTx->CR1 & USART_CR1_TXEIE))
+	{
+		if (txChannel_.get_count())
+		{
+			char ch = 0;
+			txChannel_.pop(ch);
+			if (!DE::Latched())
+			{
+				DE::On();
+				__asm__ __volatile__ ("nop");
+				__asm__ __volatile__ ("nop");
+				__asm__ __volatile__ ("nop");
+				__asm__ __volatile__ ("nop");
+			}
+			USARTx->TDR = ch;
+		}
+		else
+		{
+			DisableTxInterrupt();
+			EnableTcInterrupt();
+		}
+	}
+
+	// TRANSMIT COMPLETE INTERRUPT
+	if ((status & USART_ISR_TC) && (USARTx->CR1 & USART_CR1_TCIE))
+	{
+		// clear interrupt
+		USARTx->ICR = USART_ICR_TCCF;
+		// disable it
+		DisableTcInterrupt();
+		// turn off transmitter
+		DE::Off();
+		// and flag transmission done
+		txDone_.signal_isr();
+	}
+#else
 	uint16_t status = USARTx->SR;
 	uint8_t data = USARTx->DR;
 
@@ -261,6 +313,7 @@ void Uart<props>::UartIrqHandler()
 		// and flag transmission done
 		txDone_.signal_isr();
 	}
+#endif
 }
 
 } // namespace UART

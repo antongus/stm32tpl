@@ -46,7 +46,11 @@
 #  define STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
 #  define F2xxF4xx
+#elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
+#  define STM32L0XX
+#  include "CMSIS/stm32l0xx.h"
 #else
+#  define STM32F1XX
 #  include "CMSIS/stm32f10x.h"
 #endif
 
@@ -68,7 +72,8 @@ enum ChipType
 	stm32F10X_MD_VL,   ///< Medium density Value Line devices
 	stm32F10X_HD_VL,   ///< High density Value Line devices
 	stm32F2XX,         ///< stm32F2xx chips
-	stm32F4XX          ///< stm32F4xx chips
+	stm32F4XX,         ///< stm32F4xx chips
+	stm32L0XX,         ///< stm32L0xx chips
 };
 
 
@@ -214,6 +219,22 @@ struct ChipCaps<stm32F4XX>
 	enum { HAVE_OTG = true };
 };
 
+template<>
+struct ChipCaps<stm32L0XX>
+{
+	static const uint32_t MAX_FREQ  = 32000000;
+	static const uint32_t APB1_FREQ = 32000000;
+	static const uint32_t APB2_FREQ = 32000000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
+	static const uint32_t DEVICE_ID = 0x413;
+	enum { HAVE_BUS = false };
+	enum { SPI_COUNT = 3 };
+	enum { USART_COUNT = 2 };
+	enum { HAVE_USB = true };
+	enum { HAVE_OTG = false };
+};
+
 template<ChipType chipType>
 struct ChipInfo : public ChipCaps<chipType>
 {
@@ -269,6 +290,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F2XX> chip;
 #elif (defined STM32F4XX)
 	typedef ChipInfo<stm32F4XX> chip;
+#elif (defined STM32L0XX)
+	typedef ChipInfo<stm32L0XX> chip;
 #else
 #	error Chip type (STM32FXXX_XX) must be defined.
 #endif

@@ -40,6 +40,10 @@ namespace STM32
 namespace SPI
 {
 
+#if (defined STM32L0XX)
+typedef IRQn_Type IRQn;
+#endif
+
 /**
  * Enumeration for all SPI devices in system
  */
