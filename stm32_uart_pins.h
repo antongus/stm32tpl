@@ -39,10 +39,6 @@ namespace UART
 {
 typedef uint32_t Baudrate;
 
-#if (defined STM32L0XX)
-typedef IRQn_Type IRQn;
-#endif
-
 /**
  * define count of UART modules
  */

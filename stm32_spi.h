@@ -1,7 +1,7 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *
- *  Copyright (c) 2010-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2010-2015 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -39,10 +39,6 @@ namespace STM32
 {
 namespace SPI
 {
-
-#if (defined STM32L0XX)
-typedef IRQn_Type IRQn;
-#endif
 
 /**
  * Enumeration for all SPI devices in system
@@ -146,7 +142,7 @@ public:
 	}
 	SpiBase& operator=(uint8_t val) { Rw(val); return *this; }
 	operator uint8_t() { return Rw(); }
-
+	virtual void BufRw(uint8_t*, uint8_t* , size_t) = 0;
 private:
 	OS::TMutex mutex_;
 };
@@ -161,6 +157,11 @@ template<> struct SpiPins<SPI_1>
 	typedef Pin<'A', 5> PinSCK;
 	typedef Pin<'A', 6> PinMISO;
 	typedef Pin<'A', 7> PinMOSI;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#endif
 };
 
 template<> struct SpiPins<SPI_1, REMAP_FULL>
@@ -168,6 +169,11 @@ template<> struct SpiPins<SPI_1, REMAP_FULL>
 	typedef Pin<'B', 3> PinSCK;
 	typedef Pin<'B', 4> PinMISO;
 	typedef Pin<'B', 5> PinMOSI;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#endif
 };
 
 #if (defined RCC_APB1ENR_SPI2EN)
@@ -176,6 +182,11 @@ template<> struct SpiPins<SPI_2>
 	typedef Pin<'B', 13> PinSCK;
 	typedef Pin<'B', 14> PinMISO;
 	typedef Pin<'B', 15> PinMOSI;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#endif
 };
 #endif
 
@@ -185,6 +196,9 @@ template<> struct SpiPins<SPI_3>
 	typedef Pin<'B', 3> PinSCK;
 	typedef Pin<'B', 4> PinMISO;
 	typedef Pin<'B', 5> PinMOSI;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
+#endif
 };
 
 template<> struct SpiPins<SPI_3, REMAP_FULL>
@@ -192,6 +206,9 @@ template<> struct SpiPins<SPI_3, REMAP_FULL>
 	typedef Pin<'C', 10> PinSCK;
 	typedef Pin<'C', 11> PinMISO;
 	typedef Pin<'C', 12> PinMOSI;
+#if (defined F2xxF4xx)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
+#endif
 };
 #endif
 
@@ -215,9 +232,6 @@ template<> struct SpiTraits<SPI_1>
 #endif
 		BUS_FREQ                = chip::APB2_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
-#endif
 
 #if (defined F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH3 };
@@ -225,10 +239,12 @@ template<> struct SpiTraits<SPI_1>
 
 	typedef DMA::Dma2Channel2 RxDmaStream;
 	typedef DMA::Dma2Channel3 TxDmaStream;
+#elif (defined STM32L0XX)
+	typedef DMA::Dma1Channel2 RxDmaStream;
+	typedef DMA::Dma1Channel3 TxDmaStream;
+	enum { CH_SEL_SPIx_RX = RxDmaStream::CH_SEL_SPI1_RX };
+	enum { CH_SEL_SPIx_TX = RxDmaStream::CH_SEL_SPI1_TX };
 #else
-	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
-	enum { TX_DMA_CHANNEL = 0 };
-
 	typedef DMA::Dma1Channel2 RxDmaStream;
 	typedef DMA::Dma1Channel3 TxDmaStream;
 #endif
@@ -249,19 +265,17 @@ template<> struct SpiTraits<SPI_2>
 		BUS_FREQ                = chip::APB1_FREQ
 	};
 #if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
-#endif
-
-#if (defined F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 
 	typedef DMA::Dma1Channel3 RxDmaStream;
 	typedef DMA::Dma1Channel4 TxDmaStream;
+#elif (defined STM32L0XX)
+	typedef DMA::Dma1Channel4 RxDmaStream;
+	typedef DMA::Dma1Channel5 TxDmaStream;
+	enum { CH_SEL_SPIx_RX = RxDmaStream::CH_SEL_SPI2_RX };
+	enum { CH_SEL_SPIx_TX = RxDmaStream::CH_SEL_SPI2_TX };
 #else
-	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
-	enum { TX_DMA_CHANNEL = 0 };
-
 	typedef DMA::Dma1Channel4 RxDmaStream;
 	typedef DMA::Dma1Channel5 TxDmaStream;
 #endif
@@ -285,9 +299,6 @@ template<> struct SpiTraits<SPI_3>
 #endif
 		BUS_FREQ                = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
-#endif
 
 #if (defined F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
@@ -296,9 +307,6 @@ template<> struct SpiTraits<SPI_3>
 	typedef DMA::Dma1Channel2 RxDmaStream;
 	typedef DMA::Dma1Channel5 TxDmaStream;
 #else
-	enum { RX_DMA_CHANNEL = 0 };      // channel selection does not exist in F1 devices.
-	enum { TX_DMA_CHANNEL = 0 };
-
 	typedef DMA::Dma2Channel1 RxDmaStream;
 	typedef DMA::Dma2Channel2 TxDmaStream;
 #endif
@@ -346,13 +354,19 @@ private:
 	INLINE static void DisableClocks()  { Traits::DisableClocks(); }
 
 	static const IRQn SPIx_IRQn  = Traits::SPIx_IRQn;
-#if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_SPIx = Traits::ALT_FUNC_SPIx;
+#if (!defined STM32F1XX)
+	static const PinAltFunction ALT_FUNC_SPIx = pins::ALT_FUNC_SPIx;
 #endif
 	typedef typename Traits::RxDmaStream RxDmaStream;
 	typedef typename Traits::TxDmaStream TxDmaStream;
+#if (defined F2xxF4xx)
 	enum { RX_DMA_CHANNEL   = Traits::RX_DMA_CHANNEL };
 	enum { TX_DMA_CHANNEL   = Traits::TX_DMA_CHANNEL };
+#elif (defined STM32L0XX)
+	enum { CH_SEL_SPIx_RX = Traits::CH_SEL_SPIx_RX };
+	enum { CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX };
+#endif
+
 	enum
 	{
 		SPIx_BASE               = Traits::SPIx_BASE,
@@ -380,7 +394,7 @@ public:
 template<typename props>
 void Spi<props>::HwInit()
 {
-#if (!defined F2xxF4xx)
+#if (defined STM32F1XX)
 	if (REMAP)  // remap module if needed
 		AFIO->MAPR |= SPIx_REMAP;
 #endif
@@ -388,7 +402,7 @@ void Spi<props>::HwInit()
 	EnableClocks();    // enable SPI module clock
 
 	// configure pins
-#if (!defined F2xxF4xx)
+#if (defined STM32F1XX)
 	SCK::Mode(ALT_OUTPUT);
 	MOSI::Mode(ALT_OUTPUT);
 	MISO::Mode(INPUTPULLED);
@@ -414,7 +428,7 @@ void Spi<props>::HwDeinit()
 	SPIx->CR2 = 0;             // turn off SPI
 	SPIx->CR1 = 0;
 
-#if (!defined F2xxF4xx)
+#if (defined STM32F1XX)
 	if (REMAP)                 // turn off remap
 		AFIO->MAPR &= ~SPIx_REMAP;
 #endif
@@ -429,6 +443,10 @@ void Spi<props>::HwDeinit()
 template<typename props>
 void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t * txBuf, size_t cnt)
 {
+#if (defined STM32L0XX)
+	RxDmaStream::SelectChannel(CH_SEL_SPIx_RX);
+	TxDmaStream::SelectChannel(CH_SEL_SPIx_TX);
+#endif
 	RxDmaStream::EnableClocks();
 	TxDmaStream::EnableClocks();
 
@@ -445,7 +463,9 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t * txBuf, size_t cnt)
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
+#if (defined F2xxF4xx)
 			| RX_DMA_CHANNEL                 // select channel (only for F4xx devices)
+#endif
 			;
 
 
@@ -459,7 +479,9 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t * txBuf, size_t cnt)
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
+#if (defined F2xxF4xx)
 			| TX_DMA_CHANNEL                 // select channel (only for F4xx devices)
+#endif
 			;
 
 	// enable DMA channels

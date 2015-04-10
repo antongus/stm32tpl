@@ -57,7 +57,9 @@
 
 #include "pin.h"
 
-//#include "stm32_rcc.h"
+#if (defined STM32L0XX)
+typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
+#endif
 
 /**
  * enum all supported chip types
