@@ -134,6 +134,16 @@ template<> struct DmaChannelTraits<DMA1_CH1>
 		DMA_NO = 1,
 		CHANNEL_NO = 1
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_ADC             = (0x00 << CSELR_SHIFT),
+		CH_SEL_TIM2_CH3        = (0x08 << CSELR_SHIFT),
+		CH_SEL_AES_IN          = (0x0B << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 
@@ -150,6 +160,21 @@ template<> struct DmaChannelTraits<DMA1_CH2>
 		DMA_NO = 1,
 		CHANNEL_NO = 2
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_ADC             = (0x00 << CSELR_SHIFT),
+		CH_SEL_SPI1_RX         = (0x01 << CSELR_SHIFT),
+		CH_SEL_USART1_TX       = (0x03 << CSELR_SHIFT),
+		CH_SEL_LPUART1_TX      = (0x05 << CSELR_SHIFT),
+		CH_SEL_I2C1_TX         = (0x06 << CSELR_SHIFT),
+		CH_SEL_TIM2_UP         = (0x08 << CSELR_SHIFT),
+		CH_SEL_TIM6_UPDAC_CH1  = (0x09 << CSELR_SHIFT),
+		CH_SEL_AES_OUT         = (0x0B << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 template<> struct DmaChannelTraits<DMA1_CH3>
@@ -164,6 +189,19 @@ template<> struct DmaChannelTraits<DMA1_CH3>
 		DMA_NO = 1,
 		CHANNEL_NO = 3
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_SPI1_TX         = (0x01 << CSELR_SHIFT),
+		CH_SEL_USART1_RX       = (0x03 << CSELR_SHIFT),
+		CH_SEL_LPUART1_RX      = (0x05 << CSELR_SHIFT),
+		CH_SEL_I2C1_RX         = (0x06 << CSELR_SHIFT),
+		CH_SEL_TIM2_CH2        = (0x08 << CSELR_SHIFT),
+		CH_SEL_AES_OUT         = (0x0B << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 template<> struct DmaChannelTraits<DMA1_CH4>
@@ -178,6 +216,18 @@ template<> struct DmaChannelTraits<DMA1_CH4>
 		DMA_NO = 1,
 		CHANNEL_NO = 4
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_SPI2_RX         = (0x02 << CSELR_SHIFT),
+		CH_SEL_USART1_TX       = (0x03 << CSELR_SHIFT),
+		CH_SEL_USART2_TX       = (0x04 << CSELR_SHIFT),
+		CH_SEL_I2C2_TX         = (0x07 << CSELR_SHIFT),
+		CH_SEL_TIM2_CH4        = (0x08 << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 template<> struct DmaChannelTraits<DMA1_CH5>
@@ -192,6 +242,19 @@ template<> struct DmaChannelTraits<DMA1_CH5>
 		DMA_NO = 1,
 		CHANNEL_NO = 5
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_SPI2_TX         = (0x02 << CSELR_SHIFT),
+		CH_SEL_USART1_RX       = (0x03 << CSELR_SHIFT),
+		CH_SEL_USART2_RX       = (0x04 << CSELR_SHIFT),
+		CH_SEL_I2C2_RX         = (0x07 << CSELR_SHIFT),
+		CH_SEL_TIM2_CH1        = (0x08 << CSELR_SHIFT),
+		CH_SEL_AES_IN          = (0x0B << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 template<> struct DmaChannelTraits<DMA1_CH6>
@@ -206,6 +269,17 @@ template<> struct DmaChannelTraits<DMA1_CH6>
 		DMA_NO = 1,
 		CHANNEL_NO = 6
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_SPI2_RX         = (0x02 << CSELR_SHIFT),
+		CH_SEL_USART2_RX       = (0x04 << CSELR_SHIFT),
+		CH_SEL_LPUART1_RX      = (0x05 << CSELR_SHIFT),
+		CH_SEL_I2C1_TX         = (0x06 << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 template<> struct DmaChannelTraits<DMA1_CH7>
@@ -220,6 +294,18 @@ template<> struct DmaChannelTraits<DMA1_CH7>
 		DMA_NO = 1,
 		CHANNEL_NO = 7
 	};
+#if (defined STM32L0XX)
+	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
+	enum class ChannelSelection : uint32_t  // possible CSELR values
+	{
+		CH_SEL_SPI2_TX         = (0x02 << CSELR_SHIFT),
+		CH_SEL_USART2_TX       = (0x04 << CSELR_SHIFT),
+		CH_SEL_LPUART1_TX      = (0x05 << CSELR_SHIFT),
+		CH_SEL_I2C1_RX         = (0x06 << CSELR_SHIFT),
+		CH_SEL_TIM2_CH2_CH4    = (0x08 << CSELR_SHIFT),
+		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
+	};
+#endif
 };
 
 #ifdef HAS_DMA2
@@ -367,36 +453,13 @@ public:
 	};
 
 #if (defined STM32L0XX)
-	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
-	enum  : uint32_t  // possible CSELR values
+	using ChannelSelection = typename ChannelTraits::ChannelSelection;
+	static void SelectChannel(ChannelSelection cs)
 	{
-		CH_SEL_ADC             = (0x00 << CSELR_SHIFT),
-		CH_SEL_SPI1_RX         = (0x01 << CSELR_SHIFT),
-		CH_SEL_SPI1_TX         = (0x01 << CSELR_SHIFT),
-		CH_SEL_SPI2_RX         = (0x02 << CSELR_SHIFT),
-		CH_SEL_SPI2_TX         = (0x02 << CSELR_SHIFT),
-		CH_SEL_USART1_RX       = (0x03 << CSELR_SHIFT),
-		CH_SEL_USART1_TX       = (0x03 << CSELR_SHIFT),
-		CH_SEL_USART2_RX       = (0x04 << CSELR_SHIFT),
-		CH_SEL_USART2_TX       = (0x04 << CSELR_SHIFT),
-		CH_SEL_LPUART1_RX      = (0x05 << CSELR_SHIFT),
-		CH_SEL_LPUART1_TX      = (0x05 << CSELR_SHIFT),
-		CH_SEL_I2C1_RX         = (0x06 << CSELR_SHIFT),
-		CH_SEL_I2C1_TX         = (0x06 << CSELR_SHIFT),
-		CH_SEL_I2C2_RX         = (0x07 << CSELR_SHIFT),
-		CH_SEL_I2C2_TX         = (0x07 << CSELR_SHIFT),
-		CH_SEL_TIM2_CH3        = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM2_UP         = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM2_CH2_CH4    = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM2_CH1        = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM2_CH4        = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM2_CH2        = (0x08 << CSELR_SHIFT),
-		CH_SEL_TIM6_UPDAC_CH1  = (0x09 << CSELR_SHIFT),
-		CH_SEL_AES_IN          = (0x0B << CSELR_SHIFT),
-		CH_SEL_AES_OUT         = (0x0B << CSELR_SHIFT),
-		CH_SEL_MASK            = (0x0F << CSELR_SHIFT),
-	};
-	static void SelectChannel(uint32_t cs) { DMA->CSELR = (DMA->CSELR & ~CH_SEL_MASK) | cs; }
+		DMA->CSELR =
+				(DMA->CSELR & ~static_cast<uint32_t>(ChannelSelection::CH_SEL_MASK))
+				| static_cast<uint32_t>(cs);
+	}
 #endif
 
 	/// Constructor.
@@ -408,8 +471,8 @@ public:
 	// DMA registers
 	static IORegister<DMAx_BASE + offsetof(DMAx_TypeDef, ISR)> ISR;
 	static IORegister<DMAx_BASE + offsetof(DMAx_TypeDef, IFCR)> IFCR;
-//
-//	// Channel registers
+
+	// Channel registers
 	static IORegister<CHANNEL_BASE + offsetof(DMAx_Channel_TypeDef, CCR)>   CR;
 	static IORegister<CHANNEL_BASE + offsetof(DMAx_Channel_TypeDef, CNDTR)> NDTR;
 	static IORegister<CHANNEL_BASE + offsetof(DMAx_Channel_TypeDef, CPAR)>  PAR;

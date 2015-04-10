@@ -242,8 +242,8 @@ template<> struct SpiTraits<SPI_1>
 #elif (defined STM32L0XX)
 	typedef DMA::Dma1Channel2 RxDmaStream;
 	typedef DMA::Dma1Channel3 TxDmaStream;
-	enum { CH_SEL_SPIx_RX = RxDmaStream::CH_SEL_SPI1_RX };
-	enum { CH_SEL_SPIx_TX = RxDmaStream::CH_SEL_SPI1_TX };
+	static const RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = RxDmaStream::ChannelSelection::CH_SEL_SPI1_RX;
+	static const TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = TxDmaStream::ChannelSelection::CH_SEL_SPI1_TX;
 #else
 	typedef DMA::Dma1Channel2 RxDmaStream;
 	typedef DMA::Dma1Channel3 TxDmaStream;
@@ -273,8 +273,8 @@ template<> struct SpiTraits<SPI_2>
 #elif (defined STM32L0XX)
 	typedef DMA::Dma1Channel4 RxDmaStream;
 	typedef DMA::Dma1Channel5 TxDmaStream;
-	enum { CH_SEL_SPIx_RX = RxDmaStream::CH_SEL_SPI2_RX };
-	enum { CH_SEL_SPIx_TX = RxDmaStream::CH_SEL_SPI2_TX };
+	static const RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = RxDmaStream::ChannelSelection::CH_SEL_SPI2_RX;
+	static const TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = TxDmaStream::ChannelSelection::CH_SEL_SPI2_TX;
 #else
 	typedef DMA::Dma1Channel4 RxDmaStream;
 	typedef DMA::Dma1Channel5 TxDmaStream;
@@ -363,8 +363,8 @@ private:
 	enum { RX_DMA_CHANNEL   = Traits::RX_DMA_CHANNEL };
 	enum { TX_DMA_CHANNEL   = Traits::TX_DMA_CHANNEL };
 #elif (defined STM32L0XX)
-	enum { CH_SEL_SPIx_RX = Traits::CH_SEL_SPIx_RX };
-	enum { CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX };
+	static const typename RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = Traits::CH_SEL_SPIx_RX;
+	static const typename TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX;
 #endif
 
 	enum
