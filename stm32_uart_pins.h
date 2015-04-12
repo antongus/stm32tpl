@@ -332,6 +332,125 @@ struct DummyDE
 	INLINE static int Latched() { return false; }
 };
 
+namespace
+{
+
+
+} // namespace
+
+/**
+ * USART driver
+ */
+class UartBase
+{
+public:
+	struct USARTx_TypeDef_F1XXX
+	{
+		volatile uint16_t SR;
+		uint16_t reserved0;
+		volatile uint16_t DR;
+		uint16_t reserved1;
+		volatile uint16_t BRR;
+		uint16_t reserved2;
+		volatile uint16_t CR1;
+		uint16_t reserved3;
+		volatile uint16_t CR2;
+		uint16_t reserved4;
+		volatile uint16_t CR3;
+		uint16_t reserved5;
+		volatile uint16_t GTPR;
+		uint16_t reserved6;
+		INLINE uint32_t ReadStatus()            { return SR; }
+		INLINE void ClearStatus(uint32_t flags) { SR &= ~flags; }
+		INLINE uint8_t ReadData()               { return DR; }
+		INLINE void WriteData(uint8_t data)     { DR = data; }
+	};
+
+	struct USARTx_TypeDef_L0XXX
+	{
+		volatile uint32_t CR1;
+		volatile uint32_t CR2;
+		volatile uint32_t CR3;
+		volatile uint32_t BRR;
+		volatile uint32_t GTPR;
+		volatile uint32_t RTOR;
+		volatile uint32_t RQR;
+		volatile uint32_t ISR;
+		volatile uint32_t ICR;
+		volatile uint32_t RDR;
+		volatile uint32_t TDR;
+		INLINE uint32_t ReadStatus()            { return ISR; }
+		INLINE void ClearStatus(uint32_t flags) { ICR = flags; }
+		INLINE uint8_t ReadData()               { return RDR; }
+		INLINE void WriteData(uint8_t data)     { TDR = data; }
+	};
+#if (defined STM32L0XX)
+	using USARTx_TypeDef = USARTx_TypeDef_L0XXX;
+#else
+	using USARTx_TypeDef = USARTx_TypeDef_F1XXX;
+#endif
+
+	USARTx_TypeDef *const USARTx;
+
+	UartBase(USARTx_TypeDef *const usartx)
+		: USARTx(usartx)
+	{ }
+
+	INLINE void EnableRxInterrupt()  { USARTx->CR1 |= USART_CR1_RXNEIE; }
+	INLINE void DisableRxInterrupt() { USARTx->CR1 &= ~USART_CR1_RXNEIE; }
+	INLINE void EnableTxInterrupt()  { USARTx->CR1 |= USART_CR1_TXEIE; }
+	INLINE void DisableTxInterrupt() { USARTx->CR1 &= ~USART_CR1_TXEIE; }
+	INLINE void EnableTcInterrupt()  { USARTx->CR1 |= USART_CR1_TCIE; }
+	INLINE void DisableTcInterrupt() { USARTx->CR1 &= ~USART_CR1_TCIE; }
+	INLINE void Enable()             { USARTx->CR1 |= USART_CR1_UE; }
+	INLINE void Disable()            { USARTx->CR1 &= ~USART_CR1_UE; }
+
+	INLINE uint32_t ReadStatus()            { return USARTx->ReadStatus(); }
+	INLINE void ClearStatus(uint32_t flags) { USARTx->ClearStatus(flags); }
+	INLINE uint8_t ReadData()               { return USARTx->ReadData(); }
+	INLINE void WriteData(uint8_t data)     { USARTx->WriteData(data); }
+
+#if 0
+	INLINE uint32_t ReadStatus()
+	{
+#if (defined STM32L0XX)
+		return USARTx->ISR;
+#else
+		return USARTx->SR;
+#endif
+	}
+	INLINE void ClearStatus(uint32_t flags)
+	{
+#if (defined STM32L0XX)
+		USARTx->ICR = flags;
+#else
+		USARTx->SR &= ~flags;
+#endif
+	}
+	INLINE uint8_t ReadData()
+	{
+#if (defined STM32L0XX)
+		return USARTx->RDR;
+#else
+		return USARTx->DR;
+#endif
+	}
+
+	INLINE void WriteData(uint8_t data)
+	{
+#if (defined STM32L0XX)
+		USARTx->TDR = data;
+#else
+		USARTx->DR = data;
+#endif
+	}
+
+#endif
+
+	INLINE operator uint8_t() { return ReadData(); }
+};
+
+
 } // namespace UART
 } // namespace STM32
 

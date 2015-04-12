@@ -41,12 +41,6 @@ namespace STM32
 namespace UART
 {
 
-namespace
-{
-
-} // namespace
-
-
 /**
  * sample UART properties structure
  */
@@ -72,6 +66,7 @@ struct SampleUartProps
 template<typename props = SampleUartProps>
 class Uart
 	: public TextStream
+	, public UartBase
 {
 private:
 	typedef UartTraits<props::uartNum> Traits;
@@ -104,24 +99,17 @@ private:
 #if (!defined STM32F1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
 #endif
-
-	INLINE void EnableTxInterrupt()  { USARTx->CR1 |= USART_CR1_TXEIE; }
-	INLINE void DisableTxInterrupt() { USARTx->CR1 &= ~USART_CR1_TXEIE; }
-	INLINE void EnableTcInterrupt()  { USARTx->CR1 |= USART_CR1_TCIE; }
-	INLINE void DisableTcInterrupt() { USARTx->CR1 &= ~USART_CR1_TCIE; }
 public:
-	static IOStruct<USARTx_BASE, USART_TypeDef> USARTx;
+//	static IOStruct<USARTx_BASE, USARTx_TypeDef> USARTx;
 	Uart();
 
 	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
 	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
-	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
-	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
 	INLINE static void StartTx()         { DE::On(); }
 	INLINE static void EndTx()           { DE::Off(); }
 
-	INLINE static void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
-	INLINE static Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
+	INLINE void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
+	INLINE Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
 
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
@@ -138,6 +126,7 @@ public:
 template<class props>
 Uart<props>::Uart()
 	: TextStream()
+	, UartBase(reinterpret_cast<USARTx_TypeDef *const>(USARTx_BASE))
 	, rxChannel_()
 	, txChannel_()
 	, txDone_()
@@ -220,8 +209,8 @@ template<class props>
 void Uart<props>::UartIrqHandler()
 {
 #if (defined STM32L0XX)
-	uint16_t status = USARTx->ISR;
-	uint8_t data = USARTx->RDR;
+	uint32_t status = ReadStatus();
+	uint8_t data = ReadData();
 
 	// RX NOT EMPTY INTERRUPT
 	if (status & USART_ISR_RXNE)

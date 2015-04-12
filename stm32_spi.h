@@ -142,7 +142,7 @@ public:
 	}
 	SpiBase& operator=(uint8_t val) { Rw(val); return *this; }
 	operator uint8_t() { return Rw(); }
-	virtual void BufRw(uint8_t*, uint8_t* , size_t) = 0;
+	virtual void BufRw(uint8_t * rxbuf, uint8_t const* txBuf, size_t cnt) = 0;
 private:
 	OS::TMutex mutex_;
 };
@@ -388,7 +388,7 @@ public:
 		active ? HwInit() : HwDeinit();
 	}
 
-	void BufRw(uint8_t * rxbuf, uint8_t * txBuf, size_t cnt);
+	void BufRw(uint8_t * rxbuf, uint8_t const* txBuf, size_t cnt) override;
 };
 
 template<typename props>
@@ -441,7 +441,7 @@ void Spi<props>::HwDeinit()
 }
 
 template<typename props>
-void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t * txBuf, size_t cnt)
+void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 {
 #if (defined STM32L0XX)
 	RxDmaStream::SelectChannel(CH_SEL_SPIx_RX);
