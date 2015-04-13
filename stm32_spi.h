@@ -443,12 +443,12 @@ void Spi<props>::HwDeinit()
 template<typename props>
 void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 {
+	RxDmaStream::EnableClocks();
+	TxDmaStream::EnableClocks();
 #if (defined STM32L0XX)
 	RxDmaStream::SelectChannel(CH_SEL_SPIx_RX);
 	TxDmaStream::SelectChannel(CH_SEL_SPIx_TX);
 #endif
-	RxDmaStream::EnableClocks();
-	TxDmaStream::EnableClocks();
 
 	// clear all interrupts on RX DMA channel
 	RxDmaStream::IFCR = RxDmaStream::DMA_MASK_ALL;
