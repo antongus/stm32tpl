@@ -32,7 +32,7 @@
 #define STM32TPL_STM32_UART_H_INCLUDED
 
 #include "stm32.h"
-#include "stm32_uart_pins.h"
+#include "stm32_uart_driver.h"
 #include "textstream.h"
 #include <scmRTOS.h>
 
@@ -66,14 +66,11 @@ struct SampleUartProps
 template<typename props = SampleUartProps>
 class Uart
 	: public TextStream
-	, public UartBase
+	, public UartDriver<props::uartNum>
 {
-private:
-	typedef UartTraits<props::uartNum> Traits;
 public:
 	static const UartNum uartNum = props::uartNum;
 	static const Remap remap = props::remap;
-	static const IRQn USARTx_IRQn  = Traits::USARTx_IRQn;
 	enum
 	{
 		BAUDRATE = props::BAUDRATE,
@@ -82,34 +79,13 @@ public:
 		UART_INTERRUPT_PRIOGROUP = props::UART_INTERRUPT_PRIOGROUP,
 		UART_INTERRUPT_SUBPRIO = props::UART_INTERRUPT_SUBPRIO
 	};
-private:
-	OS::channel<char, RX_BUF_SIZE, uint32_t> rxChannel_;
-	OS::channel<char, TX_BUF_SIZE, uint32_t> txChannel_;
-	OS::TEventFlag txDone_;
+	using Driver = UartDriver<uartNum>;
+	using Driver::USARTx;
 
-	typedef UartPins<props::uartNum, props::remap> Pins;
-	typedef typename Pins::PinTX TX;
-	typedef typename Pins::PinRX RX;
-	typedef typename props::PinDE DE;
-
-	enum { USARTx_BASE            = Traits::USARTx_BASE };
-	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
-	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
-	enum { BUS_FREQ               = Traits::BUS_FREQ };
-#if (!defined STM32F1XX)
-	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
-#endif
-public:
-//	static IOStruct<USARTx_BASE, USARTx_TypeDef> USARTx;
 	Uart();
 
-	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
-	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
 	INLINE static void StartTx()         { DE::On(); }
 	INLINE static void EndTx()           { DE::Off(); }
-
-	INLINE void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
-	INLINE Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
 
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
@@ -121,24 +97,33 @@ public:
 	bool ReceiveBuffer(void* buf, size_t count, timeout_t timeout);
 
 	INLINE void UartIrqHandler();
+
+private:
+	OS::channel<char, RX_BUF_SIZE, uint32_t> rxChannel_;
+	OS::channel<char, TX_BUF_SIZE, uint32_t> txChannel_;
+	OS::TEventFlag txDone_;
+
+	using Pins = UartPins<props::uartNum, props::remap>;
+	using TX = typename Pins::PinTX;
+	using RX = typename Pins::PinRX;
+	using DE = typename props::PinDE;
+
+#if (!defined STM32F1XX)
+	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
+#endif
 };
 
 template<class props>
 Uart<props>::Uart()
-	: TextStream()
-	, UartBase(reinterpret_cast<USARTx_TypeDef *const>(USARTx_BASE))
-	, rxChannel_()
-	, txChannel_()
-	, txDone_()
 {
 #if (defined STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
-		AFIO->MAPR |= USARTx_REMAP;
+		AFIO->MAPR |= Driver::USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
-		AFIO->MAPR |= USARTx_REMAP_PARTIAL;
+		AFIO->MAPR |= Driver::USARTx_REMAP_PARTIAL;
 #endif
 
-	EnableClocks();                 // enable UART module clock
+	Driver::EnableClocks();         // enable UART module clock
 
 #if (defined STM32F1XX)             // configure pins
 	TX::Mode(ALT_OUTPUT);
@@ -162,23 +147,23 @@ Uart<props>::Uart()
 	USARTx->CR2 = 0; // 1 stop
 	USARTx->CR3 = 0; // no flow control
 
-	SetBaudrate(BAUDRATE);
+	Driver::SetBaudrate(BAUDRATE);
 
-	Enable();        // Enable USART
+	Driver::Enable();             // Enable USART
 
 #if (!defined STM32L0XX)
-	NVIC_SetPriority(USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
+	NVIC_SetPriority(Driver::USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
 #else
-	NVIC_SetPriority(USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
+	NVIC_SetPriority(Driver::USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
 #endif
-	NVIC_EnableIRQ(USARTx_IRQn);
+	NVIC_EnableIRQ(Driver::USARTx_IRQn);
 }
 
 template<class props>
 void Uart<props>::PutChar(char ch)
 {
 	txChannel_.push(ch);
-	EnableTxInterrupt();
+	Driver::TxInterrupt::Enable();
 }
 
 template<class props>
@@ -195,7 +180,7 @@ void Uart<props>::SendBuffer(const void* buf, size_t size)
 {
 	const char* ptr = reinterpret_cast<const char*>(buf);
 	txChannel_.write(ptr, size);
-	EnableTxInterrupt();
+	Driver::TxInterrupt::Enable();
 }
 
 template<typename props>
@@ -208,19 +193,18 @@ bool Uart<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
 template<class props>
 void Uart<props>::UartIrqHandler()
 {
-#if (defined STM32L0XX)
-	uint32_t status = ReadStatus();
-	uint8_t data = ReadData();
+	uint32_t status = Driver::Status();
+	uint32_t data = Driver::ReadData();
 
 	// RX NOT EMPTY INTERRUPT
-	if (status & USART_ISR_RXNE)
+	if (status & USART_FLAG_RXNE)
 	{
 		if (rxChannel_.get_free_size())
 			rxChannel_.push(data);
 	}
 
 	// TX EMPTY INTERRUPT
-	if ((status & USART_ISR_TXE) && (USARTx->CR1 & USART_CR1_TXEIE))
+	if ((status & USART_FLAG_TXE) && (USARTx->CR1 & USART_CR1_TXEIE))
 	{
 		if (txChannel_.get_count())
 		{
@@ -234,75 +218,27 @@ void Uart<props>::UartIrqHandler()
 				__asm__ __volatile__ ("nop");
 				__asm__ __volatile__ ("nop");
 			}
-			USARTx->TDR = ch;
+			Driver::WriteData((uint8_t)ch);
 		}
 		else
 		{
-			DisableTxInterrupt();
-			EnableTcInterrupt();
+			Driver::TxInterrupt::Disable();
+			Driver::TcInterrupt::Enable();
 		}
 	}
 
 	// TRANSMIT COMPLETE INTERRUPT
-	if ((status & USART_ISR_TC) && (USARTx->CR1 & USART_CR1_TCIE))
+	if ((status & USART_FLAG_TC) && (USARTx->CR1 & USART_CR1_TCIE))
 	{
 		// clear interrupt
-		USARTx->ICR = USART_ICR_TCCF;
+		Driver::TcInterrupt::Clear();
 		// disable it
-		DisableTcInterrupt();
+		Driver::TcInterrupt::Disable();
 		// turn off transmitter
 		DE::Off();
 		// and flag transmission done
 		txDone_.signal_isr();
 	}
-#else
-	uint16_t status = USARTx->SR;
-	uint8_t data = USARTx->DR;
-
-	// RX NOT EMPTY INTERRUPT
-	if (status & USART_SR_RXNE)
-	{
-		if (rxChannel_.get_free_size())
-			rxChannel_.push(data);
-	}
-
-	// TX EMPTY INTERRUPT
-	if ((status & USART_SR_TXE) && (USARTx->CR1 & USART_CR1_TXEIE))
-	{
-		if (txChannel_.get_count())
-		{
-			char ch = 0;
-			txChannel_.pop(ch);
-			if (!DE::Latched())
-			{
-				DE::On();
-				__asm__ __volatile__ ("nop");
-				__asm__ __volatile__ ("nop");
-				__asm__ __volatile__ ("nop");
-				__asm__ __volatile__ ("nop");
-			}
-			USARTx->DR = ch;
-		}
-		else
-		{
-			DisableTxInterrupt();
-			EnableTcInterrupt();
-		}
-	}
-
-	// TRANSMIT COMPLETE INTERRUPT
-	if ((status & USART_SR_TC) && (USARTx->CR1 & USART_CR1_TCIE))
-	{
-		// clear interrupt
-		USARTx->SR &= ~USART_SR_TC;
-		// disable it
-		DisableTcInterrupt();
-		// turn off transmitter
-		DE::Off();
-		// and flag transmission done
-		txDone_.signal_isr();
-	}
-#endif
 }
 
 } // namespace UART

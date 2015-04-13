@@ -32,7 +32,7 @@
 #define STM32TPL_STM32_UART_DBG_H_INCLUDED
 
 #include "stm32.h"
-#include "stm32_uart_pins.h"
+#include "stm32_uart_driver.h"
 #include "textstream.h"
 
 namespace STM32
@@ -58,69 +58,48 @@ struct SampleUartDbgProps
 template<typename props = SampleUartDbgProps>
 class UartDbg
 	: public TextStream
+	, public UartDriver<props::uartNum>
 {
-private:
-	typedef UartTraits<props::uartNum> Traits;
 public:
 	static const UartNum uartNum = props::uartNum;
 	static const Remap remap = props::remap;
 	enum { BAUDRATE = props::BAUDRATE };
+	using Driver = UartDriver<uartNum>;
+	using Driver::USARTx;
 
 private:
-	typedef UartPins<props::uartNum, props::remap> Pins;
-	typedef typename Pins::PinTX TX;
-	typedef typename Pins::PinRX RX;
-	typedef typename props::PinDE DE;
+	using Pins = UartPins<props::uartNum, props::remap>;
+	using TX = typename Pins::PinTX;
+	using RX = typename Pins::PinRX;
+	using DE = typename props::PinDE;
 
-	enum { USARTx_BASE            = Traits::USARTx_BASE };
-	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
-	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
-	enum { BUS_FREQ               = Traits::BUS_FREQ };
 #if (!defined STM32F1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
 #endif
-
 public:
-	static IOStruct<USARTx_BASE, USART_TypeDef> USARTx;
-
 	UartDbg();
 
-	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
-	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
-	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
-	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
 	INLINE static void StartTx()         { DE::On(); }
 	INLINE static void EndTx()           { DE::Off(); }
 
-	INLINE static void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
-	INLINE static Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
-
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
-	virtual int Keypressed() override
-	{
-#if (defined STM32L0XX)
-		return USARTx->ISR & USART_ISR_RXNE;
-#else
-		return USARTx->SR & USART_SR_RXNE;
-#endif
-	}
+	virtual int Keypressed() override  { return Driver::Status() & USART_FLAG_RXNE; }
 	virtual int CanSend() override { return true; };
 	virtual int TxEmpty() override { return true; };
 };
 
 template<typename props>
 UartDbg<props>::UartDbg()
-	: TextStream()
 {
 #if (defined STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
-		AFIO->MAPR |= USARTx_REMAP;
+		AFIO->MAPR |= Driver::USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
-		AFIO->MAPR |= USARTx_REMAP_PARTIAL;
+		AFIO->MAPR |= Driver::USARTx_REMAP_PARTIAL;
 #endif
 
-	EnableClocks();                 // enable UART module clock
+	Driver::EnableClocks();         // enable UART module clock
 
 #if (defined STM32F1XX)             // configure pins
 	TX::Mode(ALT_OUTPUT);
@@ -143,21 +122,16 @@ UartDbg<props>::UartDbg()
 	USARTx->CR2 = 0; // 1 stop
 	USARTx->CR3 = 0;
 
-	SetBaudrate(BAUDRATE);
+	Driver::SetBaudrate(BAUDRATE);
 
-	Enable();        // Enable USART
+	Driver::Enable();             // Enable USART
 }
 
 template<class props>
 void UartDbg<props>::PutChar(char ch)
 {
-#if (defined STM32L0XX)
-	while (!(USARTx->ISR & USART_ISR_TXE)) ;
-	USARTx->TDR = ch;
-#else
-	while (!(USARTx->SR & USART_SR_TXE)) ;
-	USARTx->DR = ch;
-#endif
+	while (!(Driver::Status() & USART_FLAG_TXE)) ;
+	Driver::WriteData(ch);
 }
 
 template<class props>
@@ -166,11 +140,7 @@ int UartDbg<props>::GetChar(int timeout)
 	for(;;)
 	{
 		if (Keypressed())
-#if (defined STM32L0XX)
-			return USARTx->RDR;
-#else
-			return USARTx->DR;
-#endif
+			return Driver::ReadData();
 		if (timeout && !--timeout)
 			return -1;
 	}

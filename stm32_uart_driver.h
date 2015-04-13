@@ -22,14 +22,14 @@
  *  THE SOFTWARE.
  *
  *
- *  @file         : stm32_uart_pins.h
- *  @description  : STM32 UART pins class template.
+ *  @file         : stm32_uart_driver.h
+ *  @description  : STM32 USART module driver.
  *  created on    : 09.11.2010
  *
  */
 
-#ifndef STM32TPL_STM32_UART_PINS_H_INCLUDED
-#define STM32TPL_STM32_UART_PINS_H_INCLUDED
+#ifndef STM32TPL_STM32_UART_DRIVER_H_INCLUDED
+#define STM32TPL_STM32_UART_DRIVER_H_INCLUDED
 
 #include "stm32.h"
 
@@ -329,7 +329,7 @@ struct DummyDE
 	INLINE static void Off() { }
 	INLINE static void Cpl() { }
 	INLINE static void Mode(direction) { }
-	INLINE static int Latched() { return false; }
+	INLINE static int Latched() { return true; }
 };
 
 namespace
@@ -338,115 +338,148 @@ namespace
 
 } // namespace
 
+#if (defined STM32L0XX)
+struct USARTx_TypeDef
+{
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t CR3;
+	volatile uint32_t BRR;
+	volatile uint32_t GTPR;
+	volatile uint32_t RTOR;
+	volatile uint32_t RQR;
+	volatile uint32_t ISR;
+	volatile uint32_t ICR;
+	volatile uint32_t RDR;
+	volatile uint32_t TDR;
+};
+
+enum : uint32_t
+{
+	USART_FLAG_PE     = 0x00000001UL,
+	USART_FLAG_FE     = 0x00000002UL,
+	USART_FLAG_NE     = 0x00000004UL,
+	USART_FLAG_ORE    = 0x00000008UL,
+	USART_FLAG_IDLE   = 0x00000010UL,
+	USART_FLAG_RXNE   = 0x00000020UL,
+	USART_FLAG_TC     = 0x00000040UL,
+	USART_FLAG_TXE    = 0x00000080UL,
+	USART_FLAG_LBD    = 0x00000100UL,
+	USART_FLAG_CTSIF  = 0x00000200UL,
+	USART_FLAG_CTS    = 0x00000400UL,
+	USART_FLAG_RTOF   = 0x00000800UL,
+	USART_FLAG_EOBF   = 0x00001000UL,
+	USART_FLAG_ABRE   = 0x00004000UL,
+	USART_FLAG_ABRF   = 0x00008000UL,
+	USART_FLAG_BUSY   = 0x00010000UL,
+	USART_FLAG_CMF    = 0x00020000UL,
+	USART_FLAG_SBKF   = 0x00040000UL,
+	USART_FLAG_RWU    = 0x00080000UL,
+	USART_FLAG_WUF    = 0x00100000UL,
+	USART_FLAG_TEACK  = 0x00200000UL,
+	USART_FLAG_REACK  = 0x00400000UL,
+};
+
+#else
+
+struct USARTx_TypeDef
+{
+	volatile uint16_t SR;
+	uint16_t reserved0;
+	volatile uint16_t DR;
+	uint16_t reserved1;
+	volatile uint16_t BRR;
+	uint16_t reserved2;
+	volatile uint16_t CR1;
+	uint16_t reserved3;
+	volatile uint16_t CR2;
+	uint16_t reserved4;
+	volatile uint16_t CR3;
+	uint16_t reserved5;
+	volatile uint16_t GTPR;
+	uint16_t reserved6;
+};
+
+enum : uint16_t
+{
+	USART_FLAG_PE   = 0x0001,
+	USART_FLAG_FE   = 0x0002,
+	USART_FLAG_NE   = 0x0004,
+	USART_FLAG_ORE  = 0x0008,
+	USART_FLAG_IDLE = 0x0010,
+	USART_FLAG_RXNE = 0x0020,
+	USART_FLAG_TC   = 0x0040,
+	USART_FLAG_TXE  = 0x0080,
+	USART_FLAG_LBD  = 0x0100,
+	USART_FLAG_CTS  = 0x0200,
+};
+
+#endif
+
+
 /**
  * USART driver
  */
-class UartBase
+template<UartNum uartNum>
+class UartDriver
 {
+private:
+	typedef UartTraits<uartNum> Traits;
 public:
-	struct USARTx_TypeDef_F1XXX
+	static const IRQn USARTx_IRQn = Traits::USARTx_IRQn;
+	enum { USARTx_BASE            = Traits::USARTx_BASE };
+	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
+	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
+	enum { BUS_FREQ               = Traits::BUS_FREQ };
+
+	static IOStruct<USARTx_BASE, USARTx_TypeDef> USARTx;
+
+	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
+	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
+	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
+	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
+
+	INLINE static void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
+	INLINE static Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
+
+#if (defined STM32L0XX)
+	INLINE static uint32_t Status()                 { return USARTx->ISR; }
+	INLINE static void ClearStatus(uint32_t flags)  { USARTx->ICR = flags; }
+	INLINE uint32_t ReadData()                      { return USARTx->RDR; }
+	INLINE void WriteData(uint8_t data)             { USARTx->TDR = data; }
+#else
+	INLINE static uint16_t Status()                 { return USARTx->SR; }
+	INLINE static void ClearStatus(uint32_t flags)  { USARTx->SR &= ~flags; }
+	INLINE uint16_t ReadData()                      { return USARTx->DR; }
+	INLINE void WriteData(uint8_t data)             { USARTx->DR = data; }
+#endif
+
+	struct RxInterrupt
 	{
-		volatile uint16_t SR;
-		uint16_t reserved0;
-		volatile uint16_t DR;
-		uint16_t reserved1;
-		volatile uint16_t BRR;
-		uint16_t reserved2;
-		volatile uint16_t CR1;
-		uint16_t reserved3;
-		volatile uint16_t CR2;
-		uint16_t reserved4;
-		volatile uint16_t CR3;
-		uint16_t reserved5;
-		volatile uint16_t GTPR;
-		uint16_t reserved6;
-		INLINE uint32_t ReadStatus()            { return SR; }
-		INLINE void ClearStatus(uint32_t flags) { SR &= ~flags; }
-		INLINE uint8_t ReadData()               { return DR; }
-		INLINE void WriteData(uint8_t data)     { DR = data; }
+		static void Enable()    { USARTx->CR1 |= USART_CR1_RXNEIE; }
+		static void Disable()   { USARTx->CR1 &= ~USART_CR1_RXNEIE; }
+		static bool IsEnabled() { return USARTx->CR1 & USART_CR1_RXNEIE; }
+		static bool Fired()     { return Status() & USART_FLAG_RXNE; }
 	};
 
-	struct USARTx_TypeDef_L0XXX
+	struct TxInterrupt
 	{
-		volatile uint32_t CR1;
-		volatile uint32_t CR2;
-		volatile uint32_t CR3;
-		volatile uint32_t BRR;
-		volatile uint32_t GTPR;
-		volatile uint32_t RTOR;
-		volatile uint32_t RQR;
-		volatile uint32_t ISR;
-		volatile uint32_t ICR;
-		volatile uint32_t RDR;
-		volatile uint32_t TDR;
-		INLINE uint32_t ReadStatus()            { return ISR; }
-		INLINE void ClearStatus(uint32_t flags) { ICR = flags; }
-		INLINE uint8_t ReadData()               { return RDR; }
-		INLINE void WriteData(uint8_t data)     { TDR = data; }
+		static void Enable()    { USARTx->CR1 |= USART_CR1_TXEIE; }
+		static void Disable()   { USARTx->CR1 &= ~USART_CR1_TXEIE; }
+		static bool IsEnabled() { return USARTx->CR1 & USART_CR1_TXEIE; }
+		static bool Fired()     { return Status() & USART_FLAG_TXE; }
 	};
-#if (defined STM32L0XX)
-	using USARTx_TypeDef = USARTx_TypeDef_L0XXX;
-#else
-	using USARTx_TypeDef = USARTx_TypeDef_F1XXX;
-#endif
 
-	USARTx_TypeDef *const USARTx;
-
-	UartBase(USARTx_TypeDef *const usartx)
-		: USARTx(usartx)
-	{ }
-
-	INLINE void EnableRxInterrupt()  { USARTx->CR1 |= USART_CR1_RXNEIE; }
-	INLINE void DisableRxInterrupt() { USARTx->CR1 &= ~USART_CR1_RXNEIE; }
-	INLINE void EnableTxInterrupt()  { USARTx->CR1 |= USART_CR1_TXEIE; }
-	INLINE void DisableTxInterrupt() { USARTx->CR1 &= ~USART_CR1_TXEIE; }
-	INLINE void EnableTcInterrupt()  { USARTx->CR1 |= USART_CR1_TCIE; }
-	INLINE void DisableTcInterrupt() { USARTx->CR1 &= ~USART_CR1_TCIE; }
-	INLINE void Enable()             { USARTx->CR1 |= USART_CR1_UE; }
-	INLINE void Disable()            { USARTx->CR1 &= ~USART_CR1_UE; }
-
-	INLINE uint32_t ReadStatus()            { return USARTx->ReadStatus(); }
-	INLINE void ClearStatus(uint32_t flags) { USARTx->ClearStatus(flags); }
-	INLINE uint8_t ReadData()               { return USARTx->ReadData(); }
-	INLINE void WriteData(uint8_t data)     { USARTx->WriteData(data); }
-
-#if 0
-	INLINE uint32_t ReadStatus()
+	struct TcInterrupt
 	{
-#if (defined STM32L0XX)
-		return USARTx->ISR;
-#else
-		return USARTx->SR;
-#endif
-	}
-	INLINE void ClearStatus(uint32_t flags)
-	{
-#if (defined STM32L0XX)
-		USARTx->ICR = flags;
-#else
-		USARTx->SR &= ~flags;
-#endif
-	}
-	INLINE uint8_t ReadData()
-	{
-#if (defined STM32L0XX)
-		return USARTx->RDR;
-#else
-		return USARTx->DR;
-#endif
-	}
+		static void Enable()    { USARTx->CR1 |= USART_CR1_TCIE; }
+		static void Disable()   { USARTx->CR1 &= ~USART_CR1_TCIE; }
+		static bool IsEnabled() { return USARTx->CR1 & USART_CR1_TCIE; }
+		static bool Fired()     { return Status() & USART_FLAG_TC; }
+		static void Clear()     { ClearStatus(USART_FLAG_TC); }
+	};
 
-	INLINE void WriteData(uint8_t data)
-	{
-#if (defined STM32L0XX)
-		USARTx->TDR = data;
-#else
-		USARTx->DR = data;
-#endif
-	}
-
-#endif
-
+public:
 	INLINE operator uint8_t() { return ReadData(); }
 };
 
@@ -455,4 +488,4 @@ public:
 } // namespace STM32
 
 
-#endif // STM32TPL_STM32_UART_PINS_H_INCLUDED
+#endif // STM32TPL_STM32_UART_DRIVER_H_INCLUDED
