@@ -193,8 +193,8 @@ bool Uart<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
 template<class props>
 void Uart<props>::UartIrqHandler()
 {
-	uint32_t status = Driver::Status();
-	uint32_t data = Driver::ReadData();
+	auto status = Driver::Status();
+	auto data = Driver::ReadData();
 
 	// RX NOT EMPTY INTERRUPT
 	if (status & USART_FLAG_RXNE)

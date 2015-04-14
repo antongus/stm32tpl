@@ -332,12 +332,9 @@ struct DummyDE
 	INLINE static int Latched() { return true; }
 };
 
-namespace
-{
-
-
-} // namespace
-
+/**
+ * USART peripheral registers for STM32L0XX chips.
+ */
 #if (defined STM32L0XX)
 struct USARTx_TypeDef
 {
@@ -354,6 +351,10 @@ struct USARTx_TypeDef
 	volatile uint32_t TDR;
 };
 
+/**
+ * USART status flags for STM32L0XX chips.
+ * Defined here because of inconsistency of this names in ST headers
+ */
 enum : uint32_t
 {
 	USART_FLAG_PE     = 0x00000001UL,
@@ -382,6 +383,9 @@ enum : uint32_t
 
 #else
 
+/**
+ * USART peripheral registers for all other chips.
+ */
 struct USARTx_TypeDef
 {
 	volatile uint16_t SR;
@@ -400,6 +404,10 @@ struct USARTx_TypeDef
 	uint16_t reserved6;
 };
 
+/**
+ * USART status flags for all other chips.
+ * Defined here because of inconsistency of this names in ST headers
+ */
 enum : uint16_t
 {
 	USART_FLAG_PE   = 0x0001,
