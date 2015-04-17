@@ -41,21 +41,22 @@ namespace TIM
 {
 
 /**
-                :   T1  T2-5    T6-7    T8  T9-11   T12-14  T15-17
---------------------------------------------------------------------
-STM32F10X_LD_VL :   x   2-4     x       -	-       -       x
-STM32F10X_MD_VL :   x   2-4     x       -	-       -       x
-STM32F10X_HD_VL :   x   x       x       -	-       x       x
-STM32F10X_LD    :   x   2-3     -       -   -       -       -
-STM32F10X_MD    :   x   2-4     -       -   -       -       -
-STM32F10X_HD    :   x   x       x       x   -       -       -
-STM32F10X_CL    :   x   x       x       x   -       -       -
-STM32F10X_XL    :   x   x       x       x   x       x       -
-STM32F2XX       :   x   x*      x       x   x       x       -
-STM32F40_41xxx  :   x   x*      x       x   x       x       -
-STM32F427_437xx :   x   x*      x       x   x       x       -
-STM32F429_439xx :   x   x*      x       x   x       x       -
+                :   T1  T2-5    T6-7    T8  T9-11   T12-14  T15-17  T21-22
+--------------------------------------------------------------------------
+STM32F10X_LD_VL :   x   2-4     x       -	-       -       x       -
+STM32F10X_MD_VL :   x   2-4     x       -	-       -       x       -
+STM32F10X_HD_VL :   x   x       x       -	-       x       x       -
+STM32F10X_LD    :   x   2-3     -       -   -       -       -       -
+STM32F10X_MD    :   x   2-4     -       -   -       -       -       -
+STM32F10X_HD    :   x   x       x       x   -       -       -       -
+STM32F10X_CL    :   x   x       x       x   -       -       -       -
+STM32F10X_XL    :   x   x       x       x   x       x       -       -
+STM32F2XX       :   x   x*      x       x   x       x       -       -
+STM32F40_41xxx  :   x   x*      x       x   x       x       -       -
+STM32F427_437xx :   x   x*      x       x   x       x       -       -
+STM32F429_439xx :   x   x*      x       x   x       x       -       -
 STM32F401xx     :
+STM32L0xx       :   -   T2      T6      -   -       -       -       x
 ---------------------------------------------------------------------
   * - TIM2 & TIM5 are 32 bit timers
 
@@ -67,13 +68,63 @@ all other - General purpose timers
 
 enum TimerNum
 {
+#if defined (RCC_APB2ENR_TIM1EN)
 	TIM_1,
-	TIM_2, TIM_3, TIM_4, TIM_5,
-	TIM_6, TIM_7,
+#endif
+#if defined (RCC_APB1ENR_TIM2EN)
+	TIM_2,
+#endif
+#if defined (RCC_APB1ENR_TIM3EN)
+	TIM_3,
+#endif
+#if defined (RCC_APB1ENR_TIM4EN)
+	TIM_4,
+#endif
+#if defined(RCC_APB1ENR_TIM5EN)
+	TIM_5,
+#endif
+#if defined(RCC_APB1ENR_TIM6EN)
+	TIM_6,
+#endif
+#if defined(RCC_APB1ENR_TIM7EN)
+	TIM_7,
+#endif
+#if defined(RCC_APB2ENR_TIM8EN)
 	TIM_8,
-	TIM_9, TIM_10, TIM_11,
-	TIM_12, TIM_13, TIM_14,
-	TIM_15, TIM_16, TIM_17,
+#endif
+#if defined(RCC_APB2ENR_TIM9EN)
+	TIM_9,
+#endif
+#if defined(RCC_APB2ENR_TIM10EN)
+	TIM_10,
+#endif
+#if defined(RCC_APB2ENR_TIM11EN)
+	TIM_11,
+#endif
+#if defined(RCC_APB1ENR_TIM12EN)
+	TIM_12,
+#endif
+#if defined(RCC_APB1ENR_TIM13EN)
+	TIM_13,
+#endif
+#if defined(RCC_APB1ENR_TIM14EN)
+	TIM_14,
+#endif
+#if defined(RCC_APB2ENR_TIM15EN)
+	TIM_15,
+#endif
+#if defined(RCC_APB2ENR_TIM16EN)
+	TIM_16,
+#endif
+#if defined(RCC_APB2ENR_TIM17EN)
+	TIM_17,
+#endif
+#if defined(RCC_APB2ENR_TIM21EN)
+	TIM_21,
+#endif
+#if defined(RCC_APB2ENR_TIM22EN)
+	TIM_22,
+#endif
 };
 
 enum TimerType
@@ -88,6 +139,7 @@ namespace
 
 template<TimerNum num> struct TimerTraits;
 
+#if defined (RCC_APB2ENR_TIM1EN)
 template<> struct TimerTraits<TIM_1>
 {
 	static const uint32_t TIMx_BASE = TIM1_BASE;
@@ -99,7 +151,9 @@ template<> struct TimerTraits<TIM_1>
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM1EN; }
 };
+#endif
 
+#if defined (RCC_APB1ENR_TIM2EN)
 template<> struct TimerTraits<TIM_2>
 {
 	static const uint32_t TIMx_BASE = TIM2_BASE;
@@ -111,7 +165,9 @@ template<> struct TimerTraits<TIM_2>
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM2EN; }
 };
+#endif
 
+#if defined (RCC_APB1ENR_TIM3EN)
 template<> struct TimerTraits<TIM_3>
 {
 	static const uint32_t TIMx_BASE = TIM3_BASE;
@@ -123,6 +179,7 @@ template<> struct TimerTraits<TIM_3>
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM3EN; }
 };
+#endif
 
 #if defined (RCC_APB1ENR_TIM4EN)
 template<> struct TimerTraits<TIM_4>
@@ -153,6 +210,26 @@ template<> struct TimerTraits<TIM_5>
 #endif
 
 
+#if defined(RCC_APB1ENR_TIM6EN)
+template<> struct TimerTraits<TIM_6>
+{
+	static const uint32_t TIMx_BASE = TIM6_BASE;
+	static const TimerType timerType = Basic;
+	static const uint32_t ccModulesCount = 0;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+#if (defined STM32F10X_HD) || (defined STM32F10X_XL) || (defined STM32F10X_CL)
+	static const IRQn TIMx_IRQn = TIM6_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM6_DAC_IRQn;
+#endif
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM6EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM6EN; }
+};
+#endif
+
+
+#if defined(RCC_APB2ENR_TIM8EN)
 template<> struct TimerTraits<TIM_8>
 {
 	static const uint32_t TIMx_BASE = TIM8_BASE;
@@ -161,6 +238,23 @@ template<> struct TimerTraits<TIM_8>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 };
+#endif
+
+
+#if defined(RCC_APB2ENR_TIM21EN)
+template<> struct TimerTraits<TIM_21>
+{
+	static const uint32_t TIMx_BASE = TIM6_BASE;
+	static const TimerType timerType = Basic;
+	static const uint32_t ccModulesCount = 0;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM6_IRQn;
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM6EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM6EN; }
+};
+#endif
+
 
 } // anon namespace
 
