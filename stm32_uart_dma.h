@@ -47,7 +47,7 @@ namespace  // private declarations
 {
 
 /**
-*  UART traits template.
+*  UART DMA traits template.
 */
 template<UartNum uartNum> struct UartDmaTraits;
 
@@ -85,10 +85,12 @@ template<> struct UartDmaTraits<UART_2>
 
 	typedef DMA::Dma1Channel5 RxDmaStream;
 	typedef DMA::Dma1Channel6 TxDmaStream;
+#elif (defined STM32L0XX)
+	typedef DMA::Dma1Channel5 RxDmaStream;
+	typedef DMA::Dma1Channel4 TxDmaStream;
+	static const RxDmaStream::ChannelSelection CH_SEL_USARTx_RX = RxDmaStream::ChannelSelection::CH_SEL_USART2_RX;
+	static const TxDmaStream::ChannelSelection CH_SEL_USARTx_TX = TxDmaStream::ChannelSelection::CH_SEL_USART2_TX;
 #else
-	enum { RX_DMA_CHANNEL = 0 };
-	enum { TX_DMA_CHANNEL = 0 };
-
 	typedef DMA::Dma1Channel6 RxDmaStream;
 	typedef DMA::Dma1Channel7 TxDmaStream;
 #endif
@@ -129,15 +131,10 @@ struct SampleUartDmaProps
 	{
 		BAUDRATE = 115200,
 		RX_BUF_SIZE = 128,
-		TX_BUF_SIZE = 128,
-		USE_RX_DMA = true,
-		USE_TX_DMA = true,
 		UART_INTERRUPT_PRIOGROUP = 2,
 		UART_INTERRUPT_SUBPRIO = 2,
 		RXDMA_INTERRUPT_PRIOGROUP = 2,
 		RXDMA_INTERRUPT_SUBPRIO = 2,
-		TXDMA_INTERRUPT_PRIOGROUP = 2,
-		TXDMA_INTERRUPT_SUBPRIO = 2
 	};
 	typedef DummyDE PinDE;
 };
@@ -160,13 +157,10 @@ public:
 	{
 		BAUDRATE                      = props::BAUDRATE,
 		RX_BUF_SIZE                   = props::RX_BUF_SIZE,
-		TX_BUF_SIZE                   = props::TX_BUF_SIZE,
 		UART_INTERRUPT_PRIOGROUP      = props::UART_INTERRUPT_PRIOGROUP,
 		UART_INTERRUPT_SUBPRIO        = props::UART_INTERRUPT_SUBPRIO,
 		RXDMA_INTERRUPT_PRIOGROUP     = props::RXDMA_INTERRUPT_PRIOGROUP,
 		RXDMA_INTERRUPT_SUBPRIO       = props::RXDMA_INTERRUPT_SUBPRIO,
-		TXDMA_INTERRUPT_PRIOGROUP     = props::TXDMA_INTERRUPT_PRIOGROUP,
-		TXDMA_INTERRUPT_SUBPRIO       = props::TXDMA_INTERRUPT_SUBPRIO
 	};
 	using Driver = UartDriver<uartNum>;
 	using Driver::USARTx;
@@ -222,8 +216,8 @@ private:
 	void InitRxDma();
 	void InitTxDma();
 	void AcceptBlock(char const* block, size_t size);
-	void DisableRx();
-	void EnableRx() { RxDmaStream::Enable(); }
+	void DisableRxDma();
+	void EnableRxDma() { RxDmaStream::Enable(); }
 };
 
 template<typename props>
@@ -379,7 +373,7 @@ template<typename props>
 void UartDma<props>::SendBuffer(const void* buf, size_t size)
 {
 	DE::On();     // Enable transmitter
-	DisableRx();  // Disable RX DMA
+	DisableRxDma();
 
 	// Clear USART transmission complete flag
 	Driver::TcInterrupt::Clear();
@@ -399,7 +393,7 @@ void UartDma<props>::SendBuffer(const void* buf, size_t size)
 	// Disable TX DMA stream
 	TxDmaStream::Disable();
 
-	EnableRx();   // Enable RX DMA
+	EnableRxDma();
 	DE::Off();    // Disable transmitter
 }
 
@@ -414,14 +408,14 @@ template<typename props>
 void UartDma<props>::AcceptBlock(char const* block, size_t size)
 {
 	uint32_t freeSize = rxChannel_.get_free_size();
-	if (freeSize < size)
+	if (size > freeSize)
 		size = freeSize;
 	if (size)
 		rxChannel_.write(block, size);
 }
 
 template<typename props>
-void UartDma<props>::DisableRx()
+void UartDma<props>::DisableRxDma()
 {
 	if (RxDmaStream::Enabled())
 	{
@@ -449,18 +443,20 @@ void UartDma<props>::UartIrqHandler()
 	// IDLE INTERRUPT
 	if (status & USART_FLAG_IDLE)  // IDLEIE is always on, so not need to check this
 	{
+#if (defined STM32L0XX)
+		Driver::ClearStatus(USART_FLAG_IDLE);
+#else
 		Driver::ReadData();
-		uint32_t cnt = RX_BUF_SIZE - RxDmaStream::NDTR;
-		if (cnt != RX_BUF_SIZE/2 && cnt != RX_BUF_SIZE)
+#endif
+		uint32_t rxCount = RX_BUF_SIZE - RxDmaStream::NDTR;
+		bool firstHalf = rxCount < RX_BUF_SIZE/2;
+		rxCount %= RX_BUF_SIZE/2;
+		if (rxCount)
 		{
-			if (cnt < RX_BUF_SIZE/2)
-				AcceptBlock(rxBuf_, cnt);
-			else
-				AcceptBlock(&rxBuf_[RX_BUF_SIZE/2], cnt - RX_BUF_SIZE/2);
-
-			DisableRx();
+			AcceptBlock(firstHalf ? rxBuf_ : &rxBuf_[RX_BUF_SIZE/2], rxCount);
+			DisableRxDma();
 			RxDmaStream::NDTR = RX_BUF_SIZE;   // re-launch DMA stream
-			EnableRx();
+			EnableRxDma();
 		}
 	}
 
