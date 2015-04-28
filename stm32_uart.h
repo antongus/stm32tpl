@@ -90,11 +90,10 @@ public:
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
 	virtual int Keypressed() override { return rxChannel_.get_count(); }
-	virtual int CanSend() override { return txChannel_.get_free_size(); };
-	virtual int TxEmpty() override { return txChannel_.get_count() == 0; };
-
-	void SendBuffer(const void* buf, size_t size);
-	bool ReceiveBuffer(void* buf, size_t count, timeout_t timeout);
+	virtual int CanSend() override { return txChannel_.get_free_size(); }
+	virtual int TxEmpty() override { return txChannel_.get_count() == 0; }
+	virtual void SendBuffer(const void* buf, size_t size) override;
+	virtual bool ReceiveBuffer(void* buf, size_t count, int timeout) override;
 
 	INLINE void UartIrqHandler();
 
@@ -184,7 +183,7 @@ void Uart<props>::SendBuffer(const void* buf, size_t size)
 }
 
 template<typename props>
-bool Uart<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
+bool Uart<props>::ReceiveBuffer(void* buf, size_t count, int timeout)
 {
 	char* ptr = reinterpret_cast<char*>(buf);
 	return rxChannel_.read(ptr, count, timeout);

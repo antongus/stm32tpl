@@ -146,11 +146,24 @@ public:
 			PutChar(*s++);
 	}
 
-	virtual void PutBuffer(void const * buf, int count) __attribute__((__noinline__))
+	virtual void SendBuffer(const void* buf, size_t size) __attribute__((__noinline__))
 	{
-		uint8_t const * s = reinterpret_cast<uint8_t const *>(buf);
-		while(count--)
+		uint8_t const *s = reinterpret_cast<uint8_t const *>(buf);
+		while(size--)
 			PutChar(*s++);
+	}
+
+	virtual bool ReceiveBuffer(void* buf, size_t count, int timeout) __attribute__((__noinline__))
+	{
+		uint8_t *s = reinterpret_cast<uint8_t*>(buf);
+		while(count--)
+		{
+			int ch = GetChar(timeout);
+			if (ch == -1)
+				return false;
+			*s++ = ch;
+		}
+		return true;
 	}
 
 	void PutHex(uint8_t b) __attribute__((__noinline__))

@@ -173,16 +173,16 @@ public:
 	virtual void PutChar(char ch) override;
 	virtual int GetChar(int timeout = 0) override;
 	virtual int Keypressed() override { return rxChannel_.get_count(); }
-	virtual int CanSend() override { return true; };
-	virtual int TxEmpty() override { return !DE::Latched(); };
+	virtual int CanSend() override { return true; }
+	virtual int TxEmpty() override { return !DE::Latched(); }
 	virtual void Puts(const char * s) override;
+	virtual void SendBuffer(const void* buf, size_t size) override;
+	virtual bool ReceiveBuffer(void* buf, size_t count, int timeout) override;
 
 	void Lock()                          { mutex_.lock(); }
 	void Unlock()                        { mutex_.unlock(); }
 	bool TryToLock()                     { return mutex_.try_lock(); }
 
-	void SendBuffer(const void* buf, size_t size);
-	bool ReceiveBuffer(void* buf, size_t count, timeout_t timeout);
 
 	INLINE void UartIrqHandler();
 	INLINE void RxDmaIrqHandler();
@@ -398,7 +398,7 @@ void UartDma<props>::SendBuffer(const void* buf, size_t size)
 }
 
 template<typename props>
-bool UartDma<props>::ReceiveBuffer(void* buf, size_t count, timeout_t timeout)
+bool UartDma<props>::ReceiveBuffer(void* buf, size_t count, int timeout)
 {
 	char* ptr = reinterpret_cast<char*>(buf);
 	return rxChannel_.read(ptr, count, timeout);
