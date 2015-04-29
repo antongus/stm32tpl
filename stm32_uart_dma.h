@@ -149,7 +149,7 @@ class UartDma
 	, public UartDriver<props::uartNum>
 {
 private:
-	typedef UartDmaTraits<props::uartNum> DmaTraits;
+	using DmaTraits = UartDmaTraits<props::uartNum>;
 public:
 	static const UartNum uartNum = props::uartNum;
 	static const Remap remap = props::remap;
@@ -255,11 +255,8 @@ UartDma<props>::UartDma()
 	USARTx->CR3 = USART_CR3_DMAR | USART_CR3_DMAT; // enable DMA for RX and TX
 
 	Driver::SetBaudrate(BAUDRATE);
-
 	Driver::Enable();             // Enable USART
-
 	InitTxDma();
-
 	InitRxDma();
 
 	// Enable USART IRQ
@@ -353,7 +350,7 @@ void UartDma<props>::InitTxDma()
 	TxDmaStream::FCR &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);  // turn off FIFO
 #endif
 #if (defined STM32L0XX)
-	RxDmaStream::PAR = (uint32_t)&USARTx->TDR;
+	TxDmaStream::PAR = (uint32_t)&USARTx->TDR;
 #else
 	TxDmaStream::PAR = (uint32_t)&USARTx->DR;                // peripheral address
 #endif
@@ -375,10 +372,8 @@ void UartDma<props>::SendBuffer(const void* buf, size_t size)
 	DE::On();     // Enable transmitter
 	DisableRxDma();
 
-	// Clear USART transmission complete flag
-	Driver::TcInterrupt::Clear();
-	// Enable UART TC interrupt
-	USARTx->CR1 |= USART_CR1_TCIE;
+	Driver::TcInterrupt::Clear();     // Clear USART transmission complete flag
+	Driver::TcInterrupt::Enable();    // Enable TC interrupt
 
 	// clear all interrupts on TX DMA channel
 	TxDmaStream::IFCR = TxDmaStream::DMA_MASK_ALL;
