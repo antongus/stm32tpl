@@ -130,10 +130,17 @@ template<> struct UartPins<UART_2>
 
 template<> struct UartPins<UART_2, REMAP_FULL>
 {
+#if (defined STM32L0XX)
+	typedef Pin<'A', 14> PinTX;
+	typedef Pin<'A', 15> PinRX;
+#else
 	typedef Pin<'D', 5> PinTX;
 	typedef Pin<'D', 6> PinRX;
+#endif
 #if (defined F2xxF4xx)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #endif
 };
 
