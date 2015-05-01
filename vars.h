@@ -32,52 +32,44 @@
 #define STM32TPL_VARS_H_INCLUDED
 
 #include "textstream.h"
-#include <string.h>
+#include <cstring>
 
 /**
- * variable handlers typedef
+ * Variable handler type.
  */
-typedef int (*VarHandler)(char *, TextStream&);
+using VarHandler = int (*)(char *, TextStream&);
 
-/**
- * forward declarations
- */
+// forward declarations
 class VarList;
 class Variable;
 typedef Variable* PVar;
-static inline void addVariable(PVar cmd);
+static inline void AddVariable(PVar cmd);
 
 /**
  * Variable class.
+ * Holds two command handlers - GET handler and SET handler.
+ * Also holds variable name and pointer to next variable in list.
  */
 class Variable
 {
+public:
+	Variable(char const* aname, VarHandler aget, VarHandler aset = nullptr)
+		: name_ { aname }
+		, get_  { aget }
+		, set_  { aset }
+	{
+		AddVariable(this);
+	}
+	char const* Name() { return name_; }
+	int Set(char* args, TextStream& stream) { return set_ ? set_(args, stream) : false; }
+	int Get(char* args, TextStream& stream) { return get_ ? get_(args, stream) : false; }
 private:
 	friend class VarList;
-	Variable* next_;
+	Variable* next_ = nullptr;
 	char const* name_;
 	VarHandler get_;
 	VarHandler set_;
-	Variable(const Variable&) {}
-protected:
-	bool match(char const* aname) { return (!strcmp(name_, aname)); }
-public:
-	__attribute__((__noinline__))
-	Variable(
-		char const* aname,
-		VarHandler aget,
-		VarHandler aset = 0
-		)
-		: next_(0)
-		, name_(aname)
-		, get_(aget)
-		, set_(aset)
-	{
-		addVariable(this);
-	}
-	char const* getName() { return name_; }
-	virtual int set(char* args, TextStream& stream) { return set_ ? set_(args, stream) : false; }
-	virtual int get(char* args, TextStream& stream) { return get_ ? get_(args, stream) : false; }
+	bool Match(char const* aname) { return (!strcmp(name_, aname)); }
 };
 
 /**
@@ -85,39 +77,38 @@ public:
  */
 class VarList
 {
+public:
+	static PVar Find(char const* aname)
+	{
+		for(PVar var = First(); var; var = Next(var))
+		{
+			if (var->Match(aname))
+				return var;
+		}
+		return 0;
+	}
+	static PVar First() { return Head(); }
+	static PVar Next(PVar var) { return var->next_; }
 private:
-	friend void addVariable(PVar cmd);
+	friend void AddVariable(PVar cmd);
 
-	static PVar& getHead()
+	static PVar& Head()
 	{
 		static PVar head_ = 0;
 		return head_;
 	}
 
-	static void add(PVar var)
+	static void Add(PVar var)
 	{
-		PVar& head = getHead();
+		PVar& head = Head();
 		var->next_ = head;
 		head = var;
 	}
-public:
-	__attribute__((__noinline__))
-	static PVar find(char const* aname)
-	{
-		for(PVar var = first(); var; var = next(var))
-		{
-			if (var->match(aname))
-				return var;
-		}
-		return 0;
-	}
-	static PVar first() { return getHead(); }
-	static PVar next(PVar var) { return var->next_; }
 };
 
-inline void addVariable(PVar var)
+inline void AddVariable(PVar var)
 {
-	VarList::add(var);
+	VarList::Add(var);
 }
 
 #define xstr(s) str(s)
