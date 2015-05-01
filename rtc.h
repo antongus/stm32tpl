@@ -32,8 +32,113 @@
 
 #include <time.h>
 
+static const char monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
+
+struct TimeUtil
+{
+	static bool IsLeapYear(uint32_t y) { return (y % 4) == 0; }
+	static void CheckTime(struct tm *t)  __attribute__((noinline))
+	{
+	    if (t->tm_sec>59) t->tm_sec=59;
+	    if (t->tm_min>59) t->tm_min=59;
+	    if (t->tm_hour>23) t->tm_hour=23;
+	    if (t->tm_wday>6) t->tm_wday=6;
+	    if (t->tm_mday<1) t->tm_mday=1;
+	    else if (t->tm_mday>31) t->tm_mday=31;
+	    if (t->tm_mon>11) t->tm_mon=11;
+	    if (t->tm_year<0) t->tm_year=0;
+	}
+
+	static struct tm *localtime(time_t t, struct tm * stm) __attribute__((noinline))
+	{
+		stm->tm_sec = t % 60;
+		t /= 60;
+		stm->tm_min = t % 60;
+		t /= 60;
+		stm->tm_hour = t % 24;
+		t /= 24;
+		stm->tm_wday = (t + 4) % 7;
+
+		uint32_t year = 1970;
+		time_t days = 0;
+
+		while((days += (IsLeapYear(year) ? 366 : 365)) <= t)
+			year++;
+
+		stm->tm_year = year - 1900;
+
+		days -= IsLeapYear(year) ? 366 : 365;
+		t -= days;
+		stm->tm_yday = t;
+
+		for (int month = 0; month < 12; month++)
+		{
+			if (month == 1) // feb
+				if (IsLeapYear(year))
+					days = 29;
+				else
+					days = 28;
+			else
+				days = monthDays[month];
+
+			if (t >= days)
+				t -= days;
+			else
+			{
+				stm->tm_mon = month;
+				stm->tm_mday = t+1;
+				break;
+			}
+		}
+		return stm;
+	}
+
+	static time_t mktime(struct tm *t)   __attribute__((noinline))
+	{
+		int year, month, i;
+		uint32_t seconds;
+
+		CheckTime(t);
+
+		year    = t->tm_year + 1900;
+		month   = t->tm_mon;
+		seconds = (uint32_t)(year - 1970) * (60*60*24UL*365);
+
+		for (i = 1970; i < year; i++)
+			if (IsLeapYear(i))
+				seconds += 60*60*24UL;
+
+		// add days for this year
+		for (i = 0; i < month; i++)
+			if (i == 1 && IsLeapYear(year))
+				seconds += (uint32_t)60*60*24UL*29;
+			else
+				seconds += (uint32_t)60*60*24UL*monthDays[i];
+
+		seconds += (uint32_t)(t->tm_mday-1) * 60*60*24UL;
+		seconds += (uint32_t)t->tm_hour * 60*60UL;
+		seconds += (uint32_t)t->tm_min * 60UL;
+		seconds += (uint32_t)t->tm_sec;
+		return seconds;
+	}
+
+	time_t date(time_t t)
+	{
+		struct tm stm;
+		localtime(t, &stm);
+		stm.tm_hour = 0;
+		stm.tm_min = 0;
+		stm.tm_sec = 0;
+		return mktime(&stm);
+	}
+
+
+};
+
 #if (defined STM32F2XX) || (defined STM32F4XX) || (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  include "rtc_stm32f4xx.h"
+#elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
+#  include "rtc_stm32l0xx.h"
 #else
 #  include "rtc_stm32f1xx.h"
 #endif
