@@ -55,8 +55,6 @@
 #endif
 
 
-#include "pin.h"
-
 #if (defined STM32L0XX)
 typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
 #endif
