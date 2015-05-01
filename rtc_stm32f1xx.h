@@ -129,7 +129,7 @@ RtcModule<use_lse>::RtcModule()
 		// enable backup domain write protection
 		PWR->CR &= ~PWR_CR_DBP;
 
-		WriteTime(1351551600); // 2012-OCT-29 23:00
+		WriteTime(1430438400); //  01 MAY 2015 00:00:00
 	}
 	else
 	{

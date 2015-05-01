@@ -159,7 +159,7 @@ RtcModule<use_lse>::RtcModule()
 		LeaveInitMode();
 		EnableWP();
 
-		WriteTime(1356998400); //  Tue, 01 JAN 2013 00:00:00
+		WriteTime(1430438400); //  01 MAY 2015 00:00:00
 
 		RTC->BKP0R = magicKey_;
 	}
