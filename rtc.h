@@ -30,7 +30,9 @@
 #ifndef STM32TPL_RTC_H_INCLUDED
 #define STM32TPL_RTC_H_INCLUDED
 
-#include <time.h>
+#include "stm32.h"
+
+#include <ctime>
 
 static const char monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 
@@ -135,16 +137,13 @@ struct TimeUtil
 
 };
 
-#if (defined STM32F2XX) || (defined STM32F4XX) || (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
+#if (defined F2xxF4xx) || (defined STM32L0XX)
 #  include "rtc_stm32f4xx.h"
-#elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
-#  include "rtc_stm32l0xx.h"
 #else
 #  include "rtc_stm32f1xx.h"
 #endif
 
 typedef RtcModule<true> RtcModuleLSE;
 typedef RtcModule<false> RtcModuleLSI;
-
 
 #endif // STM32TPL_RTC_H_INCLUDED

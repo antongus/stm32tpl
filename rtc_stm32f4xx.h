@@ -32,7 +32,9 @@
 #ifndef STM32TPL_RTC_STM32F4XX_H_INCLUDED
 #define STM32TPL_RTC_STM32F4XX_H_INCLUDED
 
-#include "stm32.h"
+#if (!defined STM32TPL_RTC_H_INCLUDED)
+#	error "include rtc.h instead of rtc_stm32f4xx.h"
+#endif
 
 /**
  * local types
@@ -102,22 +104,40 @@ private:
 	static void EnableWP()  { RTC->WPR = 0; }
 	static bool EnterInitMode();
 	static void LeaveInitMode();
-	static uint8_t Int2Bcd(uint8_t value);
-	static uint8_t Bcd2Int(uint8_t value);
+	static constexpr uint8_t Int2Bcd(uint8_t value);
+	static constexpr uint8_t Bcd2Int(uint8_t value);
 };
 
 template<bool use_lse>
 RtcModule<use_lse>::RtcModule()
 {
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;    // enable PWR clock
+	__DSB();
 	resetFlags_ = RCC->CSR;               // remember reset reason
 	RCC->CSR |= RCC_CSR_RMVF;             // clear reset flags
 
-//	if (RTC->ISR & RTC_ISR_INITS == 0)  // RTC not initialized yet
 	if (RTC->BKP0R != magicKey_) // RTC not initialized yet
 	{
 		DisableBdProtection();            // disable backup domain write protection
+#if defined (STM32L0XX)
+		RCC->CSR |= RCC_CSR_RTCRST;       // reset RTC and backup registers
+		RCC->CSR &= ~RCC_CSR_RTCRST;
 
+		if (use_lse)
+		{
+			RCC->CSR |= RCC_CSR_LSEON;                 // enable LSE
+			while (!(RCC->CSR & RCC_CSR_LSERDY)) {}    // wait LSE ready
+			RCC->CSR |= RCC_CSR_RTCSEL_LSE;            // select LSE as RTC clock source
+		}
+		else
+		{
+			RCC->CSR |= RCC_CSR_LSION;                 // enable LSI
+			while (!(RCC->CSR & RCC_CSR_LSIRDY)) {}    // wait LSI ready
+			RCC->CSR |= RCC_CSR_RTCSEL_LSI;            // select LSI as RTC clock source
+		}
+
+		RCC->CSR |= RCC_CSR_RTCEN;                     // enable RTC clock
+#else
 		RCC->BDCR |= RCC_BDCR_BDRST;      // reset Backup Domain
 		RCC->BDCR &= ~RCC_BDCR_BDRST;
 
@@ -126,25 +146,19 @@ RtcModule<use_lse>::RtcModule()
 
 		if (use_lse)
 		{
-			// enable LSE
-			RCC->BDCR |= RCC_BDCR_LSEON;
-			// wait till LSE is ready
-			while (!(RCC->BDCR & RCC_BDCR_LSERDY)) ;
-			// select LSE as RTC clock source
-			RCC->BDCR |= RCC_BDCR_RTCSEL_0;
+			RCC->BDCR |= RCC_BDCR_LSEON;               // enable LSE
+			while (!(RCC->BDCR & RCC_BDCR_LSERDY)) {}  // wait till LSE is ready
+			RCC->BDCR |= RCC_BDCR_RTCSEL_0;            // select LSE as RTC clock source
 		}
 		else
 		{
-			// enable LSI
-			RCC->CSR |= RCC_CSR_LSION;
-			// wait till LSI is ready
-			while (!(RCC->CSR & RCC_CSR_LSIRDY)) ;
-			// select LSI as RTC clock source
-			RCC->BDCR |= RCC_BDCR_RTCSEL_1;
+			RCC->CSR |= RCC_CSR_LSION;                 // enable LSI
+			while (!(RCC->CSR & RCC_CSR_LSIRDY)) {}    // wait till LSI is ready
+			RCC->BDCR |= RCC_BDCR_RTCSEL_1;            // select LSI as RTC clock source
 		}
 
-		// enable RTC clock
-		RCC->BDCR |= RCC_BDCR_RTCEN;
+		RCC->BDCR |= RCC_BDCR_RTCEN;                   // enable RTC clock
+#endif
 
 		WaitSync();
 		DisableWP();
@@ -159,14 +173,11 @@ RtcModule<use_lse>::RtcModule()
 		LeaveInitMode();
 		EnableWP();
 
-		WriteTime(1430438400); //  01 MAY 2015 00:00:00
+		RTC->BKP0R = magicKey_;       // write magic key
 
-		RTC->BKP0R = magicKey_;
+		WriteTime(1430438400);        // set default time (01 MAY 2015 00:00:00)
 	}
-	else
-	{
-		WaitSync();
-	}
+	WaitSync();
 }
 
 template<bool use_lse>
@@ -197,15 +208,15 @@ void RtcModule<use_lse>::LeaveInitMode()
 }
 
 template<bool use_lse>
-uint8_t RtcModule<use_lse>::Bcd2Int(uint8_t value)
+constexpr uint8_t RtcModule<use_lse>::Bcd2Int(uint8_t value)
 {
-	return (value & 0x0F) +(value>>4)*10;
+	return (value & 0x0F) + (value >> 4) * 10;
 }
 
 template<bool use_lse>
-uint8_t RtcModule<use_lse>::Int2Bcd(uint8_t value)
+constexpr uint8_t RtcModule<use_lse>::Int2Bcd(uint8_t value)
 {
-	return (value % 10) + ((value/10)<<4);
+	return (value % 10) + ((value / 10) << 4);
 }
 
 template<bool use_lse>
@@ -232,8 +243,9 @@ time_t RtcModule<use_lse>::ReadTime()
 template<bool use_lse>
 bool RtcModule<use_lse>::WriteTime(time_t t)
 {
-	struct tm tim;
+	DisableBdProtection();        // disable backup domain write protection
 
+	struct tm tim;
 	TimeUtil::localtime(t, &tim);
 
 	RTC_TR_Struct TR;
@@ -260,6 +272,7 @@ bool RtcModule<use_lse>::WriteTime(time_t t)
 	if (ret && !(RTC->CR & RTC_CR_BYPSHAD))
 		ret = WaitSync();
 	EnableWP();
+	EnableBdProtection();
 	return ret;
 }
 
