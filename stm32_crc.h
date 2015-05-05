@@ -30,6 +30,9 @@
 #ifndef STM32TPL_STM32_CRC_H_INCLUDED
 #define STM32TPL_STM32_CRC_H_INCLUDED
 
+#include "stm32.h"
+#include <cstddef>
+
 namespace STM32
 {
 
