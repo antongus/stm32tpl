@@ -91,8 +91,22 @@ public:
 	uint32_t ResetReason() { return resetFlags_; }
 	static time_t ReadTime(void);
 	static bool WriteTime(time_t t);
-	static void DisableBdProtection() { PWR->CR |= PWR_CR_DBP; }
-	static void EnableBdProtection()  { PWR->CR &= ~PWR_CR_DBP; }
+	struct BackupDomainProtection
+	{
+		static void Disable() { PWR->CR |= PWR_CR_DBP; }
+		static void Enable()  { PWR->CR &= ~PWR_CR_DBP; }
+	};
+	struct WriteProtection
+	{
+		static void Disable() { RTC->WPR = 0xCA; RTC->WPR = 0x53; }
+		static void Enable()  { RTC->WPR = 0; }
+	};
+	struct WakeupTimer
+	{
+		static void Stop();
+		static void Start(uint32_t prescaler, uint32_t period);
+		static void SetPrescaler(uint32_t prescaler);
+	};
 private:
 	uint32_t resetFlags_;
 	enum { magicKey_ = 0x1970 };
@@ -100,8 +114,6 @@ private:
 
 	static bool WaitSync();
 
-	static void DisableWP() { RTC->WPR = 0xCA; RTC->WPR = 0x53; }
-	static void EnableWP()  { RTC->WPR = 0; }
 	static bool EnterInitMode();
 	static void LeaveInitMode();
 	static constexpr uint8_t Int2Bcd(uint8_t value);
@@ -118,9 +130,9 @@ RtcModule<use_lse>::RtcModule()
 
 	if (RTC->BKP0R != magicKey_) // RTC not initialized yet
 	{
-		DisableBdProtection();            // disable backup domain write protection
+		BackupDomainProtection::Disable();            // disable backup domain write protection
 #if defined (STM32L0XX)
-		RCC->CSR |= RCC_CSR_RTCRST;       // reset RTC and backup registers
+		RCC->CSR |= RCC_CSR_RTCRST;                   // reset RTC and backup registers
 		RCC->CSR &= ~RCC_CSR_RTCRST;
 
 		if (use_lse)
@@ -161,7 +173,7 @@ RtcModule<use_lse>::RtcModule()
 #endif
 
 		WaitSync();
-		DisableWP();
+		WriteProtection::Disable();
 		EnterInitMode();
 
 		RTC->CR &= ~RTC_CR_FMT;       // 24 hour format
@@ -171,7 +183,7 @@ RtcModule<use_lse>::RtcModule()
 		RTC->PRER |= 0x7FUL << 16;    // async prescaler
 
 		LeaveInitMode();
-		EnableWP();
+		WriteProtection::Enable();
 
 		RTC->BKP0R = magicKey_;       // write magic key
 
@@ -183,11 +195,11 @@ RtcModule<use_lse>::RtcModule()
 template<bool use_lse>
 bool RtcModule<use_lse>::WaitSync()
 {
-	DisableWP();
+	WriteProtection::Disable();
 	RTC->ISR &= ~RTC_ISR_RSF;
 	for (int i = WAIT_CYCLES; i; i--)
 		if (RTC->ISR & RTC_ISR_RSF) break;
-	EnableWP();
+	WriteProtection::Enable();
 	return RTC->ISR & RTC_ISR_RSF;
 }
 
@@ -243,7 +255,7 @@ time_t RtcModule<use_lse>::ReadTime()
 template<bool use_lse>
 bool RtcModule<use_lse>::WriteTime(time_t t)
 {
-	DisableBdProtection();        // disable backup domain write protection
+	BackupDomainProtection::Disable();        // disable backup domain write protection
 
 	struct tm tim;
 	TimeUtil::localtime(t, &tim);
@@ -260,7 +272,7 @@ bool RtcModule<use_lse>::WriteTime(time_t t)
 	DR.bits.mon  = Int2Bcd(tim.tm_mon + 1);
 	DR.bits.year = Int2Bcd(tim.tm_year % 100);
 
-	DisableWP();
+	WriteProtection::Disable();
 
 	bool ret = EnterInitMode();
 	if (ret)
@@ -271,9 +283,54 @@ bool RtcModule<use_lse>::WriteTime(time_t t)
 	LeaveInitMode();
 	if (ret && !(RTC->CR & RTC_CR_BYPSHAD))
 		ret = WaitSync();
-	EnableWP();
-	EnableBdProtection();
+	WriteProtection::Enable();
+	BackupDomainProtection::Enable();
 	return ret;
 }
+
+template<bool use_lse>
+void RtcModule<use_lse>::WakeupTimer::Stop()
+{
+	BackupDomainProtection::Disable();        // disable backup domain write protection
+	WriteProtection::Disable();
+	RTC->CR &= ~RTC_CR_WUTE;                // disable WAKEUP timer
+	RTC->CR &= ~RTC_CR_WUTIE;               // disable WAKEUP timer interrupt
+	while (!(RTC->ISR & RTC_ISR_WUTWF)) {}  // wait till WUTWF flag set
+	WriteProtection::Enable();
+	BackupDomainProtection::Enable();
+}
+
+template<bool use_lse>
+void RtcModule<use_lse>::WakeupTimer::Start(uint32_t prescaler, uint32_t period)
+{
+	BackupDomainProtection::Disable();        // disable backup domain write protection
+	WriteProtection::Disable();
+
+	RTC->CR &= ~RTC_CR_WUTE;                // disable WAKEUP timer
+	RTC->CR &= ~RTC_CR_WUTIE;               // disable WAKEUP timer interrupt
+	while (!(RTC->ISR & RTC_ISR_WUTWF)) {}  // wait till WUTWF flag set
+
+	RTC->WUTR = period;
+	RTC->CR = (RTC->CR & ~RTC_CR_WUCKSEL) | prescaler;
+	RTC->WUTR = period;
+	EXTI->IMR |= (1UL << 20);      // enable EXTI line 20 interrupt (RTC WAKEUP event)
+	EXTI->RTSR |= (1UL << 20);     // select rising edge
+	RTC->CR |= RTC_CR_WUTIE;       // enable WAKEUP timer interrupt
+	RTC->CR |= RTC_CR_WUTE;        // enable WAKEUP timer
+//	WriteProtection::Enable();
+//	BackupDomainProtection::Enable();
+}
+
+template<bool use_lse>
+void RtcModule<use_lse>::WakeupTimer::SetPrescaler(uint32_t prescaler)
+{
+	BackupDomainProtection::Disable();        // disable backup domain write protection
+	WriteProtection::Disable();
+	RTC->CR = (RTC->CR & ~RTC_CR_WUCKSEL) | prescaler;
+	WriteProtection::Enable();
+	BackupDomainProtection::Enable();
+}
+
+
 
 #endif // STM32TPL_RTC_STM32F4XX_H_INCLUDED
