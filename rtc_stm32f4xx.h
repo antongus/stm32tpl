@@ -315,10 +315,12 @@ void RtcModule<use_lse>::WakeupTimer::Start(uint32_t prescaler, uint32_t period)
 	RTC->WUTR = period;
 	EXTI->IMR |= (1UL << 20);      // enable EXTI line 20 interrupt (RTC WAKEUP event)
 	EXTI->RTSR |= (1UL << 20);     // select rising edge
+	EXTI->PR = 0xFFFFFFFF;         // clear all EXTI pending flags
 	RTC->CR |= RTC_CR_WUTIE;       // enable WAKEUP timer interrupt
 	RTC->CR |= RTC_CR_WUTE;        // enable WAKEUP timer
-//	WriteProtection::Enable();
-//	BackupDomainProtection::Enable();
+	RTC->ISR = (RTC->ISR & RTC_ISR_INIT) | ~(RTC_ISR_WUTF | RTC_ISR_INIT);   // clear WAKEUP interrupt flag
+	WriteProtection::Enable();
+	BackupDomainProtection::Enable();
 }
 
 template<bool use_lse>
