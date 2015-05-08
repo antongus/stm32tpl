@@ -293,8 +293,7 @@ void RtcModule<use_lse>::WakeupTimer::Stop()
 {
 	BackupDomainProtection::Disable();        // disable backup domain write protection
 	WriteProtection::Disable();
-	RTC->CR &= ~RTC_CR_WUTE;                // disable WAKEUP timer
-	RTC->CR &= ~RTC_CR_WUTIE;               // disable WAKEUP timer interrupt
+	RTC->CR &= ~(RTC_CR_WUTE | RTC_CR_WUTIE);  // disable wakeup timer and its interrupt
 	while (!(RTC->ISR & RTC_ISR_WUTWF)) {}  // wait till WUTWF flag set
 	WriteProtection::Enable();
 	BackupDomainProtection::Enable();
@@ -306,19 +305,19 @@ void RtcModule<use_lse>::WakeupTimer::Start(uint32_t prescaler, uint32_t period)
 	BackupDomainProtection::Disable();        // disable backup domain write protection
 	WriteProtection::Disable();
 
-	RTC->CR &= ~RTC_CR_WUTE;                // disable WAKEUP timer
-	RTC->CR &= ~RTC_CR_WUTIE;               // disable WAKEUP timer interrupt
-	while (!(RTC->ISR & RTC_ISR_WUTWF)) {}  // wait till WUTWF flag set
+	RTC->CR &= ~(RTC_CR_WUTE | RTC_CR_WUTIE);  // disable wakeup timer and its interrupt
+	while (!(RTC->ISR & RTC_ISR_WUTWF)) {}     // wait till WUTWF flag set
 
 	RTC->WUTR = period;
 	RTC->CR = (RTC->CR & ~RTC_CR_WUCKSEL) | prescaler;
-	RTC->WUTR = period;
-	EXTI->IMR |= (1UL << 20);      // enable EXTI line 20 interrupt (RTC WAKEUP event)
-	EXTI->RTSR |= (1UL << 20);     // select rising edge
-	EXTI->PR = 0xFFFFFFFF;         // clear all EXTI pending flags
-	RTC->CR |= RTC_CR_WUTIE;       // enable WAKEUP timer interrupt
-	RTC->CR |= RTC_CR_WUTE;        // enable WAKEUP timer
-	RTC->ISR = (RTC->ISR & RTC_ISR_INIT) | ~(RTC_ISR_WUTF | RTC_ISR_INIT);   // clear WAKEUP interrupt flag
+
+	EXTI->IMR |= (1UL << 20);                  // enable EXTI line 20 interrupt (RTC wakeup event)
+	EXTI->RTSR |= (1UL << 20);                 // select rising edge
+	EXTI->PR = (1UL << 20);                    // clear EXTI pending bit
+
+	RTC->ISR = (RTC->ISR & RTC_ISR_INIT) | ~(RTC_ISR_WUTF | RTC_ISR_INIT);   // clear wakeup interrupt flag
+	RTC->CR |= RTC_CR_WUTIE | RTC_CR_WUTE;     // enable wakeup timer and its interrupt
+
 	WriteProtection::Enable();
 	BackupDomainProtection::Enable();
 }
