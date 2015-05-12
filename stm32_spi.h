@@ -32,6 +32,7 @@
 #define STM32TPL_STM32_SPI_H_INCLUDED
 
 #include "stm32.h"
+#include "pin.h"
 #include "stm32_dma.h"
 #include <scmRTOS.h>
 
