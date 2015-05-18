@@ -30,24 +30,23 @@
  *
  */
 
-#ifndef IS25LP_H_INCLUDED
-#define IS25LP_H_INCLUDED
+#ifndef SERIAL_FLASH_H_INCLUDED
+#define SERIAL_FLASH_H_INCLUDED
 
 #include <stdint.h>
 #include "pin.h"
 #include "stm32_spi.h"
 
 #include "textstream.h"
-
 extern TextStream& uart;
 
 namespace  // private types
 {
 
 /**
- * all IS25 opcodes
+ * Some serial flash opcodes
  */
-enum IS25Command
+enum CommandCode : uint8_t
 {
 	/// read commands
 	READ                             = 0x03, ///< normal read, up to 50MHz,  needs 0 dummy bytes
@@ -67,18 +66,18 @@ enum IS25Command
 	WREN                             = 0x06, ///< write enable
 	WRDI                             = 0x04, ///< write disable
 
-	// status
+	/// status
 	RDSR                             = 0x05, ///< read status register
 	WRSR                             = 0x01, ///< write status register
 
-	// misc.
+	/// miscellaneous.
 	RDJDID                           = 0x9F  ///< read JEDEC ID
 };
 
 /**
  * Status register
  */
-struct Is25LpStatus
+struct SerialFlashStatus
 {
 	union
 	{
@@ -93,39 +92,30 @@ struct Is25LpStatus
 		}__attribute__ ((packed))
 		bits;
 	};
-	Is25LpStatus() {}
-	Is25LpStatus(uint8_t val) { byte = val; }
-    operator uint8_t() const
-    {
-        return byte;
-    }
-
-    uint8_t operator = (const uint8_t val)
-	{
-    	byte = val;
-		return val;
-	}
-
+	SerialFlashStatus() {}
+	SerialFlashStatus(const uint8_t val) { operator=(val); }
+	operator uint8_t() const { return byte; }
+	SerialFlashStatus operator=(const uint8_t val) { byte = val; return val; }
 };
 
 } // anonymous namespace
 
 
-struct SampleIs25LpProps
+struct SampleSerialFlashProps
 {
 	enum
 	{
 		SIZE_MB = 8,                  // 4, 8, 16 (MBytes)
-		SHARE_PORT = false,
-		DEBUG_LOG = true,
+		SHARE_PORT = false,           // set to true if SPI port is shared with other devices
+		DEBUG_LOG = true,             // set to true to get debug output
 		NOPS_AFTER_SELECT = 1,
 		NOPS_BEFORE_DESELECT = 4
 	};
 	using CS = Pin<'A', 1, 'L'>;
 };
 
-template<class props = SampleIs25LpProps>
-class Is25LpCore
+template<class props = SampleSerialFlashProps>
+class SerialFlashCore
 {
 public:
 	enum
@@ -148,7 +138,7 @@ public:
 		NOPS_BEFORE_DESELECT = props::NOPS_BEFORE_DESELECT
 	};
 
-	Is25LpCore(STM32::SPI::SpiBase& spiref)
+	SerialFlashCore(STM32::SPI::SpiBase& spiref)
 		: spi_(spiref)
 		{ }
 
@@ -164,7 +154,7 @@ public:
 	void UnprotectSector(uint32_t addr);
 	void GlobalProtect();
 	void GlobalUnprotect();
-	Is25LpStatus ReadStatus();
+	SerialFlashStatus ReadStatus();
 	uint32_t ReadJedecId();
 	uint32_t PageAddress(uint32_t addr) { return addr & PAGE_MASK; }
 	uint32_t SectorAddress(uint32_t addr) { return addr & SECTOR_MASK; }
@@ -174,35 +164,45 @@ protected:
 private:
 	STM32::SPI::SpiBase& spi_;
 
-	void Lock(){ if (SHARE_PORT) spi_.Lock(); }
-	void Unlock(){ if (SHARE_PORT) spi_.Unlock(); }
+	struct Locker
+	{
+		Locker(STM32::SPI::SpiBase& spi)
+		: spi_(spi)
+		{ if (SHARE_PORT) spi_.Lock(); }
+		~Locker() { if (SHARE_PORT) spi_.Unlock(); }
+	private:
+		STM32::SPI::SpiBase& spi_;
+	};
+
+	void Lock()   { if (SHARE_PORT) spi_.Lock(); }
+	void Unlock() { if (SHARE_PORT) spi_.Unlock(); }
 	void Select(void);
 	void Deselect(void);
-	bool Command(uint8_t cmd);
-	bool CommandAndAddr(uint8_t cmd, uint32_t addr);
+	bool Command(CommandCode cmd);
+	bool CommandAndAddr(CommandCode cmd, uint32_t addr);
 	bool WriteEnable();
-	bool Wait(uint32_t ticks = 210);
+	bool Wait(uint32_t timeoutMs = 210);
 	bool WriteStatus(uint8_t value);
 };
 
 template<class props>
-class Is25LpChip : public Is25LpCore<props>
+class SerialFlashChip : public SerialFlashCore<props>
 {
 public:
-	Is25LpChip(STM32::SPI::SpiBase& spiref)
-		: Is25LpCore<props>(spiref)
+	SerialFlashChip(STM32::SPI::SpiBase& spiref)
+		: SerialFlashCore<props>(spiref)
 		{
 			CS::Direct(OUTPUT);
 			CS::Off();
 		}
 protected:
-	typedef class props::CS CS;
-	void DoSelect(void) { CS::On(); };
+	using CS = typename props::CS;
+	void DoSelect(void)   { CS::On(); };
 	void DoDeselect(void) { CS::Off(); };
 };
 
 template<class props>
-void Is25LpCore<props>::Select()
+void SerialFlashCore<props>::Select()
 {
 	DoSelect();
 	for (int i = 0; i < NOPS_AFTER_SELECT; i++)
@@ -210,7 +210,7 @@ void Is25LpCore<props>::Select()
 }
 
 template<class props>
-void Is25LpCore<props>::Deselect()
+void SerialFlashCore<props>::Deselect()
 {
 	for (int i = 0; i < NOPS_BEFORE_DESELECT; i++)
 		__asm__ __volatile__ ("nop");
@@ -218,7 +218,7 @@ void Is25LpCore<props>::Deselect()
 }
 
 template<class props>
-bool Is25LpCore<props>::Command(uint8_t cmd)
+bool SerialFlashCore<props>::Command(CommandCode cmd)
 {
 	if (!Wait()) return false;
 	Select();
@@ -227,7 +227,7 @@ bool Is25LpCore<props>::Command(uint8_t cmd)
 }
 
 template<class props>
-bool Is25LpCore<props>::CommandAndAddr(uint8_t cmd, uint32_t addr)
+bool SerialFlashCore<props>::CommandAndAddr(CommandCode cmd, uint32_t addr)
 {
 	if (!Wait()) return false;
 	Select();
@@ -238,14 +238,20 @@ bool Is25LpCore<props>::CommandAndAddr(uint8_t cmd, uint32_t addr)
 	return true;
 }
 
+/**
+ * Wait for write operation finishes.
+ * @param timeoutMs : timeout, milliseconds
+ * @return true if write operation done within given time interval, false otherwise.
+ */
 template<class props>
-bool Is25LpCore<props>::Wait(uint32_t ticks)
+bool SerialFlashCore<props>::Wait(uint32_t timeoutMs)
 {
+	// for MX25L6406E:
 	// Page write time        : typical: 1.4ms, max :    5ms
 	// 4Kb  sector erase time : typical:  75ms, max :  200ms
 	// 64Kb block erase time  : typical:  0.7s, max :    2s
 	// full erase time        : typical:   50s, max :   80s
-	for (uint32_t i = 0; i < ticks; i++)
+	for (uint32_t i = 0; i < timeoutMs; i++)
 	{
 		if (!(ReadStatus().bits.WIP)) // write in progress?
 			return true;
@@ -259,7 +265,7 @@ bool Is25LpCore<props>::Wait(uint32_t ticks)
 
 
 template<class props>
-bool Is25LpCore<props>::WriteEnable()
+bool SerialFlashCore<props>::WriteEnable()
 {
 	bool ret = Command(WREN);
 	Deselect();
@@ -267,21 +273,21 @@ bool Is25LpCore<props>::WriteEnable()
 }
 
 template<class props>
-void Is25LpCore<props>::GlobalProtect()
+void SerialFlashCore<props>::GlobalProtect()
 {
 	WriteStatus(0x7F);  // do not write 1 to SRWD (because it can't be set back to 0 if WP pin not tied to VCC)
 }
 
 template<class props>
-void Is25LpCore<props>::GlobalUnprotect()
+void SerialFlashCore<props>::GlobalUnprotect()
 {
 	WriteStatus(0);
 }
 
 template<class props>
-Is25LpStatus Is25LpCore<props>::ReadStatus()
+SerialFlashStatus SerialFlashCore<props>::ReadStatus()
 {
-	Is25LpStatus res;
+	SerialFlashStatus res;
 	Select();
 	spi_.Rw(RDSR);
 	res = spi_.Rw();                  // first byte
@@ -290,10 +296,10 @@ Is25LpStatus Is25LpCore<props>::ReadStatus()
 }
 
 template<class props>
-uint32_t Is25LpCore<props>::ReadJedecId()
+uint32_t SerialFlashCore<props>::ReadJedecId()
 {
 	uint32_t res = 0;
-	Lock();
+	Locker locker(spi_);
 	if (Command(RDJDID))
 	{
 		res = spi_.Rw();
@@ -303,14 +309,13 @@ uint32_t Is25LpCore<props>::ReadJedecId()
 		res |= spi_.Rw();
 	}
 	Deselect();
-	Unlock();
 	return res;
 }
 
 template<class props>
-bool Is25LpCore<props>::WriteStatus(uint8_t value)
+bool SerialFlashCore<props>::WriteStatus(uint8_t value)
 {
-	Lock();
+	Locker locker(spi_);
 	bool ret = WriteEnable();
 	if (ret)
 	{
@@ -318,15 +323,13 @@ bool Is25LpCore<props>::WriteStatus(uint8_t value)
 		spi_.Rw(value);
 		Deselect();
 	}
-	Unlock();
 	return ret;
 }
 
 template<class props>
-bool Is25LpCore<props>::Read(uint32_t addr, void *buf, uint32_t len)
+bool SerialFlashCore<props>::Read(uint32_t addr, void *buf, uint32_t len)
 {
-	Lock();
-
+	Locker locker(spi_);
 	bool ret = CommandAndAddr(FAST_READ, addr);
 	if (ret)
 	{
@@ -337,16 +340,13 @@ bool Is25LpCore<props>::Read(uint32_t addr, void *buf, uint32_t len)
 
 		Deselect();
 	}
-
-	Unlock();
 	return ret;
 }
 
 template<class props>
-bool Is25LpCore<props>::Write(uint32_t addr, void const *buf, uint32_t len)
+bool SerialFlashCore<props>::Write(uint32_t addr, void const *buf, uint32_t len)
 {
-	Lock();
-
+	Locker locker(spi_);
 	bool ret = WriteEnable() && CommandAndAddr(PP, addr);
 	if (ret)
 	{
@@ -363,14 +363,13 @@ bool Is25LpCore<props>::Write(uint32_t addr, void const *buf, uint32_t len)
 	else
 		Deselect();
 
-	Unlock();
 	return ret;
 }
 
 template<class props>
-bool Is25LpCore<props>::Verify(uint32_t addr, void const *buf, uint32_t len)
+bool SerialFlashCore<props>::Verify(uint32_t addr, void const *buf, uint32_t len)
 {
-	Lock();
+	Locker locker(spi_);
 	bool ret = CommandAndAddr(FAST_READ, addr);
 	if (ret)
 	{
@@ -383,17 +382,16 @@ bool Is25LpCore<props>::Verify(uint32_t addr, void const *buf, uint32_t len)
 				break;
 			}
 
-		Deselect();
 	}
-	Unlock();
+	Deselect();
 	return ret;
 }
 
 
 template<class props>
-bool Is25LpCore<props>::CheckErased(uint32_t addr, uint32_t count)
+bool SerialFlashCore<props>::CheckErased(uint32_t addr, uint32_t count)
 {
-	Lock();
+	Locker locker(spi_);
 	bool ret = CommandAndAddr(FAST_READ, addr);
 	if (ret)
 	{
@@ -411,42 +409,40 @@ bool Is25LpCore<props>::CheckErased(uint32_t addr, uint32_t count)
 }
 
 template<class props>
-bool Is25LpCore<props>::IsSectorErased(uint32_t addr)
+bool SerialFlashCore<props>::IsSectorErased(uint32_t addr)
 {
 	return CheckErased(addr, SECTOR_SIZE);
 }
 
 template<class props>
-bool Is25LpCore<props>::IsPageErased(uint32_t addr)
+bool SerialFlashCore<props>::IsPageErased(uint32_t addr)
 {
 	return CheckErased(addr, PAGE_SIZE);
 }
 
 template<class props>
-bool Is25LpCore<props>::EraseSector(uint32_t addr)
+bool SerialFlashCore<props>::EraseSector(uint32_t addr)
 {
-	Lock();
+	Locker locker(spi_);
 	bool ret = WriteEnable() && CommandAndAddr(ERASE_SECTOR, addr);
 	Deselect();
 
 	// wait for 4K erase operation finishes (max time : 300us)
 	ret = ret && Wait(310);
-	Unlock();
 	return ret;
 }
 
 template<class props>
-bool Is25LpCore<props>::FullErase()
+bool SerialFlashCore<props>::FullErase()
 {
-	Lock();
+	Locker locker(spi_);
 	bool ret = WriteEnable() && Command(ERASE_CHIP);
 	Deselect();
 
 	// wait for chip erase operation finishes (max time : 80s)
 	ret = ret && Wait(82 * 1000);
-	Unlock();
 	return ret;
 }
 
 
-#endif // IS25LP_H_INCLUDED
+#endif // SERIAL_FLASH_H_INCLUDED
