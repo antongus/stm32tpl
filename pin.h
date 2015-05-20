@@ -41,4 +41,22 @@
 #  include "pin_stm32F1xx.h"
 #endif
 
+/**
+ * Dummy pin.
+ * Used when some pin is optional and not present in current configuration
+ * (i.e DE pin in USART or WP pin in serial flash).
+ */
+template <bool latched = true>
+struct DummyPin
+{
+	static void On() { }
+	static void Off() { }
+	static void Cpl() { }
+	static void Mode(direction) { }
+	static int Latched() { return latched; }
+};
+
+using DummyPinOn = DummyPin<true>;
+using DummyPinOff = DummyPin<false>;
+
 #endif // STM32TPL_PIN_H_INCLUDED
