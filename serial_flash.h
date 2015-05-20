@@ -37,9 +37,6 @@
 #include "pin.h"
 #include "stm32_spi.h"
 
-#include "textstream.h"
-extern TextStream& uart;
-
 namespace  // private types
 {
 
@@ -93,7 +90,7 @@ struct SerialFlashStatus
 		bits;
 	};
 	SerialFlashStatus() {}
-	SerialFlashStatus(const uint8_t val) { operator=(val); }
+	SerialFlashStatus(const uint8_t val) { byte = val; }
 	operator uint8_t() const { return byte; }
 	SerialFlashStatus operator=(const uint8_t val) { byte = val; return val; }
 };
@@ -107,11 +104,11 @@ struct SampleSerialFlashProps
 	{
 		SIZE_MB = 8,                  // 4, 8, 16 (MBytes)
 		SHARE_PORT = false,           // set to true if SPI port is shared with other devices
-		DEBUG_LOG = true,             // set to true to get debug output
 		NOPS_AFTER_SELECT = 1,
 		NOPS_BEFORE_DESELECT = 4
 	};
 	using CS = Pin<'A', 1, 'L'>;
+	using WP = DummyPinOn;
 };
 
 template<class props = SampleSerialFlashProps>
@@ -133,7 +130,6 @@ public:
 	enum
 	{
 		SHARE_PORT = props::SHARE_PORT,
-		DEBUG_LOG = props::DEBUG_LOG,
 		NOPS_AFTER_SELECT = props::NOPS_AFTER_SELECT,
 		NOPS_BEFORE_DESELECT = props::NOPS_BEFORE_DESELECT
 	};
@@ -159,25 +155,21 @@ public:
 	uint32_t PageAddress(uint32_t addr) { return addr & PAGE_MASK; }
 	uint32_t SectorAddress(uint32_t addr) { return addr & SECTOR_MASK; }
 protected:
-	virtual void DoSelect(void) = 0;
-	virtual void DoDeselect(void) = 0;
+	virtual void DoSelect() = 0;
+	virtual void DoDeselect() = 0;
 private:
 	STM32::SPI::SpiBase& spi_;
 
 	struct Locker
 	{
-		Locker(STM32::SPI::SpiBase& spi)
-		: spi_(spi)
-		{ if (SHARE_PORT) spi_.Lock(); }
+		Locker(STM32::SPI::SpiBase& spi) : spi_(spi) { if (SHARE_PORT) spi_.Lock(); }
 		~Locker() { if (SHARE_PORT) spi_.Unlock(); }
 	private:
 		STM32::SPI::SpiBase& spi_;
 	};
 
-	void Lock()   { if (SHARE_PORT) spi_.Lock(); }
-	void Unlock() { if (SHARE_PORT) spi_.Unlock(); }
-	void Select(void);
-	void Deselect(void);
+	void Select();
+	void Deselect();
 	bool Command(CommandCode cmd);
 	bool CommandAndAddr(CommandCode cmd, uint32_t addr);
 	bool WriteEnable();
@@ -185,20 +177,29 @@ private:
 	bool WriteStatus(uint8_t value);
 };
 
+/**
+ * Serial flash chip.
+ * It is actually SerialFlashCore<> descendant + CS pin.
+ * Made separate class to optimize multi-chip configurations.
+ */
 template<class props>
-class SerialFlashChip : public SerialFlashCore<props>
+class SerialFlashChip : public props::CoreType
 {
 public:
 	SerialFlashChip(STM32::SPI::SpiBase& spiref)
-		: SerialFlashCore<props>(spiref)
+		: props::CoreType(spiref)
 		{
 			CS::Direct(OUTPUT);
 			CS::Off();
+			WP::Direct(OUTPUT);
+			WP::Off();
 		}
 protected:
 	using CS = typename props::CS;
-	void DoSelect(void)   { CS::On(); };
-	void DoDeselect(void) { CS::Off(); };
+	using WP = typename props::WP;
+	void DoSelect() override   { CS::On(); };
+	void DoDeselect() override { CS::Off(); };
+	static void WriteProtect(bool on)  { WP::On(on); };
 };
 
 template<class props>
@@ -257,9 +258,6 @@ bool SerialFlashCore<props>::Wait(uint32_t timeoutMs)
 			return true;
 		OS::sleep(1);
 	}
-
-	if (DEBUG_LOG)
-		uart << "\r\n at25 : wait failed!";
 	return false;
 }
 
@@ -288,9 +286,10 @@ template<class props>
 SerialFlashStatus SerialFlashCore<props>::ReadStatus()
 {
 	SerialFlashStatus res;
+	Deselect();
 	Select();
 	spi_.Rw(RDSR);
-	res = spi_.Rw();                  // first byte
+	res = spi_.Rw(245);                  // first byte
 	Deselect();
 	return res;
 }
