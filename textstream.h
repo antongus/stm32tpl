@@ -142,8 +142,9 @@ public:
 
 	virtual void Puts(const char * s) __attribute__((__noinline__))
 	{
-		while (*s)
-			PutChar(*s++);
+		if (s)
+			while (*s)
+				PutChar(*s++);
 	}
 
 	virtual void SendBuffer(const void* buf, size_t size) __attribute__((__noinline__))
