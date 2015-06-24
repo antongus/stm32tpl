@@ -122,9 +122,9 @@ public:
 		crc_ = (tmp << 8) ^ crc16CcittTable.data[(tmp >> 8) ^ val];
 	}
 	void Add(char *s) { while (*s) Add(*s++); }
-	void Add(void *buf, size_t size)
+	void Add(void const* buf, size_t size)
 	{
-		char *ptr = reinterpret_cast<char *>(buf);
+		char const* ptr = reinterpret_cast<char const*>(buf);
 		for (size_t i = 0; i < size; ++i)
 			Add(ptr[i]);
 	}
