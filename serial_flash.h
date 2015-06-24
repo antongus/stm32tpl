@@ -186,8 +186,9 @@ template<class props>
 class SerialFlashChip : public props::CoreType
 {
 public:
+	using CoreType = typename props::CoreType;
 	SerialFlashChip(STM32::SPI::SpiBase& spiref)
-		: props::CoreType(spiref)
+		: CoreType(spiref)
 		{
 			CS::Direct(OUTPUT);
 			CS::Off();
