@@ -124,7 +124,8 @@ public:
 		SECTOR_COUNT = SIZE / SECTOR_SIZE,     // sector count (2048)
 		PAGE_SIZE = 256UL,                     // page size (maximum writable unit)
 		PAGE_MASK = ~(PAGE_SIZE - 1),          // mask to get page address from any address
-		PAGE_COUNT = SIZE / PAGE_SIZE          // 32768 (0x8000)
+		PAGE_COUNT = SIZE / PAGE_SIZE,         // 32768 (0x8000)
+		PAGES_PER_SECTOR = SECTOR_SIZE / PAGE_SIZE,  // 16
 	};
 
 	enum
@@ -152,8 +153,8 @@ public:
 	void GlobalUnprotect();
 	SerialFlashStatus ReadStatus();
 	uint32_t ReadJedecId();
-	uint32_t PageAddress(uint32_t addr) { return addr & PAGE_MASK; }
-	uint32_t SectorAddress(uint32_t addr) { return addr & SECTOR_MASK; }
+	static constexpr uint32_t PageAddress(uint32_t addr) { return addr & PAGE_MASK; }
+	static constexpr uint32_t SectorAddress(uint32_t addr) { return addr & SECTOR_MASK; }
 protected:
 	virtual void DoSelect() = 0;
 	virtual void DoDeselect() = 0;
