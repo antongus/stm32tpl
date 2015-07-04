@@ -154,4 +154,15 @@ T MedianFilter<T, size>::Put(T value)
 	return result_;
 }
 
+template<typename T>
+class DummyFilter
+{
+public:
+	DummyFilter() {}
+	T Put(T value) { return value; };
+	void Reset() { }
+private:
+};
+
+
 #endif // STM32TPL_FILTERS_H_INCLUDED
