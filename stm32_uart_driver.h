@@ -460,8 +460,8 @@ public:
 #if (defined STM32L0XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->ICR = flags; }
-	INLINE uint32_t ReadData()                      { return USARTx->RDR; }
-	INLINE void WriteData(uint8_t data)             { USARTx->TDR = data; }
+	INLINE static uint32_t ReadData()               { return USARTx->RDR; }
+	INLINE static void WriteData(uint8_t data)      { USARTx->TDR = data; }
 #else
 	INLINE static uint16_t Status()                 { return USARTx->SR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->SR &= ~flags; }
