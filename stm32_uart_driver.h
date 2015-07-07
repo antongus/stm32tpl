@@ -237,6 +237,7 @@ template<> struct UartTraits<UART_1>
 	};
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART1EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB2RSTR |= RCC_APB2RSTR_USART1RST; RCC->APB2RSTR &= ~RCC_APB2RSTR_USART1RST; }
 };
 
 template<> struct UartTraits<UART_2>
@@ -255,6 +256,7 @@ template<> struct UartTraits<UART_2>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART2EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART2RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART2RST; }
 };
 
 #if (UART_COUNT > 2)
@@ -275,6 +277,7 @@ template<> struct UartTraits<UART_3>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART3EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART3RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART3RST; }
 };
 #endif
 
@@ -291,6 +294,7 @@ template<> struct UartTraits<UART_4>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART4EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART4RST; }
 };
 #endif
 
@@ -307,6 +311,7 @@ template<> struct UartTraits<UART_5>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART5EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART5RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART5RST; }
 };
 #endif
 
@@ -323,6 +328,7 @@ template<> struct UartTraits<UART_6>
 	};
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART6EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB2RSTR |= RCC_APB2RSTR_USART6RST; RCC->APB2RSTR &= ~RCC_APB2RSTR_USART6RST; }
 };
 #endif
 
