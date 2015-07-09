@@ -67,16 +67,6 @@ public:
 	using Driver = UartDriver<uartNum>;
 	using Driver::USARTx;
 
-private:
-	using Pins = UartPins<props::uartNum, props::remap>;
-	using TX = typename Pins::PinTX;
-	using RX = typename Pins::PinRX;
-	using DE = typename props::PinDE;
-
-#if (!defined STM32F1XX)
-	static const PinAltFunction ALT_FUNC_USARTx = Pins::ALT_FUNC_USARTx;
-#endif
-public:
 	UartDbg();
 
 	INLINE static void StartTx()         { DE::On(); }
@@ -87,6 +77,9 @@ public:
 	virtual int Keypressed() override  { return Driver::Status() & USART_FLAG_RXNE; }
 	virtual int CanSend() override { return true; };
 	virtual int TxEmpty() override { return true; };
+private:
+	using Pins = UartPins<props::uartNum, props::remap>;
+	using DE = typename props::PinDE;
 };
 
 template<typename props>
@@ -100,18 +93,7 @@ UartDbg<props>::UartDbg()
 #endif
 
 	Driver::EnableClocks();         // enable UART module clock
-
-#if (defined STM32F1XX)             // configure pins
-	TX::Mode(ALT_OUTPUT);
-	RX::Mode(INPUTPULLED);
-	RX::PullUp();
-#else
-	TX::Alternate(ALT_FUNC_USARTx);
-	RX::Alternate(ALT_FUNC_USARTx);
-	TX::Mode(ALT_OUTPUT);
-	RX::Mode(ALT_INPUT_PULLUP);
-#endif
-
+	Pins::Init();                   // configure pins
 	DE::Mode(OUTPUT);
 	DE::Off();
 

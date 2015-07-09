@@ -32,6 +32,7 @@
 #define STM32TPL_STM32_UART_DRIVER_H_INCLUDED
 
 #include "stm32.h"
+#include "pin.h"
 
 namespace STM32
 {
@@ -90,12 +91,14 @@ enum UartNum
 */
 enum Remap { REMAP_NONE, REMAP_FULL, REMAP_PARTIAL };
 
+namespace
+{
 /**
 *  @brief UART pins selection template. Used internally.
 */
-template<UartNum uartNum, Remap remapped = REMAP_NONE> struct UartPins;
+template<UartNum uartNum, Remap remapped = REMAP_NONE> struct UartPinSet;
 
-template<> struct UartPins<UART_1>
+template<> struct UartPinSet<UART_1>
 {
 	typedef Pin<'A', 9> PinTX;
 	typedef Pin<'A', 10> PinRX;
@@ -106,7 +109,7 @@ template<> struct UartPins<UART_1>
 #endif
 };
 
-template<> struct UartPins<UART_1, REMAP_FULL>
+template<> struct UartPinSet<UART_1, REMAP_FULL>
 {
 	typedef Pin<'B', 6> PinTX;
 	typedef Pin<'B', 7> PinRX;
@@ -117,7 +120,7 @@ template<> struct UartPins<UART_1, REMAP_FULL>
 #endif
 };
 
-template<> struct UartPins<UART_2>
+template<> struct UartPinSet<UART_2>
 {
 	typedef Pin<'A', 2> PinTX;
 	typedef Pin<'A', 3> PinRX;
@@ -128,7 +131,7 @@ template<> struct UartPins<UART_2>
 #endif
 };
 
-template<> struct UartPins<UART_2, REMAP_FULL>
+template<> struct UartPinSet<UART_2, REMAP_FULL>
 {
 #if (defined STM32L0XX)
 	typedef Pin<'A', 14> PinTX;
@@ -145,7 +148,7 @@ template<> struct UartPins<UART_2, REMAP_FULL>
 };
 
 #if (UART_COUNT > 2)
-template<> struct UartPins<UART_3>
+template<> struct UartPinSet<UART_3>
 {
 	typedef Pin<'B', 10> PinTX;
 	typedef Pin<'B', 11> PinRX;
@@ -154,7 +157,7 @@ template<> struct UartPins<UART_3>
 #endif
 };
 
-template<> struct UartPins<UART_3, REMAP_PARTIAL>
+template<> struct UartPinSet<UART_3, REMAP_PARTIAL>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
@@ -163,7 +166,7 @@ template<> struct UartPins<UART_3, REMAP_PARTIAL>
 #endif
 };
 
-template<> struct UartPins<UART_3, REMAP_FULL>
+template<> struct UartPinSet<UART_3, REMAP_FULL>
 {
 	typedef Pin<'D', 8> PinTX;
 	typedef Pin<'D', 9> PinRX;
@@ -174,7 +177,7 @@ template<> struct UartPins<UART_3, REMAP_FULL>
 #endif
 
 #if (UART_COUNT > 3)
-template<> struct UartPins<UART_4>
+template<> struct UartPinSet<UART_4>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
@@ -185,7 +188,7 @@ template<> struct UartPins<UART_4>
 #endif
 
 #if (UART_COUNT > 4)
-template<> struct UartPins<UART_5>
+template<> struct UartPinSet<UART_5>
 {
 	typedef Pin<'C', 12> PinTX;
 	typedef Pin<'D', 2> PinRX;
@@ -196,7 +199,7 @@ template<> struct UartPins<UART_5>
 #endif
 
 #if (UART_COUNT > 5)
-template<> struct UartPins<UART_6>
+template<> struct UartPinSet<UART_6>
 {
 	typedef Pin<'C', 6> PinTX;
 	typedef Pin<'C', 7> PinRX;
@@ -205,7 +208,7 @@ template<> struct UartPins<UART_6>
 #endif
 };
 
-template<> struct UartPins<UART_6, REMAP_FULL>
+template<> struct UartPinSet<UART_6, REMAP_FULL>
 {
 	typedef Pin<'G', 14> PinTX;
 	typedef Pin<'G', 9> PinRX;
@@ -214,6 +217,47 @@ template<> struct UartPins<UART_6, REMAP_FULL>
 #endif
 };
 #endif
+}
+
+template<UartNum uartNum, Remap remapped = REMAP_NONE>
+struct UartPins
+{
+	using PinSet = UartPinSet<uartNum, remapped>;
+	using PinTX = typename PinSet::PinTX;
+	using PinRX = typename PinSet::PinRX;
+#if (defined F2xxF4xx) || (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = PinSet::ALT_FUNC_USARTx;
+#endif
+
+	static void Init()
+	{
+#if (defined STM32F1XX)
+		PinTX::Mode(ALT_OUTPUT);
+		PinRX::Mode(INPUTPULLED);
+		PinRX::PullUp();
+#else
+		PinTX::Alternate(ALT_FUNC_USARTx);
+		PinRX::Alternate(ALT_FUNC_USARTx);
+		PinTX::Mode(ALT_OUTPUT);
+		PinRX::Mode(ALT_INPUT_PULLUP);
+#endif
+	}
+
+	static void DeInit()
+	{
+#if (defined STM32F1XX)
+		PinTX::Mode(ANALOGINPUT);
+		PinRX::Mode(ANALOGINPUT);
+		PinRX::PullUp();
+#else
+		PinTX::Alternate((PinAltFunction)0);
+		PinRX::Alternate((PinAltFunction)0);
+		PinTX::Mode(INPUT);
+		PinRX::Mode(INPUT);
+		PinRX::PullNone();
+#endif
+	}
+};
 
 
 /**
