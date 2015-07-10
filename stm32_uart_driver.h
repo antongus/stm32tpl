@@ -515,8 +515,8 @@ public:
 #else
 	INLINE static uint16_t Status()                 { return USARTx->SR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->SR &= ~flags; }
-	INLINE uint16_t ReadData()                      { return USARTx->DR; }
-	INLINE void WriteData(uint8_t data)             { USARTx->DR = data; }
+	INLINE static uint16_t ReadData()               { return USARTx->DR; }
+	INLINE static void WriteData(uint8_t data)      { USARTx->DR = data; }
 #endif
 
 	struct RxInterrupt
