@@ -381,7 +381,7 @@ bool UartDma<props>::ReceiveBuffer(void* buf, size_t count, int timeout)
 	char* ptr = reinterpret_cast<char*>(buf);
 	while (count)
 	{
-		uint32_t slice = count > RX_BUF_SIZE ? RX_BUF_SIZE : count;
+		uint32_t slice = count > RX_BUF_SIZE ? (uint32_t)RX_BUF_SIZE : count;
 		if (!rxChannel_.read(ptr, slice, timeout))
 			return false;
 		count -= slice;
