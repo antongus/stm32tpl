@@ -504,8 +504,10 @@ public:
 	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
 	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
 
-	INLINE static void SetBaudrate(Baudrate value)   { USARTx->BRR = (BUS_FREQ + value/2) / value; }
-	INLINE static Baudrate GetBaudrate()             { return BUS_FREQ / USARTx->BRR; }
+	INLINE static void SetBaudrate(Baudrate value, uint32_t busFreq = BUS_FREQ)
+		{ USARTx->BRR = (busFreq + value/2) / value;}
+	INLINE static Baudrate GetBaudrate(uint32_t busFreq = BUS_FREQ)
+		{ return busFreq / USARTx->BRR; }
 
 #if (defined STM32L0XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
