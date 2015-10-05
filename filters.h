@@ -159,6 +159,7 @@ class DummyFilter
 {
 public:
 	DummyFilter() {}
+	DummyFilter(double) {}
 	T Put(T value) { return value; };
 	void Reset() { }
 private:
