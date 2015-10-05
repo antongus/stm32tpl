@@ -338,7 +338,7 @@ template<> struct UartTraits<UART_4>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART4EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
-	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART4RST; }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_UART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_UART4RST; }
 };
 #endif
 
@@ -355,7 +355,7 @@ template<> struct UartTraits<UART_5>
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART5EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
-	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART5RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART5RST; }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_UART5RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_UART5RST; }
 };
 #endif
 
