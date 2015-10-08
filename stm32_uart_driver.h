@@ -501,6 +501,7 @@ public:
 
 	INLINE static void EnableClocks()    { Traits::EnableClocks(); }
 	INLINE static void DisableClocks()   { Traits::DisableClocks(); }
+	INLINE static void Reset()           { Traits::Reset(); }
 	INLINE static void Enable()          { USARTx->CR1 |= USART_CR1_UE; }
 	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
 
