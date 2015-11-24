@@ -182,7 +182,7 @@ template<> struct UartPinSet<UART_4>
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
 #if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART4
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
 #endif
 };
 #endif
@@ -193,7 +193,7 @@ template<> struct UartPinSet<UART_5>
 	typedef Pin<'C', 12> PinTX;
 	typedef Pin<'D', 2> PinRX;
 #if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART5
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART5;
 #endif
 };
 #endif
@@ -204,7 +204,7 @@ template<> struct UartPinSet<UART_6>
 	typedef Pin<'C', 6> PinTX;
 	typedef Pin<'C', 7> PinRX;
 #if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
 #endif
 };
 
@@ -213,7 +213,7 @@ template<> struct UartPinSet<UART_6, REMAP_FULL>
 	typedef Pin<'G', 14> PinTX;
 	typedef Pin<'G', 9> PinRX;
 #if (defined F2xxF4xx)
-	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
 #endif
 };
 #endif

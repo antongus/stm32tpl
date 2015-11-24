@@ -88,7 +88,6 @@ typedef struct
 	volatile uint32_t MAR;    // DMA stream memory 0 address register
 	volatile uint32_t M1AR;   // DMA stream memory 1 address register
 	volatile uint32_t FCR;    // DMA stream FIFO control register
-#endif
 }DMAx_Stream_TypeDef;
 
 /**
