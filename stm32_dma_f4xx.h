@@ -32,6 +32,7 @@
 #define STM32TPL_STM32_DMA_F4XX_H_INCLUDED
 
 #include "stm32.h"
+#include <stddef.h>
 
 namespace STM32
 {
