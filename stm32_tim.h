@@ -142,12 +142,17 @@ template<TimerNum num> struct TimerTraits;
 #if defined (RCC_APB2ENR_TIM1EN)
 template<> struct TimerTraits<TIM_1>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM1_BASE;
 	static const TimerType timerType = Advanced;
 	static const uint32_t ccModulesCount = 4;
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
+#if !defined F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM1_UP_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM1_UP_TIM10_IRQn;
+#endif
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM1EN; }
 };
@@ -156,6 +161,11 @@ template<> struct TimerTraits<TIM_1>
 #if defined (RCC_APB1ENR_TIM2EN)
 template<> struct TimerTraits<TIM_2>
 {
+#if defined F2xxF4xx
+	using CounterType = uint32_t;
+#else
+	using CounterType = uint16_t;
+#endif
 	static const uint32_t TIMx_BASE = TIM2_BASE;
 	static const TimerType timerType = General;
 	static const uint32_t ccModulesCount = 4;
@@ -170,6 +180,7 @@ template<> struct TimerTraits<TIM_2>
 #if defined (RCC_APB1ENR_TIM3EN)
 template<> struct TimerTraits<TIM_3>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM3_BASE;
 	static const TimerType timerType = General;
 	static const uint32_t ccModulesCount = 4;
@@ -184,6 +195,7 @@ template<> struct TimerTraits<TIM_3>
 #if defined (RCC_APB1ENR_TIM4EN)
 template<> struct TimerTraits<TIM_4>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM4_BASE;
 	static const TimerType timerType = General;
 	static const uint32_t ccModulesCount = 4;
@@ -198,6 +210,11 @@ template<> struct TimerTraits<TIM_4>
 #if defined(RCC_APB1ENR_TIM5EN)
 template<> struct TimerTraits<TIM_5>
 {
+#if defined F2xxF4xx
+	using CounterType = uint32_t;
+#else
+	using CounterType = uint16_t;
+#endif
 	static const uint32_t TIMx_BASE = TIM5_BASE;
 	static const TimerType timerType = General;
 	static const uint32_t ccModulesCount = 4;
@@ -213,6 +230,7 @@ template<> struct TimerTraits<TIM_5>
 #if defined(RCC_APB1ENR_TIM6EN)
 template<> struct TimerTraits<TIM_6>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM6_BASE;
 	static const TimerType timerType = Basic;
 	static const uint32_t ccModulesCount = 0;
@@ -232,6 +250,7 @@ template<> struct TimerTraits<TIM_6>
 #if defined(RCC_APB2ENR_TIM8EN)
 template<> struct TimerTraits<TIM_8>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM8_BASE;
 	static const TimerType timerType = Advanced;
 	static const uint32_t ccModulesCount = 4;
@@ -244,6 +263,7 @@ template<> struct TimerTraits<TIM_8>
 #if defined(RCC_APB2ENR_TIM21EN)
 template<> struct TimerTraits<TIM_21>
 {
+	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM6_BASE;
 	static const TimerType timerType = Basic;
 	static const uint32_t ccModulesCount = 0;
@@ -302,6 +322,7 @@ class Timer
 public:
 	static const TimerNum NUMBER        = timerNum;
 	typedef TimerTraits<timerNum> Traits;
+	using CounterType = typename Traits::CounterType;
 	static const uint32_t TIMx_BASE       = Traits::TIMx_BASE;
 	static const IRQn TIMx_IRQn           = Traits::TIMx_IRQn;
 	static const TimerType timerType      = Traits::timerType;
@@ -324,7 +345,7 @@ public:
 		static void Clear()     { TIMx->SR = ~TIM_SR_UIF; }
 	};
 
-	static uint16_t Count() { return TIMx->CNT; }
+	static CounterType Count() { return TIMx->CNT; }
 
 	/**
 	 * Capture/Compare channel template
