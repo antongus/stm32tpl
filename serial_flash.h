@@ -191,9 +191,9 @@ public:
 	SerialFlashChip(STM32::SPI::SpiBase& spiref)
 		: CoreType(spiref)
 		{
-			CS::Direct(OUTPUT);
+			CS::Mode(OUTPUT);
 			CS::Off();
-			WP::Direct(OUTPUT);
+			WP::Mode(OUTPUT);
 			WP::Off();
 		}
 protected:
