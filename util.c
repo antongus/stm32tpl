@@ -84,7 +84,39 @@ char* itoa(int value, char* s, int base)
 
 long small_atoi(char * s)
 {
-	long rv=0;
+	long long rv=0;
+	int sign = 0;
+
+	// skip till we find either a digit or '+' or '-'
+	while (*s)
+	{
+		if (*s <= '9' && *s >= '0')
+			break;
+		if (*s == '-' || *s == '+')
+			break;
+		s++;
+	}
+
+	sign = (*s == '-');
+	if (*s == '-' || *s == '+')
+		s++;
+
+	while (*s && *s >= '0' && *s <= '9')
+	{
+		rv = (rv * 10) + (*s - '0');
+		s++;
+	}
+
+	return (sign ? -rv : rv);
+}
+
+// the same as above, but long long.
+// this function is added to achieve 10-byte precision in atof().
+// Otherwise atof() fails in some cases, i.e:
+// atof(-2.3150092354) was return -1.8855125058
+long long small_atoll(char * s)
+{
+	long long rv=0;
 	int sign = 0;
 
 	// skip till we find either a digit or '+' or '-'
@@ -139,8 +171,8 @@ void pad(char * s, int width, char padder)
 
 double small_atof(const char * s)
 {
-	char buf[16];
-	strncpy(buf, s, 16);
+	char buf[24];
+	strncpy(buf, s, 24);
 
 	char* ptr = buf;
 	while (*ptr)
@@ -154,14 +186,14 @@ double small_atof(const char * s)
 
 	char * dot = strchr(ptr, '.');
 	if (!dot) dot = strchr(ptr, ',');
-	if (!dot) return negative ? -small_atoi(ptr) : small_atoi(ptr);
+	if (!dot) return negative ? -small_atoll(ptr) : small_atoll(ptr);
 
 	*dot++ = 0;
-	double res = small_atoi(dot);
+	double res = small_atoll(dot);
 	int l = strlen(dot);
 	while (l--)
 		res /= 10;
-	res += small_atoi(ptr);
+	res += small_atoll(ptr);
 
 	return negative ? -res : res;
 }
