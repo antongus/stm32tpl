@@ -49,6 +49,12 @@
 #elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
 #  define STM32L0XX
 #  include "CMSIS/stm32l0xx.h"
+#elif (defined STM32L100xB) || (defined STM32L100xBA) || (defined STM32L100xC) || \
+    (defined STM32L151xB) || (defined STM32L151xBA) || (defined STM32L151xC) || (defined STM32L151xCA) || (defined STM32L151xD) || (defined STM32L151xDX) || (defined STM32L151xE) || \
+    (defined STM32L152xB) || (defined STM32L152xBA) || (defined STM32L152xC) || (defined STM32L152xCA) || (defined STM32L152xD) || (defined STM32L152xDX) || (defined STM32L152xE) || \
+    (defined STM32L162xC) || (defined STM32L162xCA) || (defined STM32L162xD) || (defined STM32L162xDX) || (defined STM32L162xE)
+#  define STM32L1XX
+#  include "CMSIS/stm32l1xx.h"
 #else
 #  define STM32F1XX
 #  include "CMSIS/stm32f10x.h"
@@ -74,6 +80,7 @@ enum ChipType
 	stm32F2XX,         ///< stm32F2xx chips
 	stm32F4XX,         ///< stm32F4xx chips
 	stm32L0XX,         ///< stm32L0xx chips
+	stm32L1XX,         ///< stm32L1xx chips
 };
 
 
@@ -235,6 +242,22 @@ struct ChipCaps<stm32L0XX>
 	enum { HAVE_OTG = false };
 };
 
+template<>
+struct ChipCaps<stm32L1XX>
+{
+	static const uint32_t MAX_FREQ  = 32000000;
+	static const uint32_t APB1_FREQ = 32000000;
+	static const uint32_t APB2_FREQ = 32000000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
+	static const uint32_t DEVICE_ID = 0x413;
+	enum { HAVE_BUS = false };
+	enum { SPI_COUNT = 3 };
+	enum { USART_COUNT = 2 };
+	enum { HAVE_USB = true };
+	enum { HAVE_OTG = false };
+};
+
 template<ChipType chipType>
 struct ChipInfo : public ChipCaps<chipType>
 {
@@ -292,6 +315,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F4XX> chip;
 #elif (defined STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
+#elif (defined STM32L1XX)
+	typedef ChipInfo<stm32L1XX> chip;
 #else
 #	error Chip type (STM32FXXX_XX) must be defined.
 #endif
