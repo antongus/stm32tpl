@@ -182,6 +182,53 @@ enum PinOutputType
 /**
  * PinAltFunction enumeration. Defines all possible arguments for Alternate() function.
  */
+#ifdef STM32TPL_PIN_STM32L1XX
+enum PinAltFunction
+{
+	ALT_FUNC_RTC_50Hz  = 0x00,          ///< RTC_50Hz Alternate Function mapping
+	ALT_FUNC_MCO       = 0x00,          ///< MCO (MCO1 and MCO2) Alternate Function mapping
+	ALT_FUNC_RTC_AF1   = 0x00,          ///< RTC_AF1 Alternate Function mapping
+	ALT_FUNC_WKUP      = 0x00,          ///< Wakeup (WKUP1, WKUP2 and WKUP3) Alternate Function mapping
+	ALT_FUNC_SWJ       = 0x00,          ///< SWJ (SWD and JTAG) Alternate Function mapping
+	ALT_FUNC_TRACE     = 0x00,          ///< TRACE Alternate Function mapping
+
+	ALT_FUNC_TIM2      = 0x01,          ///< TIM2 Alternate Function mapping
+
+	ALT_FUNC_TIM3      = 0x02,          ///< TIM3 Alternate Function mapping
+	ALT_FUNC_TIM4      = 0x02,          ///< TIM4 Alternate Function mapping
+	ALT_FUNC_TIM5      = 0x02,          ///< TIM5 Alternate Function mapping
+
+	ALT_FUNC_TIM9      = 0x03,          ///< TIM9 Alternate Function mapping
+	ALT_FUNC_TIM10     = 0x03,          ///< TIM10 Alternate Function mapping
+	ALT_FUNC_TIM11     = 0x03,          ///< TIM11 Alternate Function mapping
+
+	ALT_FUNC_I2C1      = 0x04,          ///< I2C1 Alternate Function mapping
+	ALT_FUNC_I2C2      = 0x04,          ///< I2C2 Alternate Function mapping
+
+	ALT_FUNC_SPI1      = 0x05,          ///< SPI1 Alternate Function mapping
+	ALT_FUNC_SPI2      = 0x05,          ///< SPI2/I2S2 Alternate Function mapping
+
+	ALT_FUNC_SPI3      = 0x06,          ///< SPI3/I2S3 Alternate Function mapping
+
+	ALT_FUNC_USART1    = 0x07,          ///< USART1 Alternate Function mapping
+	ALT_FUNC_USART2    = 0x07,          ///< USART2 Alternate Function mapping
+	ALT_FUNC_USART3    = 0x07,          ///< USART3 Alternate Function mapping
+
+	ALT_FUNC_UART4     = 0x08,          ///< UART4 Alternate Function mapping
+	ALT_FUNC_UART5     = 0x08,          ///< UART5 Alternate Function mapping
+
+	ALT_FUNC_USB       = 0x0A,          ///< USB Full speed device Alternate Function mapping
+
+	ALT_FUNC_LCD       = 0x0B,          ///< LCD Alternate Function mapping
+
+	ALT_FUNC_FSMC      = 0x0C,          ///< FSMC Alternate Function mapping
+	ALT_FUNC_SDIO      = 0x0C,          ///< SDIO Alternate Function mapping
+
+	ALT_FUNC_RI        = 0x0E,          ///< RI Alternate Function mapping
+
+	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
+};
+#else
 enum PinAltFunction
 {
 	ALT_FUNC_RTC_50Hz  = 0x00,          ///< RTC_50Hz Alternate Function mapping
@@ -239,7 +286,7 @@ enum PinAltFunction
 
 	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
 };
-
+#endif
 
 
 template<char port> struct port_gpio_t;
