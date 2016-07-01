@@ -75,8 +75,9 @@ enum Divisor
 */
 enum Remap
 {
-	REMAP_NONE = 0,      //!< no remap
-	REMAP_FULL           //!< remap
+	REMAP_NONE = 0,        //!< no remap
+	REMAP_FULL,            //!< remap
+	REMAP_2,               //!< remap #2
 };
 
 /**
@@ -170,6 +171,18 @@ template<> struct SpiPins<SPI_1, REMAP_FULL>
 	typedef Pin<'B', 3> PinSCK;
 	typedef Pin<'B', 4> PinMISO;
 	typedef Pin<'B', 5> PinMOSI;
+#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
+#elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#endif
+};
+
+template<> struct SpiPins<SPI_1, REMAP_2>
+{
+	typedef Pin<'E', 13> PinSCK;
+	typedef Pin<'E', 14> PinMISO;
+	typedef Pin<'E', 15> PinMOSI;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32L0XX)
