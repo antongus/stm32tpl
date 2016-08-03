@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32TPL_STM32_FLASH_H_INCLUDED
-#define STM32TPL_STM32_FLASH_H_INCLUDED
+#ifndef STM32TPL_STM32_FLASH_F1XX_H_INCLUDED
+#define STM32TPL_STM32_FLASH_F1XX_H_INCLUDED
 
 #include "stm32.h"
 
@@ -339,4 +339,4 @@ bool Stm32Flash<props>::ReadOutProtect()
 
 } // namespace STM32
 
-#endif // STM32TPL_STM32_FLASH_H_INCLUDED
+#endif // STM32TPL_STM32_FLASH_F1XX_H_INCLUDED
