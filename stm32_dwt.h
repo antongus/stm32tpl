@@ -49,10 +49,10 @@ struct DWT_Type
 	uint32_t COMP0;      // Comparator Register0
 	uint32_t MASK0;      // Mask Register0
 	uint32_t FUNCTION0;  // Function Register0
-	uint32_t COMP1;      // Comparator Register1
+	uint32_t COMP_1;     // Comparator Register1
 	uint32_t MASK1;      // Mask Register1
 	uint32_t FUNCTION1;  // Function Register1
-	uint32_t COMP2;      // Comparator Register2
+	uint32_t COMP_2;     // Comparator Register2
 	uint32_t MASK2;      // Mask Register2
 	uint32_t FUNCTION2;  // Function Register2
 	uint32_t COMP3;      // Comparator Register3

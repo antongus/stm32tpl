@@ -41,6 +41,7 @@
     (defined STM32L151xB) || (defined STM32L151xBA) || (defined STM32L151xC) || (defined STM32L151xCA) || (defined STM32L151xD) || (defined STM32L151xDX) || (defined STM32L151xE) || \
     (defined STM32L152xB) || (defined STM32L152xBA) || (defined STM32L152xC) || (defined STM32L152xCA) || (defined STM32L152xD) || (defined STM32L152xDX) || (defined STM32L152xE) || \
     (defined STM32L162xC) || (defined STM32L162xCA) || (defined STM32L162xD) || (defined STM32L162xDX) || (defined STM32L162xE)
+#  define STM32TPL_PIN_STM32L1XX
 #  include "pin_stm32F4xx.h"
 #else
 #  include "pin_stm32F1xx.h"
