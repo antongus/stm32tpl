@@ -174,7 +174,7 @@ private:
 	{
 		const volatile uint32_t* addr_32 = static_cast<volatile uint32_t*>(addr);
 		for (int i = 0; i < 128; i++)
-			if (*addr_32 != 0xFFFFFFFF)
+			if (*addr_32++ != 0xFFFFFFFF)
 				return false;
 		return true;
 	}
