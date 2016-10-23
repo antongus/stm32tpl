@@ -67,6 +67,9 @@ template<> struct UartDmaTraits<UART_1>
 	typedef DMA::Dma1Channel2 TxDmaStream;
 	static const RxDmaStream::ChannelSelection CH_SEL_USARTx_RX = RxDmaStream::ChannelSelection::CH_SEL_USART1_RX;
 	static const TxDmaStream::ChannelSelection CH_SEL_USARTx_TX = TxDmaStream::ChannelSelection::CH_SEL_USART1_TX;
+#elif (defined STM32TPL_STM32F0XX)
+	typedef DMA::Dma1Channel3 RxDmaStream;
+	typedef DMA::Dma1Channel2 TxDmaStream;
 #else
 	typedef DMA::Dma1Channel5 RxDmaStream;
 	typedef DMA::Dma1Channel4 TxDmaStream;
@@ -90,6 +93,9 @@ template<> struct UartDmaTraits<UART_2>
 	typedef DMA::Dma1Channel4 TxDmaStream;
 	static const RxDmaStream::ChannelSelection CH_SEL_USARTx_RX = RxDmaStream::ChannelSelection::CH_SEL_USART2_RX;
 	static const TxDmaStream::ChannelSelection CH_SEL_USARTx_TX = TxDmaStream::ChannelSelection::CH_SEL_USART2_TX;
+#elif (defined STM32TPL_STM32F0XX)
+	typedef DMA::Dma1Channel5 RxDmaStream;
+	typedef DMA::Dma1Channel4 TxDmaStream;
 #else
 	typedef DMA::Dma1Channel6 RxDmaStream;
 	typedef DMA::Dma1Channel7 TxDmaStream;
@@ -108,6 +114,9 @@ template<> struct UartDmaTraits<UART_3>
 
 	typedef DMA::Dma1Channel1 RxDmaStream;
 	typedef DMA::Dma1Channel3 TxDmaStream;
+#elif (defined STM32TPL_STM32F0XX)
+	typedef DMA::Dma1Channel7 RxDmaStream;
+	typedef DMA::Dma1Channel6 TxDmaStream;
 #else
 	enum { RX_DMA_CHANNEL = 0 };
 	enum { TX_DMA_CHANNEL = 0 };
@@ -243,18 +252,18 @@ UartDma<props>::UartDma()
 	InitRxDma();
 
 	// Enable USART IRQ
-#if (!defined STM32L0XX)
-	NVIC_SetPriority(Driver::USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	NVIC_SetPriority(Driver::USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
+#else
+	NVIC_SetPriority(Driver::USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));
 #endif
 	NVIC_EnableIRQ(Driver::USARTx_IRQn);
 
 	// Enable RX DMA IRQ
-#if (!defined STM32L0XX)
-	NVIC_SetPriority(RxDmaStream::DMAChannel_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), RXDMA_INTERRUPT_PRIOGROUP, RXDMA_INTERRUPT_SUBPRIO));
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	NVIC_SetPriority(RxDmaStream::DMAChannel_IRQn, RXDMA_INTERRUPT_SUBPRIO);
+#else
+	NVIC_SetPriority(RxDmaStream::DMAChannel_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), RXDMA_INTERRUPT_PRIOGROUP, RXDMA_INTERRUPT_SUBPRIO));
 #endif
 	NVIC_EnableIRQ(RxDmaStream::DMAChannel_IRQn);
 }
@@ -294,7 +303,7 @@ void UartDma<props>::InitRxDma()
 	RxDmaStream::FCR &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);
 	RxDmaStream::M1AR = (uint32_t)rxBuf_;
 #endif
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	RxDmaStream::PAR = (uint32_t)&USARTx->RDR;
 #else
 	RxDmaStream::PAR = (uint32_t)&USARTx->DR;
@@ -332,7 +341,7 @@ void UartDma<props>::InitTxDma()
 #if (defined F2xxF4xx)
 	TxDmaStream::FCR &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);  // turn off FIFO
 #endif
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	TxDmaStream::PAR = (uint32_t)&USARTx->TDR;
 #else
 	TxDmaStream::PAR = (uint32_t)&USARTx->DR;                // peripheral address
@@ -429,7 +438,7 @@ void UartDma<props>::UartIrqHandler()
 	// IDLE INTERRUPT
 	if (status & USART_FLAG_IDLE)  // IDLEIE is always on, so not need to check this
 	{
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 		Driver::ClearStatus(USART_FLAG_IDLE);
 #else
 		Driver::ReadData();
