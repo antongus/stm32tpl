@@ -43,6 +43,12 @@
     (defined STM32L162xC) || (defined STM32L162xCA) || (defined STM32L162xD) || (defined STM32L162xDX) || (defined STM32L162xE)
 #  define STM32TPL_PIN_STM32L1XX
 #  include "pin_stm32F4xx.h"
+#elif (defined STM32F030x6) || (defined STM32F030x8) || (defined STM32F030xC) || (defined STM32F031x6) || \
+    (defined STM32F038xx) || (defined STM32F042x6) || (defined STM32F048x6) || (defined STM32F051x8) || \
+    (defined STM32F058xx) || (defined STM32F070x6) || (defined STM32F070xB) || (defined STM32F071xB) || \
+    (defined STM32F072xB) || (defined STM32F078xx) || (defined STM32F091xC) || (defined STM32F098xx)
+#  define STM32TPL_PIN_STM32F0XX
+#  include "pin_stm32L0xx.h"
 #else
 #  include "pin_stm32F1xx.h"
 #endif

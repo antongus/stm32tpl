@@ -23,7 +23,7 @@
  *
  *
  *  file         : pin_stm32L0xx.h
- *  description  : GPIO pin manipulation class template for STM32L0xx.
+ *  description  : GPIO pin manipulation class template for STM32L0xx and STM32F0xx.
  *                 Inspired by AVR macros from Askold Volkov
  *
  * USAGE:
@@ -91,6 +91,17 @@ typedef struct
   volatile uint32_t AFR[2];   ///!< GPIO alternate function registers
 } GPIOxTypeDef;
 
+#ifdef STM32TPL_PIN_STM32F0XX
+enum
+{
+	pGPIOA_BASE      = 0x48000000UL,
+	pGPIOB_BASE      = 0x48000400UL,
+	pGPIOC_BASE      = 0x48000800UL,
+	pGPIOD_BASE      = 0x48000C00UL,
+	pGPIOE_BASE      = 0x48001000UL,
+	pGPIOF_BASE      = 0x48001400UL,
+};
+#else // by default STM32L00x assumed
 enum
 {
 	pGPIOA_BASE      = 0x50000000UL,
@@ -99,6 +110,7 @@ enum
 	pGPIOD_BASE      = 0x50000C00UL,
 	pGPIOH_BASE      = 0x50001C00UL
 };
+#endif
 
 }
 
@@ -213,10 +225,23 @@ template<> struct port_gpio_t<'D'>
 	enum { GPIOx_BASE = pGPIOD_BASE };
 };
 
+#ifdef STM32TPL_PIN_STM32F0XX
+template<> struct port_gpio_t<'E'>
+{
+	enum { GPIOx_BASE = pGPIOD_BASE };
+};
+
+template<> struct port_gpio_t<'F'>
+{
+	enum { GPIOx_BASE = pGPIOD_BASE };
+};
+
+#else
 template<> struct port_gpio_t<'H'>
 {
 	enum { GPIOx_BASE = pGPIOH_BASE };
 };
+#endif
 
 template<
 	char port,
