@@ -49,9 +49,9 @@ typedef uint32_t Baudrate;
 #	define UART_COUNT 7
 #elif (defined RCC_APB2ENR_USART6EN)
 #	define UART_COUNT 6
-#elif (defined RCC_APB1ENR_UART5EN)
+#elif (defined RCC_APB1ENR_UART5EN) || (defined RCC_APB1ENR_USART5EN)
 #	define UART_COUNT 5
-#elif (defined RCC_APB1ENR_UART4EN)
+#elif (defined RCC_APB1ENR_UART4EN) || (defined RCC_APB1ENR_USART4EN)
 #	define UART_COUNT 4
 #elif (defined RCC_APB1ENR_USART3EN)
 #	define UART_COUNT 3
@@ -89,7 +89,7 @@ enum UartNum
 /**
 *  @brief enum for remap state
 */
-enum Remap { REMAP_NONE, REMAP_FULL, REMAP_PARTIAL };
+enum Remap { REMAP_NONE, REMAP_FULL, REMAP_PARTIAL, REMAP_PARTIAL2 };
 
 namespace
 {
@@ -106,6 +106,8 @@ template<> struct UartPinSet<UART_1>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
 #elif (defined STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
 #endif
 };
 
@@ -116,6 +118,8 @@ template<> struct UartPinSet<UART_1, REMAP_FULL>
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
 #elif (defined STM32L0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
 #endif
 };
@@ -128,12 +132,14 @@ template<> struct UartPinSet<UART_2>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
 #elif (defined STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
 #endif
 };
 
 template<> struct UartPinSet<UART_2, REMAP_FULL>
 {
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	typedef Pin<'A', 14> PinTX;
 	typedef Pin<'A', 15> PinRX;
 #else
@@ -144,6 +150,8 @@ template<> struct UartPinSet<UART_2, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
 #elif (defined STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
 #endif
 };
 
@@ -154,6 +162,8 @@ template<> struct UartPinSet<UART_3>
 	typedef Pin<'B', 11> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #endif
 };
 
@@ -163,8 +173,19 @@ template<> struct UartPinSet<UART_3, REMAP_PARTIAL>
 	typedef Pin<'C', 11> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
 #endif
 };
+
+#if (defined STM32TPL_STM32F0XX)
+template<> struct UartPinSet<UART_3, REMAP_PARTIAL2>
+{
+	typedef Pin<'C', 4> PinTX;
+	typedef Pin<'C', 5> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
+};
+#endif
 
 template<> struct UartPinSet<UART_3, REMAP_FULL>
 {
@@ -172,6 +193,8 @@ template<> struct UartPinSet<UART_3, REMAP_FULL>
 	typedef Pin<'D', 9> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
 #endif
 };
 #endif
@@ -183,8 +206,20 @@ template<> struct UartPinSet<UART_4>
 	typedef Pin<'C', 11> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
+#elif (defined STM32TPL_STM32F0XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
 #endif
 };
+
+#if (defined STM32TPL_STM32F0XX)
+template<> struct UartPinSet<UART_4, REMAP_FULL>
+{
+	typedef Pin<'A', 0> PinTX;
+	typedef Pin<'A', 11> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+};
+#endif
+
 #endif
 
 #if (UART_COUNT > 4)
@@ -225,7 +260,7 @@ struct UartPins
 	using PinSet = UartPinSet<uartNum, remapped>;
 	using PinTX = typename PinSet::PinTX;
 	using PinRX = typename PinSet::PinRX;
-#if (defined F2xxF4xx) || (defined STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if (!defined STM32F1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = PinSet::ALT_FUNC_USARTx;
 #endif
 
@@ -306,7 +341,11 @@ template<> struct UartTraits<UART_2>
 #if (UART_COUNT > 2)
 template<> struct UartTraits<UART_3>
 {
+#if (defined STM32TPL_STM32F0XX)
+	static const IRQn USARTx_IRQn  = USART3_4_IRQn;
+#else
 	static const IRQn USARTx_IRQn  = USART3_IRQn;
+#endif
 	enum
 	{
 		USARTx_BASE               = USART3_BASE,
@@ -326,6 +365,22 @@ template<> struct UartTraits<UART_3>
 #endif
 
 #if (UART_COUNT > 3)
+#if (defined STM32TPL_STM32F0XX)
+template<> struct UartTraits<UART_4>
+{
+	static const IRQn USARTx_IRQn  = USART3_4_IRQn;
+	enum
+	{
+		USARTx_BASE               = USART4_BASE,
+		USARTx_REMAP              = 0,
+		USARTx_REMAP_PARTIAL      = 0,
+		BUS_FREQ                  = chip::APB1_FREQ
+	};
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART4EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART4EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART4RST; }
+};
+#else
 template<> struct UartTraits<UART_4>
 {
 	static const IRQn USARTx_IRQn  = UART4_IRQn;
@@ -340,6 +395,7 @@ template<> struct UartTraits<UART_4>
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
 	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_UART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_UART4RST; }
 };
+#endif
 #endif
 
 #if (UART_COUNT > 4)
@@ -392,7 +448,7 @@ struct DummyDE
 /**
  * USART peripheral registers for STM32L0XX chips.
  */
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 struct USARTx_TypeDef
 {
 	volatile uint32_t CR1;
@@ -510,7 +566,7 @@ public:
 	INLINE static Baudrate GetBaudrate(uint32_t busFreq = BUS_FREQ)
 		{ return busFreq / USARTx->BRR; }
 
-#if (defined STM32L0XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->ICR = flags; }
 	INLINE static uint32_t ReadData()               { return USARTx->RDR; }
