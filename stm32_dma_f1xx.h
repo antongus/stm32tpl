@@ -149,10 +149,10 @@ template<> struct DmaChannelTraits<DMA1_CH1>
 
 template<> struct DmaChannelTraits<DMA1_CH2>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel2_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel2_3_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel2_IRQn;
 #endif
 
 	enum
@@ -179,10 +179,10 @@ template<> struct DmaChannelTraits<DMA1_CH2>
 
 template<> struct DmaChannelTraits<DMA1_CH3>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel3_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel2_3_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel3_IRQn;
 #endif
 	enum
 	{
@@ -206,10 +206,10 @@ template<> struct DmaChannelTraits<DMA1_CH3>
 
 template<> struct DmaChannelTraits<DMA1_CH4>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel4_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel4_IRQn;
 #endif
 	enum
 	{
@@ -232,10 +232,10 @@ template<> struct DmaChannelTraits<DMA1_CH4>
 
 template<> struct DmaChannelTraits<DMA1_CH5>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel5_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel5_IRQn;
 #endif
 	enum
 	{
@@ -259,10 +259,10 @@ template<> struct DmaChannelTraits<DMA1_CH5>
 
 template<> struct DmaChannelTraits<DMA1_CH6>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel6_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel6_IRQn;
 #endif
 	enum
 	{
@@ -284,10 +284,10 @@ template<> struct DmaChannelTraits<DMA1_CH6>
 
 template<> struct DmaChannelTraits<DMA1_CH7>
 {
-#if (!defined STM32L0XX)
-	static const IRQn DMAChannel_IRQn = DMA1_Channel7_IRQn;
-#else
+#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
+#else
+	static const IRQn DMAChannel_IRQn = DMA1_Channel7_IRQn;
 #endif
 	enum
 	{
