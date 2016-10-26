@@ -98,6 +98,12 @@ template<> struct Stm32FlashProps<stm32F10X_HD_VL>
 	enum { PAGE_SIZE = 2048 };
 };
 
+template<> struct Stm32FlashProps<stm32F0XX>
+{
+	enum { PAGE_COUNT = 256 };
+	enum { PAGE_SIZE = 2048 };
+};
+
 
 } // anon namespace
 
@@ -140,7 +146,9 @@ public:
 
 	static bool ErasePage(uint32_t addr);
 	static bool MassErase();
+#ifndef STM32TPL_STM32F0XX
 	static bool IsReadOutProtected() { return FLASH->OBR & FLASH_OBR_RDPRT; }
+#endif
 	static bool ReadOutProtect();
 
 
