@@ -150,6 +150,7 @@ public:
 	static WriteResult Write16(uint32_t addr, uint32_t data);
 	static bool Write(uint32_t addr, const void* buf, uint32_t count);
 	static uint32_t Read(uint32_t addr) { return *(uint32_t*)addr; }
+	static void Read(uint32_t addr, void* buf, uint32_t count);
 private:
 	enum
 	{
@@ -287,6 +288,13 @@ bool Stm32Flash<props>::Write(uint32_t addr, const void* buf, uint32_t count)
 		addr += 2;
 	}
 	return true;
+}
+
+template<class props>
+void Stm32Flash<props>::Read(uint32_t addr, void* buf, uint32_t count)
+{
+	const uint8_t* src = reinterpret_cast<const uint8_t*>(addr);
+	memcpy(buf, src, count);
 }
 
 template<class props>
