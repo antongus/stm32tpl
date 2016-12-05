@@ -148,7 +148,9 @@ template<> struct TimerTraits<TIM_1>
 	static const uint32_t ccModulesCount = 4;
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
-#if !defined F2xxF4xx
+#if defined STM32TPL_STM32F0XX
+	static const IRQn TIMx_IRQn = TIM1_BRK_UP_TRG_COM_IRQn;
+#elif !defined F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM1_UP_IRQn;
 #else
 	static const IRQn TIMx_IRQn = TIM1_UP_TIM10_IRQn;

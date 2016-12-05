@@ -98,6 +98,12 @@ template<> struct Stm32FlashProps<stm32F10X_HD_VL>
 	enum { PAGE_SIZE = 2048 };
 };
 
+template<> struct Stm32FlashProps<stm32F0XX>
+{
+	enum { PAGE_COUNT = 256 };
+	enum { PAGE_SIZE = 2048 };
+};
+
 
 } // anon namespace
 
@@ -140,7 +146,9 @@ public:
 
 	static bool ErasePage(uint32_t addr);
 	static bool MassErase();
+#ifndef STM32TPL_STM32F0XX
 	static bool IsReadOutProtected() { return FLASH->OBR & FLASH_OBR_RDPRT; }
+#endif
 	static bool ReadOutProtect();
 
 
@@ -150,6 +158,7 @@ public:
 	static WriteResult Write16(uint32_t addr, uint32_t data);
 	static bool Write(uint32_t addr, const void* buf, uint32_t count);
 	static uint32_t Read(uint32_t addr) { return *(uint32_t*)addr; }
+	static void Read(uint32_t addr, void* buf, uint32_t count);
 private:
 	enum
 	{
@@ -287,6 +296,13 @@ bool Stm32Flash<props>::Write(uint32_t addr, const void* buf, uint32_t count)
 		addr += 2;
 	}
 	return true;
+}
+
+template<class props>
+void Stm32Flash<props>::Read(uint32_t addr, void* buf, uint32_t count)
+{
+	const uint8_t* src = reinterpret_cast<const uint8_t*>(addr);
+	memcpy(buf, src, count);
 }
 
 template<class props>

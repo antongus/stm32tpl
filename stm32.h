@@ -55,13 +55,19 @@
     (defined STM32L162xC) || (defined STM32L162xCA) || (defined STM32L162xD) || (defined STM32L162xDX) || (defined STM32L162xE)
 #  define STM32TPL_STM32L1XX
 #  include "CMSIS/stm32l1xx.h"
+#elif (defined STM32F030x6) || (defined STM32F030x8) || (defined STM32F030xC) || (defined STM32F031x6) || \
+    (defined STM32F038xx) || (defined STM32F042x6) || (defined STM32F048x6) || (defined STM32F051x8) || \
+    (defined STM32F058xx) || (defined STM32F070x6) || (defined STM32F070xB) || (defined STM32F071xB) || \
+    (defined STM32F072xB) || (defined STM32F078xx) || (defined STM32F091xC) || (defined STM32F098xx)
+#  define STM32TPL_STM32F0XX
+#  include "CMSIS/stm32f0xx.h"
 #else
 #  define STM32F1XX
 #  include "CMSIS/stm32f10x.h"
 #endif
 
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
 typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -80,6 +86,7 @@ enum ChipType
 	stm32F2XX,         ///< stm32F2xx chips
 	stm32F4XX,         ///< stm32F4xx chips
 	stm32L0XX,         ///< stm32L0xx chips
+	stm32F0XX,         ///< stm32F0xx chips
 	stm32L1XX,         ///< stm32L1xx chips
 };
 
@@ -98,11 +105,6 @@ struct ChipCaps<stm32F10X_LD>
 	static const uint32_t APB2_FREQ = 72000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 1 };
-	enum { USART_COUNT = 2 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -113,11 +115,6 @@ struct ChipCaps<stm32F10X_MD>
 	static const uint32_t APB2_FREQ = 72000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 2 };
-	enum { USART_COUNT = 3 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -128,11 +125,6 @@ struct ChipCaps<stm32F10X_HD>
 	static const uint32_t APB2_FREQ = 72000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = true };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 5 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -143,11 +135,6 @@ struct ChipCaps<stm32F10X_CL>
 	static const uint32_t APB2_FREQ = 72000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 5 };
-	enum { HAVE_USB = false };
-	enum { HAVE_OTG = true };
 };
 
 template<>
@@ -158,11 +145,6 @@ struct ChipCaps<stm32F10X_LD_VL>
 	static const uint32_t APB2_FREQ = 24000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 1 };
-	enum { USART_COUNT = 2 };
-	enum { HAVE_USB = false };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -173,11 +155,6 @@ struct ChipCaps<stm32F10X_MD_VL>
 	static const uint32_t APB2_FREQ = 24000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 2 };
-	enum { USART_COUNT = 3 };
-	enum { HAVE_USB = false };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -188,11 +165,6 @@ struct ChipCaps<stm32F10X_HD_VL>
 	static const uint32_t APB2_FREQ = 24000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 2 };
-	enum { USART_COUNT = 3 };
-	enum { HAVE_USB = false };
-	enum { HAVE_OTG = false };
 };
 
 template<>
@@ -203,11 +175,6 @@ struct ChipCaps<stm32F2XX>
 	static const uint32_t APB2_FREQ = 60000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
-	enum { HAVE_BUS = true };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 6 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = true };
 };
 
 template<>
@@ -218,12 +185,6 @@ struct ChipCaps<stm32F4XX>
 	static const uint32_t APB2_FREQ = 84000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
-	static const uint32_t DEVICE_ID = 0x413;
-	enum { HAVE_BUS = true };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 6 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = true };
 };
 
 template<>
@@ -234,12 +195,16 @@ struct ChipCaps<stm32L0XX>
 	static const uint32_t APB2_FREQ = 32000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
-	static const uint32_t DEVICE_ID = 0x413;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 2 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = false };
+};
+
+template<>
+struct ChipCaps<stm32F0XX>
+{
+	static const uint32_t MAX_FREQ  = 48000000;
+	static const uint32_t APB1_FREQ = 48000000;
+	static const uint32_t APB2_FREQ = 48000000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7AC;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7CC;
 };
 
 template<>
@@ -248,14 +213,8 @@ struct ChipCaps<stm32L1XX>
 	static const uint32_t MAX_FREQ  = 32000000;
 	static const uint32_t APB1_FREQ = 32000000;
 	static const uint32_t APB2_FREQ = 32000000;
-	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
-	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
-	static const uint32_t DEVICE_ID = 0x413;
-	enum { HAVE_BUS = false };
-	enum { SPI_COUNT = 3 };
-	enum { USART_COUNT = 2 };
-	enum { HAVE_USB = true };
-	enum { HAVE_OTG = false };
+	static const uint32_t DEVICE_ID_ADDR = 0x1FF800D0;  // for Cat.3, Cat.4, Cat.5 and Cat.6 devices
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FF800CC;  // for Cat.3, Cat.4, Cat.5 and Cat.6 devices
 };
 
 template<ChipType chipType>
@@ -269,11 +228,6 @@ struct ChipInfo : public ChipCaps<chipType>
 	using caps::APB2_FREQ;
 	using caps::DEVICE_ID_ADDR;
 	using caps::FLASH_SIZE_ADDR;
-	using caps::HAVE_BUS;
-	using caps::SPI_COUNT;
-	using caps::USART_COUNT;
-	using caps::HAVE_USB;
-	using caps::HAVE_OTG;
 
 	static IRegister<DEVICE_ID_ADDR + 0> serial1;
 	static IRegister<DEVICE_ID_ADDR + 4> serial2;
@@ -317,6 +271,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
 	typedef ChipInfo<stm32L1XX> chip;
+#elif (defined STM32TPL_STM32F0XX)
+	typedef ChipInfo<stm32F0XX> chip;
 #else
 #	error Chip type (STM32FXXX_XX) must be defined.
 #endif
