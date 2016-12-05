@@ -204,20 +204,20 @@ struct CanModule
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_CANEN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_CANEN; __DSB(); }
 	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_CANRST; RCC->APB1RSTR &= ~RCC_APB1RSTR_CANRST; }
-	INLINE static bool EnterInitMode()
+	INLINE static bool EnterInitMode(uint32_t timeout = 0xFFFFF)
 	{
 		CANx->MCR |= CAN_MCR_INRQ;
-		for (uint32_t i = 0; i < 0xFFFFFF; ++i)
+		for (uint32_t i = 0; i < timeout; ++i)
 		{
 			if (CANx->MSR & CAN_MSR_INAK)
 				return true;
 		}
 		return false;
 	}
-	INLINE static bool ExitInitMode()
+	INLINE static bool ExitInitMode(uint32_t timeout = 0xFFFFF)
 	{
 		CANx->MCR &= ~CAN_MCR_INRQ;
-		for (uint32_t i = 0; i < 0xFFFFFF; ++i)
+		for (uint32_t i = 0; i < timeout; ++i)
 		{
 			if (!(CANx->MSR & CAN_MSR_INAK))
 				return true;
