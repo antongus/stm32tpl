@@ -199,7 +199,6 @@ public:
 private:
 	OS::TMutex mutex_;
 	OS::TEventFlag txDmaDone_;
-	OS::TEventFlag rxDmaDone_;
 	OS::channel<char, RX_BUF_SIZE, uint32_t> rxChannel_;
 	char rxBuf_[RX_BUF_SIZE];
 
