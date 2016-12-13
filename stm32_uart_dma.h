@@ -381,7 +381,6 @@ void UartDma<props>::SendBuffer(const void* buf, size_t size)
 	TxDmaStream::Disable();
 
 	EnableRxDma();
-	DE::Off();    // Disable transmitter
 }
 
 template<typename props>
@@ -462,6 +461,8 @@ void UartDma<props>::UartIrqHandler()
 		Driver::TcInterrupt::Clear();
 		// disable it
 		Driver::TcInterrupt::Disable();
+		// Disable transmitter
+		DE::Off();
 		// and flag transmission done
 		txDmaDone_.signal_isr();
 	}
