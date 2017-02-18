@@ -407,7 +407,7 @@ public:
 		};
 
 		static IORegister<TIMx_BASE + CCRxSelector<num>::ccmrOffset, uint16_t> CCMRx;
-		static IORegister<TIMx_BASE + CCRxSelector<num>::ccrOffset, uint16_t> CCRx;
+		static IORegister<TIMx_BASE + CCRxSelector<num>::ccrOffset, CounterType> CCRx;
 
 		static void Enable()              { TIMx->CCER |= CCER_CCxE; }
 		static void Disable()             { TIMx->CCER &= ~CCER_CCxE; }
