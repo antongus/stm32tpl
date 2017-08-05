@@ -102,7 +102,7 @@ template<> struct UartPinSet<UART_1>
 {
 	typedef Pin<'A', 9> PinTX;
 	typedef Pin<'A', 10> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
@@ -115,7 +115,7 @@ template<> struct UartPinSet<UART_1, REMAP_FULL>
 {
 	typedef Pin<'B', 6> PinTX;
 	typedef Pin<'B', 7> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
@@ -128,7 +128,7 @@ template<> struct UartPinSet<UART_2>
 {
 	typedef Pin<'A', 2> PinTX;
 	typedef Pin<'A', 3> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
@@ -146,7 +146,7 @@ template<> struct UartPinSet<UART_2, REMAP_FULL>
 	typedef Pin<'D', 5> PinTX;
 	typedef Pin<'D', 6> PinRX;
 #endif
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
@@ -160,7 +160,7 @@ template<> struct UartPinSet<UART_3>
 {
 	typedef Pin<'B', 10> PinTX;
 	typedef Pin<'B', 11> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
@@ -171,7 +171,7 @@ template<> struct UartPinSet<UART_3, REMAP_PARTIAL>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
@@ -191,7 +191,7 @@ template<> struct UartPinSet<UART_3, REMAP_FULL>
 {
 	typedef Pin<'D', 8> PinTX;
 	typedef Pin<'D', 9> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
@@ -204,7 +204,7 @@ template<> struct UartPinSet<UART_4>
 {
 	typedef Pin<'C', 10> PinTX;
 	typedef Pin<'C', 11> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
@@ -227,7 +227,7 @@ template<> struct UartPinSet<UART_5>
 {
 	typedef Pin<'C', 12> PinTX;
 	typedef Pin<'D', 2> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART5;
 #endif
 };
@@ -238,7 +238,7 @@ template<> struct UartPinSet<UART_6>
 {
 	typedef Pin<'C', 6> PinTX;
 	typedef Pin<'C', 7> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
 #endif
 };
@@ -247,7 +247,7 @@ template<> struct UartPinSet<UART_6, REMAP_FULL>
 {
 	typedef Pin<'G', 14> PinTX;
 	typedef Pin<'G', 9> PinRX;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART6;
 #endif
 };

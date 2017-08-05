@@ -56,7 +56,7 @@ template<UartNum uartNum> struct UartDmaTraits;
 */
 template<> struct UartDmaTraits<UART_1>
 {
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 
@@ -82,7 +82,7 @@ template<> struct UartDmaTraits<UART_1>
 */
 template<> struct UartDmaTraits<UART_2>
 {
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 
@@ -108,7 +108,7 @@ template<> struct UartDmaTraits<UART_2>
 #if (UART_COUNT > 2)
 template<> struct UartDmaTraits<UART_3>
 {
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH4 };
 
@@ -207,7 +207,7 @@ private:
 
 	using RxDmaStream = typename DmaTraits::RxDmaStream;
 	using TxDmaStream = typename DmaTraits::TxDmaStream;
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL   = DmaTraits::RX_DMA_CHANNEL };
 	enum { TX_DMA_CHANNEL   = DmaTraits::TX_DMA_CHANNEL };
 #elif (defined STM32TPL_STM32L0XX)
@@ -298,7 +298,7 @@ void UartDma<props>::InitRxDma()
 #if (defined STM32TPL_STM32L0XX)
 	RxDmaStream::SelectChannel(CH_SEL_USARTx_RX);
 #endif
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	RxDmaStream::FCR &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);
 	RxDmaStream::M1AR = (uint32_t)rxBuf_;
 #endif
@@ -319,7 +319,7 @@ void UartDma<props>::InitRxDma()
 			| DMA::DMA_CR_CIRC              // circular mode
 			| DMA::DMA_CR_HTIE              // half-transfer interrupt enable
 			| DMA::DMA_CR_TCIE              // transfer-complete interrupt enable
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 			| RX_DMA_CHANNEL                // select channel (only for F4xx devices)
 #endif
 			;
@@ -337,7 +337,7 @@ void UartDma<props>::InitTxDma()
 #if (defined STM32TPL_STM32L0XX)
 	TxDmaStream::SelectChannel(CH_SEL_USARTx_TX);
 #endif
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	TxDmaStream::FCR &= ~(DMA_SxFCR_DMDIS | DMA_SxFCR_FTH);  // turn off FIFO
 #endif
 #if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
@@ -351,7 +351,7 @@ void UartDma<props>::InitTxDma()
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 			| TX_DMA_CHANNEL                 // select channel (only for F4xx devices)
 #endif
 			;
@@ -412,13 +412,13 @@ void UartDma<props>::DisableRxDma()
 {
 	if (RxDmaStream::Enabled())
 	{
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 		// disable DMA TC interrupt because it fired when disabling DMA channel (F4 only)
 		RxDmaStream::CR &= ~DMA::DMA_CR_TCIE;
 #endif
 		// turn off DMA stream
 		RxDmaStream::Disable();
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 		// wait for TC interrupt flag and clear it
 		while (!(RxDmaStream::ISR & RxDmaStream::DMA_MASK_TCIF)) ;
 		RxDmaStream::IFCR = RxDmaStream::DMA_MASK_TCIF;

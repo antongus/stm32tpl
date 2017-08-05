@@ -38,14 +38,14 @@
 
 #if defined STM32F2XX
 #  include "CMSIS/stm32f2xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif defined STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  define STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
 #  define STM32TPL_STM32L0XX
 #  include "CMSIS/stm32l0xx.h"

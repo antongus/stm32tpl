@@ -159,7 +159,7 @@ template<> struct SpiPins<SPI_1>
 	typedef Pin<'A', 5> PinSCK;
 	typedef Pin<'A', 6> PinMISO;
 	typedef Pin<'A', 7> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
@@ -171,7 +171,7 @@ template<> struct SpiPins<SPI_1, REMAP_FULL>
 	typedef Pin<'B', 3> PinSCK;
 	typedef Pin<'B', 4> PinMISO;
 	typedef Pin<'B', 5> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
@@ -183,7 +183,7 @@ template<> struct SpiPins<SPI_1, REMAP_2>
 	typedef Pin<'E', 13> PinSCK;
 	typedef Pin<'E', 14> PinMISO;
 	typedef Pin<'E', 15> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
@@ -196,7 +196,7 @@ template<> struct SpiPins<SPI_2>
 	typedef Pin<'B', 13> PinSCK;
 	typedef Pin<'B', 14> PinMISO;
 	typedef Pin<'B', 15> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
@@ -210,7 +210,7 @@ template<> struct SpiPins<SPI_3>
 	typedef Pin<'B', 3> PinSCK;
 	typedef Pin<'B', 4> PinMISO;
 	typedef Pin<'B', 5> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
 #endif
 };
@@ -220,7 +220,7 @@ template<> struct SpiPins<SPI_3, REMAP_FULL>
 	typedef Pin<'C', 10> PinSCK;
 	typedef Pin<'C', 11> PinMISO;
 	typedef Pin<'C', 12> PinMOSI;
-#if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
 #endif
 };
@@ -247,7 +247,7 @@ template<> struct SpiTraits<SPI_1>
 		BUS_FREQ                = chip::APB2_FREQ
 	};
 
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH3 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH3 };
 
@@ -278,7 +278,7 @@ template<> struct SpiTraits<SPI_2>
 		SPIx_REMAP              = 0,
 		BUS_FREQ                = chip::APB1_FREQ
 	};
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 
@@ -314,7 +314,7 @@ template<> struct SpiTraits<SPI_3>
 		BUS_FREQ                = chip::APB1_FREQ
 	};
 
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 	enum { TX_DMA_CHANNEL = DMA::DMA_CR_CHSEL_CH0 };
 
@@ -373,7 +373,7 @@ private:
 #endif
 	typedef typename Traits::RxDmaStream RxDmaStream;
 	typedef typename Traits::TxDmaStream TxDmaStream;
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 	enum { RX_DMA_CHANNEL   = Traits::RX_DMA_CHANNEL };
 	enum { TX_DMA_CHANNEL   = Traits::TX_DMA_CHANNEL };
 #elif (defined STM32TPL_STM32L0XX)
@@ -477,7 +477,7 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 			| RX_DMA_CHANNEL                 // select channel (only for F4xx devices)
 #endif
 			;
@@ -493,7 +493,7 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
-#if (defined F2xxF4xx)
+#if (defined STM32TPL_F2xxF4xx)
 			| TX_DMA_CHANNEL                 // select channel (only for F4xx devices)
 #endif
 			;
