@@ -131,7 +131,7 @@ RtcModule<use_lse>::RtcModule()
 	if (RTC->BKP0R != magicKey_) // RTC not initialized yet
 	{
 		BackupDomainProtection::Disable();            // disable backup domain write protection
-#if defined (STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if defined (STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX)
 		RCC->CSR |= RCC_CSR_RTCRST;                   // reset RTC and backup registers
 		RCC->CSR &= ~RCC_CSR_RTCRST;
 
