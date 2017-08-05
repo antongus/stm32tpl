@@ -368,7 +368,7 @@ private:
 	INLINE static void DisableClocks()  { Traits::DisableClocks(); }
 
 	static const IRQn SPIx_IRQn  = Traits::SPIx_IRQn;
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = pins::ALT_FUNC_SPIx;
 #endif
 	typedef typename Traits::RxDmaStream RxDmaStream;
@@ -408,7 +408,7 @@ public:
 template<typename props>
 void Spi<props>::HwInit()
 {
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 	if (REMAP)  // remap module if needed
 		AFIO->MAPR |= SPIx_REMAP;
 #endif
@@ -416,7 +416,7 @@ void Spi<props>::HwInit()
 	EnableClocks();    // enable SPI module clock
 
 	// configure pins
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 	SCK::Mode(ALT_OUTPUT);
 	MOSI::Mode(ALT_OUTPUT);
 	MISO::Mode(INPUTPULLED);
@@ -442,7 +442,7 @@ void Spi<props>::HwDeinit()
 	SPIx->CR2 = 0;             // turn off SPI
 	SPIx->CR1 = 0;
 
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 	if (REMAP)                 // turn off remap
 		AFIO->MAPR &= ~SPIx_REMAP;
 #endif

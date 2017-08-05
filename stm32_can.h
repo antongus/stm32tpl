@@ -54,7 +54,7 @@ template<> struct CanPins<REMAP_B8_B9>
 {
 	using RxPin = Pin<'B', 8>;
 	using TxPin = Pin<'B', 9>;
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_CANx = ALT_FUNC_4;
 #endif
 };
@@ -63,7 +63,7 @@ template<> struct CanPins<REMAP_A11_A12>
 {
 	using RxPin = Pin<'A', 11>;
 	using TxPin = Pin<'A', 12>;
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_CANx = ALT_FUNC_4;
 #endif
 };
@@ -72,7 +72,7 @@ template<> struct CanPins<REMAP_D0_D1>
 {
 	using RxPin = Pin<'D', 0>;
 	using TxPin = Pin<'D', 1>;
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_CANx = ALT_FUNC_0;
 #endif
 };
@@ -164,12 +164,12 @@ struct CanModule
 	using TxPin = typename Pins::TxPin;
 	using RxPin = typename Pins::RxPin;
 
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_CANx = Pins::ALT_FUNC_CANx;
 #endif
 	static void InitPins()
 	{
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 		TxPin::Mode(ALT_OUTPUT);
 		RxPin::Mode(INPUTPULLED);
 		RxPin::PullUp();
@@ -182,7 +182,7 @@ struct CanModule
 	}
 	static void DeinitPins()
 	{
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 		TxPin::Mode(ANALOGINPUT);
 		RxPin::Mode(ANALOGINPUT);
 		RxPin::PullUp();

@@ -62,7 +62,7 @@
 #  define STM32TPL_STM32F0XX
 #  include "CMSIS/stm32f0xx.h"
 #else
-#  define STM32F1XX
+#  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
 #endif
 

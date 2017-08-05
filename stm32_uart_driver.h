@@ -260,13 +260,13 @@ struct UartPins
 	using PinSet = UartPinSet<uartNum, remapped>;
 	using PinTX = typename PinSet::PinTX;
 	using PinRX = typename PinSet::PinRX;
-#if (!defined STM32F1XX)
+#if (!defined STM32TPL_STM32F1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = PinSet::ALT_FUNC_USARTx;
 #endif
 
 	static void Init()
 	{
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 		PinTX::Mode(ALT_OUTPUT);
 		PinRX::Mode(INPUTPULLED);
 		PinRX::PullUp();
@@ -280,7 +280,7 @@ struct UartPins
 
 	static void DeInit()
 	{
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 		PinTX::Mode(ANALOGINPUT);
 		PinRX::Mode(ANALOGINPUT);
 		PinRX::PullUp();

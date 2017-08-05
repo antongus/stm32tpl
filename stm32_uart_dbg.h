@@ -85,7 +85,7 @@ private:
 template<typename props>
 UartDbg<props>::UartDbg()
 {
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
 		AFIO->MAPR |= Driver::USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
