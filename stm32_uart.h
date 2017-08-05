@@ -133,7 +133,7 @@ Uart<props>::Uart()
 
 	Driver::Enable();             // Enable USART
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	NVIC_SetPriority(Driver::USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
 #else
 	NVIC_SetPriority(Driver::USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));

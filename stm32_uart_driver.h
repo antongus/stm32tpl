@@ -104,7 +104,7 @@ template<> struct UartPinSet<UART_1>
 	typedef Pin<'A', 10> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
@@ -117,7 +117,7 @@ template<> struct UartPinSet<UART_1, REMAP_FULL>
 	typedef Pin<'B', 7> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART1;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
@@ -130,7 +130,7 @@ template<> struct UartPinSet<UART_2>
 	typedef Pin<'A', 3> PinRX;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
@@ -139,7 +139,7 @@ template<> struct UartPinSet<UART_2>
 
 template<> struct UartPinSet<UART_2, REMAP_FULL>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	typedef Pin<'A', 14> PinTX;
 	typedef Pin<'A', 15> PinRX;
 #else
@@ -148,7 +148,7 @@ template<> struct UartPinSet<UART_2, REMAP_FULL>
 #endif
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART2;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
@@ -446,9 +446,9 @@ struct DummyDE
 };
 
 /**
- * USART peripheral registers for STM32L0XX chips.
+ * USART peripheral registers for STM32TPL_STM32L0XX chips.
  */
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 struct USARTx_TypeDef
 {
 	volatile uint32_t CR1;
@@ -465,7 +465,7 @@ struct USARTx_TypeDef
 };
 
 /**
- * USART status flags for STM32L0XX chips.
+ * USART status flags for STM32TPL_STM32L0XX chips.
  * Defined here because of inconsistency of this names in ST headers
  */
 enum : uint32_t
@@ -566,7 +566,7 @@ public:
 	INLINE static Baudrate GetBaudrate(uint32_t busFreq = BUS_FREQ)
 		{ return busFreq / USARTx->BRR; }
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->ICR = flags; }
 	INLINE static uint32_t ReadData()               { return USARTx->RDR; }

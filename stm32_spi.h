@@ -161,7 +161,7 @@ template<> struct SpiPins<SPI_1>
 	typedef Pin<'A', 7> PinMOSI;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
 #endif
 };
@@ -173,7 +173,7 @@ template<> struct SpiPins<SPI_1, REMAP_FULL>
 	typedef Pin<'B', 5> PinMOSI;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
 #endif
 };
@@ -185,7 +185,7 @@ template<> struct SpiPins<SPI_1, REMAP_2>
 	typedef Pin<'E', 15> PinMOSI;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
 #endif
 };
@@ -198,7 +198,7 @@ template<> struct SpiPins<SPI_2>
 	typedef Pin<'B', 15> PinMOSI;
 #if (defined F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
 #endif
 };
@@ -253,7 +253,7 @@ template<> struct SpiTraits<SPI_1>
 
 	typedef DMA::Dma2Channel2 RxDmaStream;
 	typedef DMA::Dma2Channel3 TxDmaStream;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	typedef DMA::Dma1Channel2 RxDmaStream;
 	typedef DMA::Dma1Channel3 TxDmaStream;
 	static const RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = RxDmaStream::ChannelSelection::CH_SEL_SPI1_RX;
@@ -284,7 +284,7 @@ template<> struct SpiTraits<SPI_2>
 
 	typedef DMA::Dma1Channel3 RxDmaStream;
 	typedef DMA::Dma1Channel4 TxDmaStream;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	typedef DMA::Dma1Channel4 RxDmaStream;
 	typedef DMA::Dma1Channel5 TxDmaStream;
 	static const RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = RxDmaStream::ChannelSelection::CH_SEL_SPI2_RX;
@@ -376,7 +376,7 @@ private:
 #if (defined F2xxF4xx)
 	enum { RX_DMA_CHANNEL   = Traits::RX_DMA_CHANNEL };
 	enum { TX_DMA_CHANNEL   = Traits::TX_DMA_CHANNEL };
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	static const typename RxDmaStream::ChannelSelection CH_SEL_SPIx_RX = Traits::CH_SEL_SPIx_RX;
 	static const typename TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX;
 #endif
@@ -459,7 +459,7 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 {
 	RxDmaStream::EnableClocks();
 	TxDmaStream::EnableClocks();
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	RxDmaStream::SelectChannel(CH_SEL_SPIx_RX);
 	TxDmaStream::SelectChannel(CH_SEL_SPIx_TX);
 #endif

@@ -47,7 +47,7 @@
 #  include "CMSIS/stm32f4xx.h"
 #  define F2xxF4xx
 #elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
-#  define STM32L0XX
+#  define STM32TPL_STM32L0XX
 #  include "CMSIS/stm32l0xx.h"
 #elif (defined STM32L100xB) || (defined STM32L100xBA) || (defined STM32L100xC) || \
     (defined STM32L151xB) || (defined STM32L151xBA) || (defined STM32L151xC) || (defined STM32L151xCA) || (defined STM32L151xD) || (defined STM32L151xDX) || (defined STM32L151xE) || \
@@ -67,7 +67,7 @@
 #endif
 
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
 typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -267,7 +267,7 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F2XX> chip;
 #elif (defined STM32F4XX)
 	typedef ChipInfo<stm32F4XX> chip;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
 	typedef ChipInfo<stm32L1XX> chip;
