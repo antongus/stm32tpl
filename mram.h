@@ -23,7 +23,7 @@
  *
  *
  *  file         : mram.h
- *  description  : MRAM memory class.
+ *  description  : serial MRAM memory class.
  *                 tested with:
  *                    MR25H10 (Everspin)
  *
@@ -32,78 +32,44 @@
 #ifndef STM32TPL_MRAM_H_INCLUDED
 #define STM32TPL_MRAM_H_INCLUDED
 
-#include <stdint.h>
+#include <cstdint>
 #include "pin.h"
 #include "stm32_spi.h"
 
+/**
+ * Sample MRAM properties structure
+ */
 struct SampleMramProps
 {
-	enum
-	{
-		SIZE_MB = 8,                  // 4, 8, 16 (MBytes)
-		SHARE_PORT = false,           // set to true if SPI port is shared with other devices
-		NOPS_AFTER_SELECT = 1,
-		NOPS_BEFORE_DESELECT = 4
-	};
-	using CS = Pin<'A', 1, 'L'>;
-	using WP = DummyPinOn;
+	static constexpr bool lockSpi { false };           //!< set to true if SPI port is shared
+	static constexpr unsigned nopsAfterSelect { 1 };
+	static constexpr unsigned nopsBeforeDeselect { 4 };
 };
 
 template<class props = SampleMramProps>
 class MramCore
 {
 public:
-	/**
-	 * Commands
-	 */
+	/// Command codes
 	enum class Command : uint8_t
 	{
-		/// protection commands
 		WREN            = 0x06, ///< write enable
 		WRDI            = 0x04, ///< write disable
-
-		/// status
 		RDSR            = 0x05, ///< read status register
 		WRSR            = 0x01, ///< write status register
-
-		/// read/write
 		READ            = 0x03, ///< read data
 		WRITE           = 0x02, ///< write data
-
-		/// miscellaneous.
 		SLEEP           = 0xB9, ///< enter sleep mode
 		WAKE            = 0xAB, ///< leave sleep mode
 	};
 
-	/**
-	 * Status register
-	 */
-	struct Status
+	/// Status bits
+	enum StatusBits : uint8_t
 	{
-		union
-		{
-			uint8_t byte;
-			struct
-			{
-				uint8_t		                      :1;  ///< don't care
-				uint8_t		WEL                   :1;  ///< write enable.
-				uint8_t		BP                    :2;  ///< block protect bits (non-volatile)
-				uint8_t		                      :3;  ///< don't care
-				uint8_t		SRWD                  :1;  ///< status register write disable (non-volatile)
-			}__attribute__ ((packed))
-			bits;
-		};
-		Status() {}
-		Status(const uint8_t val) { byte = val; }
-		operator uint8_t() const { return byte; }
-		Status operator=(const uint8_t val) { byte = val; return val; }
-	};
-
-	enum
-	{
-		SHARE_PORT = props::SHARE_PORT,
-		NOPS_AFTER_SELECT = props::NOPS_AFTER_SELECT,
-		NOPS_BEFORE_DESELECT = props::NOPS_BEFORE_DESELECT
+		STATUS_WEL     = 1U << 1,  ///< write enable latch (1 after WREN, 0 after WRDI)
+		STATUS_BP0     = 1U << 2,  ///< block protect bits (non-volatile)
+		STATUS_BP1     = 1U << 3,  ///< block protect bits (non-volatile)
+		STATUS_SRWD    = 1U << 7,  ///< status register write disable (non-volatile)
 	};
 
 	MramCore(STM32::SPI::SpiBase& spiref)
@@ -113,27 +79,31 @@ public:
 	void read(uint32_t addr, void *buf, size_t len);
 	void write(uint32_t addr, void const *buf, size_t len);
 	bool verify(uint32_t addr, void const *buf, size_t len);
-	Status readStatus();
+	void writeProtect(bool on);
+
+	void writeEnable()    { command(Command::WREN); deselect(); }
+	void writeDisable()   { command(Command::WRDI); deselect(); }
+	void sleep()          { command(Command::SLEEP); deselect(); }
+	void wake()           { command(Command::WAKE); deselect(); }
+
 protected:
 	virtual void doSelect() = 0;
 	virtual void doDeselect() = 0;
+	virtual void doWriteProtect(bool) = 0;
+
 private:
 	STM32::SPI::SpiBase& spi_;
 
-	struct Locker
-	{
-		Locker(STM32::SPI::SpiBase& spi) : spi_(spi) { if (SHARE_PORT) spi_.Lock(); }
-		~Locker() { if (SHARE_PORT) spi_.Unlock(); }
-	private:
-		STM32::SPI::SpiBase& spi_;
-	};
+	static constexpr bool lockSpi { props::lockSpi };
+	static constexpr unsigned nopsAfterSelect { props::nopsAfterSelect };
+	static constexpr unsigned nopsBeforeDeselect { props::nopsBeforeDeselect };
 
 	void select();
 	void deselect();
 	void command(Command cmd);
-	void commandAndAddr(Command cmd, uint32_t addr);
-	void writeEnable();
-	bool writeStatus(uint8_t value);
+	void command(Command cmd, uint32_t addr);
+	uint8_t readStatus();
+	void writeStatus(uint8_t value);
 };
 
 /**
@@ -160,21 +130,25 @@ protected:
 	using WP = typename props::WP;
 	void doSelect() override   { CS::On(); };
 	void doDeselect() override { CS::Off(); };
-	static void writeProtect(bool on)  { WP::On(on); };
+	void doWriteProtect(bool on) override { WP::On(on); };
 };
 
 template<class props>
 void MramCore<props>::select()
 {
+	if (lockSpi)
+		spi_.Lock();
 	doSelect();
-	for (int i = 0; i < NOPS_AFTER_SELECT; i++)
+	for (auto i = 0U; i < nopsAfterSelect; i++)
 		__asm__ __volatile__ ("nop");
 }
 
 template<class props>
 void MramCore<props>::deselect()
 {
-	for (int i = 0; i < NOPS_BEFORE_DESELECT; i++)
+	if (lockSpi)
+		spi_.Unlock();
+	for (auto i = 0U; i < nopsBeforeDeselect; i++)
 		__asm__ __volatile__ ("nop");
 	doDeselect();
 }
@@ -187,54 +161,42 @@ void MramCore<props>::command(Command cmd)
 }
 
 template<class props>
-void MramCore<props>::commandAndAddr(Command cmd, uint32_t addr)
+void MramCore<props>::command(Command cmd, uint32_t addr)
 {
-	select();
-	spi_.Rw(static_cast<uint8_t>(cmd));
+	command(cmd);
 	spi_.Rw(addr >> 16);
 	spi_.Rw(addr >> 8);
 	spi_.Rw(addr);
 }
 
 template<class props>
-void MramCore<props>::writeEnable()
+uint8_t MramCore<props>::readStatus()
 {
-	command(Command::WREN);
-	deselect();
-}
-
-template<class props>
-typename MramCore<props>::Status
-MramCore<props>::readStatus()
-{
-	MramCore<props>::Status res;
-	deselect();
-	select();
-	spi_.Rw(static_cast<uint8_t>(Command::RDSR));
-	res = spi_.Rw();
+	command(Command::RDSR);
+	uint8_t res = spi_.Rw();
 	deselect();
 	return res;
 }
 
 template<class props>
-bool MramCore<props>::writeStatus(uint8_t value)
+void MramCore<props>::writeStatus(uint8_t value)
 {
-	Locker locker(spi_);
-	bool ret = writeEnable();
-	if (ret)
-	{
-		command(Command::WRSR);
-		spi_.Rw(value);
-		deselect();
-	}
-	return ret;
+	writeEnable();
+	command(Command::WRSR);
+	spi_.Rw(value);
+	deselect();
+}
+
+template<class props>
+void MramCore<props>::writeProtect(bool on)
+{
+	doWriteProtect(on);
 }
 
 template<class props>
 void MramCore<props>::read(uint32_t addr, void *buf, size_t len)
 {
-	Locker locker(spi_);
-	commandAndAddr(Command::READ, addr);
+	command(Command::READ, addr);
 	spi_.Rw();  // dummy byte
 	uint8_t *p = reinterpret_cast<uint8_t *>(buf);
 	while (len--)
@@ -246,9 +208,8 @@ void MramCore<props>::read(uint32_t addr, void *buf, size_t len)
 template<class props>
 void MramCore<props>::write(uint32_t addr, void const *buf, size_t len)
 {
-	Locker locker(spi_);
 	writeEnable();
-	commandAndAddr(Command::WRITE, addr);
+	command(Command::WRITE, addr);
 
 	// send data itself
 	uint8_t const *p = reinterpret_cast<uint8_t const *>(buf);
@@ -261,9 +222,8 @@ void MramCore<props>::write(uint32_t addr, void const *buf, size_t len)
 template<class props>
 bool MramCore<props>::verify(uint32_t addr, void const *buf, size_t len)
 {
-	Locker locker(spi_);
 	bool ret = true;
-	commandAndAddr(Command::READ, addr);
+	command(Command::READ, addr);
 	spi_.Rw();  // dummy byte
 	uint8_t const *p = reinterpret_cast<uint8_t const *>(buf);
 	while (len--)
