@@ -197,7 +197,6 @@ template<class props>
 void MramCore<props>::read(uint32_t addr, void *buf, size_t len)
 {
 	command(Command::READ, addr);
-	spi_.Rw();  // dummy byte
 	uint8_t *p = reinterpret_cast<uint8_t *>(buf);
 	while (len--)
 		*p++ = spi_.Rw();
