@@ -228,12 +228,12 @@ template<> struct port_gpio_t<'D'>
 #ifdef STM32TPL_PIN_STM32F0XX
 template<> struct port_gpio_t<'E'>
 {
-	enum { GPIOx_BASE = pGPIOD_BASE };
+	enum { GPIOx_BASE = pGPIOE_BASE };
 };
 
 template<> struct port_gpio_t<'F'>
 {
-	enum { GPIOx_BASE = pGPIOD_BASE };
+	enum { GPIOx_BASE = pGPIOF_BASE };
 };
 
 #else
