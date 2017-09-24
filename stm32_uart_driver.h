@@ -255,6 +255,29 @@ template<> struct UartPinSet<UART_6, REMAP_FULL>
 #endif
 };
 #endif
+
+#if (defined RCC_APB1ENR_LPUART1EN)
+template<> struct UartPinSet<LPUART_1, REMAP_NONE>
+{
+	typedef Pin<'C', 4> PinTX;
+	typedef Pin<'C', 5> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_2;
+};
+
+template<> struct UartPinSet<LPUART_1, REMAP_PARTIAL>
+{
+	typedef Pin<'C', 10> PinTX;
+	typedef Pin<'C', 11> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+};
+
+template<> struct UartPinSet<LPUART_1, REMAP_FULL>
+{
+	typedef Pin<'B', 10> PinTX;
+	typedef Pin<'B', 11> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+};
+#endif
 }
 
 template<UartNum uartNum, Remap remapped = REMAP_NONE>
