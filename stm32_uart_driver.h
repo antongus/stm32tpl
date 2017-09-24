@@ -458,6 +458,24 @@ template<> struct UartTraits<UART_6>
 };
 #endif
 
+#if (defined RCC_APB1ENR_LPUART1EN)
+template<> struct UartTraits<LPUART_1>
+{
+	static const IRQn USARTx_IRQn  = RNG_LPUART1_IRQn;
+	enum
+	{
+		USARTx_BASE               = LPUART1_BASE,
+		USARTx_REMAP              = 0,
+		USARTx_REMAP_PARTIAL      = 0,
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 256,
+	};
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_LPUART1EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_LPUART1EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_LPUART1RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_LPUART1RST; }
+};
+#endif
+
 /**
  * Dummy DE pin.
  * Used as DE pin when no DE pin needed.
