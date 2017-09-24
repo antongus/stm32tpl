@@ -614,9 +614,9 @@ public:
 	INLINE static void Disable()         { USARTx->CR1 &= ~USART_CR1_UE; }
 
 	INLINE static void SetBaudrate(Baudrate value, uint32_t busFreq = BUS_FREQ)
-		{ USARTx->BRR = (busFreq + value/2) / value;}
+		{ USARTx->BRR = (static_cast<unsigned long long>(busFreq) * BUS_FREQ_MUL + value/2) / value;}
 	INLINE static Baudrate GetBaudrate(uint32_t busFreq = BUS_FREQ)
-		{ return busFreq / USARTx->BRR; }
+		{ return static_cast<unsigned long long>(busFreq) * BUS_FREQ_MUL / USARTx->BRR; }
 
 #if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
