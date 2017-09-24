@@ -338,7 +338,8 @@ template<> struct UartTraits<UART_1>
 		USARTx_REMAP              = 0,
 #endif
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB2_FREQ
+		BUS_FREQ                  = chip::APB2_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART1EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; __DSB(); }
@@ -357,7 +358,8 @@ template<> struct UartTraits<UART_2>
 		USARTx_REMAP              = 0,
 #endif
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB1_FREQ
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART2EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; __DSB(); }
@@ -382,7 +384,8 @@ template<> struct UartTraits<UART_3>
 		USARTx_REMAP              = 0,
 		USARTx_REMAP_PARTIAL      = 0,
 #endif
-		BUS_FREQ                  = chip::APB1_FREQ
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART3EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; __DSB(); }
@@ -400,7 +403,8 @@ template<> struct UartTraits<UART_4>
 		USARTx_BASE               = USART4_BASE,
 		USARTx_REMAP              = 0,
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB1_FREQ
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART4EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART4EN; __DSB(); }
@@ -415,7 +419,8 @@ template<> struct UartTraits<UART_4>
 		USARTx_BASE               = UART4_BASE,
 		USARTx_REMAP              = 0,
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB1_FREQ
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART4EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; __DSB(); }
@@ -433,7 +438,8 @@ template<> struct UartTraits<UART_5>
 		USARTx_BASE               = UART5_BASE,
 		USARTx_REMAP              = 0,
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB1_FREQ
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_UART5EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
@@ -450,7 +456,8 @@ template<> struct UartTraits<UART_6>
 		USARTx_BASE               = USART6_BASE,
 		USARTx_REMAP              = 0,
 		USARTx_REMAP_PARTIAL      = 0,
-		BUS_FREQ                  = chip::APB2_FREQ
+		BUS_FREQ                  = chip::APB2_FREQ,
+		BUS_FREQ_MUL              = 1,
 	};
 	INLINE static void EnableClocks()  { RCC->APB2ENR |= RCC_APB2ENR_USART6EN;  __DSB(); }
 	INLINE static void DisableClocks() { RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; __DSB(); }
@@ -596,6 +603,7 @@ public:
 	enum { USARTx_REMAP           = Traits::USARTx_REMAP };
 	enum { USARTx_REMAP_PARTIAL   = Traits::USARTx_REMAP_PARTIAL };
 	enum { BUS_FREQ               = Traits::BUS_FREQ };
+	enum { BUS_FREQ_MUL           = Traits::BUS_FREQ_MUL };
 
 	static IOStruct<USARTx_BASE, USARTx_TypeDef> USARTx;
 
