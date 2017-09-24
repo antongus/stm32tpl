@@ -64,25 +64,28 @@ typedef uint32_t Baudrate;
 */
 enum UartNum
 {
-	UART_1
-	,UART_2
+	UART_1,
+	UART_2,
 #if (UART_COUNT > 2)
-	,UART_3
+	UART_3,
 #endif
 #if (UART_COUNT > 3)
-	,UART_4
+	UART_4,
 #endif
 #if (UART_COUNT > 4)
-	,UART_5
+	UART_5,
 #endif
 #if (UART_COUNT > 5)
-	,UART_6
+	UART_6,
 #endif
 #if (UART_COUNT > 6)
-	,UART_7
+	UART_7,
 #endif
 #if (UART_COUNT > 7)
-	,UART_8
+	UART_8,
+#endif
+#if (defined RCC_APB1ENR_LPUART1EN)
+	LPUART_1,
 #endif
 };
 
