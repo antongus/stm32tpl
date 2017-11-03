@@ -263,6 +263,12 @@ struct CanModule
 		CANx->FA1R |= fMask;
 	}
 
+	INLINE static void DisableFilter(unsigned number)
+	{
+		const uint32_t fMask = 1UL << number;
+		CANx->FA1R &= ~fMask;
+	}
+
 	struct TxEmptyInterrupt
 	{
 		static void Enable()    { CANx->IER |= CAN_IER_TMEIE; }
