@@ -418,6 +418,7 @@ private:
 	static const Divisor  InitialDivisor   = props::InitialDivisor;
 	static const Cpol     InitialCPOL      = props::InitialCPOL;
 	static const Cpha     InitialCPHA      = props::InitialCPHA;
+	static const bool     UseInterrupt     = props::UseInterrupt;
 
 	typedef SpiTraits<NUMBER> Traits;
 	typedef SpiPins<NUMBER, REMAP> pins;
@@ -441,6 +442,10 @@ private:
 	static const typename TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX;
 #endif
 
+	using DmaStrategy<props>::type::waitDmaDone;
+	using DmaStrategy<props>::type::initDmaInterrupt;
+	using DmaStrategy<props>::type::deinitDmaInterrupt;
+
 	enum
 	{
 		SPIx_BASE               = Traits::SPIx_BASE,
@@ -462,7 +467,7 @@ public:
 		active ? HwInit() : HwDeinit();
 	}
 
-	void BufRw(uint8_t * rxbuf, uint8_t const* txBuf, size_t cnt) override;
+	void BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt) override;
 };
 
 template<typename props>
@@ -494,11 +499,17 @@ void Spi<props>::HwInit()
 	SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD;
 	SPIx->CR2 = 0;
 	SPIx->CR1 = SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_SPE | InitialDivisor | InitialCPHA | InitialCPOL;
+
+	initDmaInterrupt();
 }
 
 template<typename props>
 void Spi<props>::HwDeinit()
 {
+	RxDmaStream::DisableClocks();
+	TxDmaStream::DisableClocks();
+	deinitDmaInterrupt();
+
 	SPIx->CR2 = 0;             // turn off SPI
 	SPIx->CR1 = 0;
 
@@ -517,6 +528,11 @@ void Spi<props>::HwDeinit()
 template<typename props>
 void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 {
+	bool const tx = txBuf != nullptr;
+	bool const rx = rxBuf != nullptr;
+	uint8_t txDummy = 0xFF;
+	uint8_t rxDummy;
+
 	RxDmaStream::EnableClocks();
 	TxDmaStream::EnableClocks();
 #if (defined STM32TPL_STM32L0XX)
@@ -529,11 +545,11 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 
 	// RX DMA stream : from DR to rxBuf
 	RxDmaStream::PAR = (uint32_t)&SPIx->DR;
-	RxDmaStream::MAR = (uint32_t)rxBuf;
+	RxDmaStream::MAR = rx ? (uint32_t)rxBuf : (uint32_t)&rxDummy;
 	RxDmaStream::NDTR = cnt;
 	RxDmaStream::CR = 0
 			| DMA::DMA_CR_DIR_PERITH_TO_MEM  // From peripheral to memory
-			| DMA::DMA_CR_MINC               // Memory increment mode
+			| (rx ? DMA::DMA_CR_MINC : 0)    // Memory increment mode
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
@@ -543,13 +559,16 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 			;
 
 
+	// clear all interrupts on TX DMA channel
+	TxDmaStream::IFCR = TxDmaStream::DMA_MASK_ALL;	// TX DMA stream : from txBuf to DR
+
 	// TX DMA stream : from txBuf to DR
 	TxDmaStream::PAR = (uint32_t)&SPIx->DR;
-	TxDmaStream::MAR = (uint32_t)txBuf;
+	TxDmaStream::MAR = tx ? (uint32_t)txBuf : (uint32_t)&txDummy;
 	TxDmaStream::NDTR = cnt;
 	TxDmaStream::CR = 0
 			| DMA::DMA_CR_DIR_MEM_TO_PERITH  // From memory to peripheral
-			| DMA::DMA_CR_MINC               // Memory increment mode
+			| (tx ? DMA::DMA_CR_MINC : 0)    // Memory increment mode
 			| DMA::DMA_CR_MSIZE_8_BIT        // Memory size
 			| DMA::DMA_CR_PSIZE_8_BIT        // Peripheral size
 			| DMA::DMA_CR_PRIO_HIGH          // priority
@@ -565,7 +584,8 @@ void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 	// enable SPI DMA transfer
 	SPIx->CR2 |= SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN;
 
-	while (!(RxDmaStream::ISR & RxDmaStream::DMA_MASK_TCIF)) ;
+	// wait for RX DMA done
+	waitDmaDone();
 
 	// disable DMA channels
 	TxDmaStream::Disable();
