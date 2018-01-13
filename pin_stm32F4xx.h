@@ -30,11 +30,11 @@
  *
  *   I. Declare typedef for pin:
  * typedef Pin<'A', 5, 'H', PIN_SPEED_50MHZ> PA5;    // PA5, active level = high, pin speed = 50MHZ
- * typedef Pin<'A', 6> PA6;               // PA6, default active level ('H'), default pin speed (PIN_SPEED_2MHZ)
- * typedef Pin<'B', 12, 'L'> PB12;        // PB12, active level = low, default pin speed (PIN_SPEED_2MHZ)
+ * typedef Pin<'A', 6> PA6;               // PA6, default active level ('H'), default pin speed (PIN_SPEED_100MHZ)
+ * typedef Pin<'B', 12, 'L'> PB12;        // PB12, active level = low, default pin speed (PIN_SPEED_100MHZ)
  *
  *   II. Set pin mode:
- * PA5::Mode(OUTPUT);                     // configure PA5 as output (push-pull, 100MHz)
+ * PA5::Mode(OUTPUT);                     // configure PA5 as output (push-pull, 50MHz)
  * PA5::Direct(OUTPUT);                   // the same.
  * PA6::Mode(INPUT);                      // configure PA6 as input floating
  * PB12::Mode(OUTPUT);                    // configure PB12 as output
