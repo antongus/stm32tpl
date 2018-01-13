@@ -36,6 +36,8 @@
 #include "stm32_dma.h"
 #include <scmRTOS.h>
 
+#include <type_traits>
+
 namespace STM32
 {
 namespace SPI
@@ -144,7 +146,7 @@ public:
 	}
 	SpiBase& operator=(uint8_t val) { Rw(val); return *this; }
 	operator uint8_t() { return Rw(); }
-	virtual void BufRw(uint8_t * rxbuf, uint8_t const* txBuf, size_t cnt) = 0;
+	virtual void BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt) = 0;
 private:
 	OS::TMutex mutex_;
 };
@@ -330,6 +332,59 @@ template<> struct SpiTraits<SPI_3>
 };
 #endif
 
+template <class Props>
+struct DmaStrategyPolling
+{
+	using DmaStream = typename SpiTraits<Props::NUMBER>::RxDmaStream;
+	INLINE static void waitDmaDone()
+	{
+		while (!(DmaStream::ISR & DmaStream::DMA_MASK_TCIF)) ;
+	}
+	void initDmaInterrupt() {};
+	void deinitDmaInterrupt() {};
+};
+
+template <class Props>
+struct DmaStrategyInterrupt
+{
+	using DmaStream = typename SpiTraits<Props::NUMBER>::RxDmaStream;
+	INLINE void waitDmaDone()
+	{
+		flag.wait();
+	}
+	void initDmaInterrupt()
+	{
+	    // Enable RX DMA IRQ
+#if (!defined STM32TPL_STM32L0XX)
+	    NVIC_SetPriority(DmaStream::DMAChannel_IRQn,
+	    		NVIC_EncodePriority(NVIC_GetPriorityGrouping(), Props::IrqPrioGroup, Props::IrqSubPrio));
+#else
+	    NVIC_SetPriority(DmaStream::DMAChannel_IRQn, Props::IrqSubPrio);
+#endif
+	    NVIC_EnableIRQ(DmaStream::DMAChannel_IRQn);
+	};
+	INLINE void IrqHandler()
+	{
+		if (DmaStream::ISR & DmaStream::DMA_MASK_TCIF )
+		{
+			DmaStream::IFCR = DmaStream::DMA_MASK_TCIF;
+			flag.signal_isr();
+		}
+	}
+	void deinitDmaInterrupt()
+	{
+	    NVIC_DisableIRQ(DmaStream::DMAChannel_IRQn);
+	};
+private:
+	OS::TEventFlag flag;
+};
+
+// alias template for conditional select DMA handling strategy depending on properties
+template <class Props>
+using DmaStrategy = std::conditional<Props::UseInterrupt,
+		DmaStrategyInterrupt<Props>,
+		DmaStrategyPolling<Props>>;
+
 } // anonymous namespace
 
 
@@ -343,13 +398,18 @@ struct SampleSpiProps
 	static const Divisor  InitialDivisor   = SPI_DIV_32;
 	static const Cpol     InitialCPOL      = CPOL_L;
 	static const Cpha     InitialCPHA      = CPHA_1;
+	static const bool     UseInterrupt     = false;
+	static const uint32_t IrqPrioGroup     = 2;
+	static const uint32_t IrqSubPrio       = 2;
 };
 
 /**
 *  SPI template class.
 */
 template<typename props>
-class Spi: public SpiBase
+class Spi
+		: public SpiBase
+		, public DmaStrategy<props>::type
 {
 public:
 	static const SpiNum   NUMBER    = props::NUMBER;
