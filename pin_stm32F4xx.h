@@ -273,13 +273,14 @@ enum PinAltFunction
 	ALT_FUNC_TIM13     = 0x09,          ///< TIM13 Alternate Function mapping
 	ALT_FUNC_TIM14     = 0x09,          ///< TIM14 Alternate Function mapping
 
-	ALT_FUNC_OTG_FS    = 0x0A,          ///< OTG_FS Alternate Function mapping
-	ALT_FUNC_OTG_HS    = 0x0A,          ///< OTG_HS Alternate Function mapping
+	ALT_FUNC_OTG_FS    = 0x0A,          ///< OTG_FS with internal transceiver
+	ALT_FUNC_OTG_HS    = 0x0A,          ///< OTG_HS with external transceiver
+	ALT_FUNC_OTG_HS_ULPI = 0x0A,        ///< OTG_HS with external transceiver
+	ALT_FUNC_OTG_HS_FS = 0x0C,          ///< OTG HS configured in FS (with internal transceiver)
 
 	ALT_FUNC_ETH       = 0x0B,          ///< ETHERNET Alternate Function mapping
 
 	ALT_FUNC_FSMC      = 0x0C,          ///< FSMC Alternate Function mapping
-	ALT_FUNC_OTG_HS_FS = 0x0C,          ///< OTG HS configured in FS, Alternate Function mapping
 	ALT_FUNC_SDIO      = 0x0C,          ///< SDIO Alternate Function mapping
 
 	ALT_FUNC_DCMI      = 0x0D,          ///< DCMI Alternate Function mapping
