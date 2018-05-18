@@ -89,7 +89,8 @@ class RtcModule
 public:
 	RtcModule();
 	uint32_t ResetReason() { return resetFlags_; }
-	static time_t ReadTime(void);
+	static time_t ReadTime();
+	static unsigned ReadSubseconds();
 	static bool WriteTime(time_t t);
 	struct BackupDomainProtection
 	{
@@ -255,6 +256,12 @@ time_t RtcModule<use_lse>::ReadTime()
 	tim.tm_year = Bcd2Int(DR.bits.year) + 100;    // year since 1900
 
 	return TimeUtil::mktime(&tim);
+}
+
+template<bool use_lse>
+unsigned RtcModule<use_lse>::ReadSubseconds()
+{
+	return RTC->SSR;
 }
 
 template<bool use_lse>
