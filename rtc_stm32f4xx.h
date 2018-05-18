@@ -123,6 +123,11 @@ private:
 template<bool use_lse>
 RtcModule<use_lse>::RtcModule()
 {
+	static constexpr unsigned quartzFreqHz = use_lse ? 39000 : 32768;
+	static constexpr unsigned asyncPrediv = 0x7F;
+	static constexpr unsigned syncPrediv = quartzFreqHz / (asyncPrediv + 1) - 1;
+
+
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;    // enable PWR clock
 	__DSB();
 	resetFlags_ = RCC->CSR;               // remember reset reason
@@ -179,8 +184,8 @@ RtcModule<use_lse>::RtcModule()
 		RTC->CR &= ~RTC_CR_FMT;       // 24 hour format
 
 		// prescaler should be set in two separate writes
-		RTC->PRER = 0xFFUL;           // sync prescaler
-		RTC->PRER |= 0x7FUL << 16;    // async prescaler
+		RTC->PRER = syncPrediv;           // sync prescaler
+		RTC->PRER |= asyncPrediv << 16;    // async prescaler
 
 		LeaveInitMode();
 		WriteProtection::Enable();
