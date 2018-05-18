@@ -124,7 +124,7 @@ template<bool use_lse>
 RtcModule<use_lse>::RtcModule()
 {
 	static constexpr unsigned quartzFreqHz = use_lse ? 39000 : 32768;
-	static constexpr unsigned asyncPrediv = 0x7F;
+	static constexpr unsigned asyncPrediv = 0x1F;
 	static constexpr unsigned syncPrediv = quartzFreqHz / (asyncPrediv + 1) - 1;
 
 
