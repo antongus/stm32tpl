@@ -99,7 +99,7 @@ public:
 			middle_ += coeff_ * ((double)value - middle_);
             result_ += coeff_ * (middle_ - result_);
 		}
-		res_ = result_;
+		res_ = result_ + 0.5;
 		return res_;
 	}
 	T Get() { return res_; }
