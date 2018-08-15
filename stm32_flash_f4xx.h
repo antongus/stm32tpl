@@ -100,6 +100,9 @@ public:
 
 	static void Read(uint32_t addr, void* buf, uint32_t count);
 	static bool Write(uint32_t addr, const void* buf, uint32_t count);
+
+	static bool IsReadOutProtected();
+	static bool ReadOutProtect();
 private:
 	enum
 	{
@@ -111,6 +114,13 @@ private:
 	enum { MASS_ERASE_TIMEOUT = props::MASS_ERASE_TIMEOUT };
 	static const ProgramWordWidth pSize = props::pSize;
 
+	IORegister<FLASH_BASE + 0x14 + 1, uint8_t> optCrByte0;
+	IORegister<FLASH_BASE + 0x14 + 1, uint8_t> rdpByte;
+	enum {
+		rdpLevelNone = 0xAA,
+		rdpLevelOne = 1,
+		rdpLevelTwo = 0x55,
+	};
 
 	static bool Pgerr()      { return FLASH->SR & (FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR); }
 	static bool Wrprterr()   { return FLASH->SR & FLASH_SR_WRPERR; }
@@ -132,6 +142,40 @@ void FlashController<props>::Wait()
 {
 	while (Busy()) ;
 	__DSB();
+}
+
+template<class props>
+bool FlashController<props>::IsReadOutProtected()
+{
+	if (rdpByte == rdpLevelNone)
+		return false;
+	return true;
+}
+
+template<class props>
+bool FlashController<props>::ReadOutProtect()
+{
+	Unlock();
+	Options::Unlock();
+
+	FLASH->SR = 0
+			| FLASH_SR_EOP
+			| FLASH_SR_PGAERR
+			| FLASH_SR_PGPERR
+			| FLASH_SR_PGSERR
+			| FLASH_SR_WRPERR // clear errors, if any
+			;
+
+
+	if (!sReadOutProtected())
+	{
+		rdpByte = rdpLevelOne;
+		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)
+		{
+			/* Generate System Reset to load the new option byte values */
+			FLASH_OB_Launch();
+		}
+	}
 }
 
 template<class props>
