@@ -115,7 +115,7 @@ private:
 	static const ProgramWordWidth pSize = props::pSize;
 
 	IORegister<FLASH_BASE + 0x14 + 1, uint8_t> optCrByte0;
-	IORegister<FLASH_BASE + 0x14 + 1, uint8_t> rdpByte;
+	static IORegister<FLASH_BASE + 0x14 + 1, uint8_t> rdpByte;
 	enum {
 		rdpLevelNone = 0xAA,
 		rdpLevelOne = 1,
@@ -167,15 +167,16 @@ bool FlashController<props>::ReadOutProtect()
 			;
 
 
-	if (!sReadOutProtected())
+	if (!IsReadOutProtected())
 	{
 		rdpByte = rdpLevelOne;
-		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)
-		{
-			/* Generate System Reset to load the new option byte values */
-			FLASH_OB_Launch();
-		}
+//		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)
+//		{
+//			/* Generate System Reset to load the new option byte values */
+//			FLASH_OB_Launch();
+//		}
 	}
+	return true;
 }
 
 template<class props>
