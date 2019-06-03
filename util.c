@@ -172,7 +172,7 @@ void pad(char * s, int width, char padder)
 double small_atof(const char * s)
 {
 	char buf[24];
-	strncpy(buf, s, 24);
+	strncpy(buf, s, 23);
 
 	char* ptr = buf;
 	while (*ptr)
