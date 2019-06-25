@@ -69,7 +69,8 @@ public:
 	void SetTest(bool value)           { WriteAll(value ? 0x0F01 : 0x0F00); }
 	void SetDecodeMode(uint8_t flags)  { WriteAll(0x0900 | flags); }
 	void SetUsedDigits(uint8_t value)  { WriteAll(0x0B00 | value); }
-	void SetBrightness(uint8_t value)  { WriteAll(0x0A00 | (value & 0x0F)); }
+	void SetBrightness(unsigned value) { WriteAll(0x0A00 | (value & 0x0F)); }
+	void SetBrightness(unsigned chipNum, unsigned value);
 	void Cls();
 	void Test(int delay = 2);
 	void SetDigit(unsigned digit, unsigned value);
@@ -94,6 +95,17 @@ void TMax7219Chain<props>::Init()
 	SetUsedDigits(0xFF);
 	SetDecodeMode(0x00);
 	SetBrightness(DEFAULT_BRIGHTNESS);
+}
+
+template<typename props>
+void TMax7219Chain<props>::SetBrightness(unsigned chipNum, unsigned value)
+{
+	uint16_t w = 0x0A00 | (value & 0x0F);
+
+	for (auto i = 0u; i < CHIP_COUNT; ++i)
+		props::ShiftWord((CHIP_COUNT - 1) - i == chipNum ? w : 0x0000);
+
+	props::Latch();
 }
 
 /**
@@ -146,12 +158,11 @@ void TMax7219Chain<props>::Test(int delay)
 template<typename props>
 void TMax7219Chain<props>::SetDigit(unsigned digit, unsigned value)
 {
-	int targetChip = digit / DIGITS_PER_CHIP;
-	uint16_t w = ((digit % DIGITS_PER_CHIP + 1) << 8) | value;
+	auto targetChip = digit / DIGITS_PER_CHIP;
+	auto w = ((digit % DIGITS_PER_CHIP + 1) << 8) | value;
 
-
-	for (int i = CHIP_COUNT - 1; i >= 0; i--)
-		props::ShiftWord(i == targetChip ? w : 0x0000);
+	for (auto i = 0u; i < CHIP_COUNT; ++i)
+		props::ShiftWord((CHIP_COUNT - 1) - i == targetChip ? w : 0x0000);
 
 	props::Latch();
 }
