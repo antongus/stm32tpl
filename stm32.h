@@ -35,6 +35,10 @@
 #include "ioregister.h"
 #include "cortex-m3-regs.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wregister"
+#endif
 
 #if defined STM32F2XX
 #  include "CMSIS/stm32f2xx.h"
@@ -277,5 +281,8 @@ template<ChipType chipType> struct ChipInfo;
 #	error Chip type (STM32FXXX_XX) must be defined.
 #endif
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif // STM32TPL_STM32_H_INCLUDED
