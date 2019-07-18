@@ -332,6 +332,11 @@ template<> struct SpiTraits<SPI_3>
 };
 #endif
 
+} // anonymous namespace
+
+namespace detail
+{
+
 template <class Props>
 struct DmaStrategyPolling
 {
@@ -385,7 +390,7 @@ using DmaStrategy = std::conditional<Props::UseInterrupt,
 		DmaStrategyInterrupt<Props>,
 		DmaStrategyPolling<Props>>;
 
-} // anonymous namespace
+} // namespace detail
 
 
 /**
@@ -409,7 +414,7 @@ struct SampleSpiProps
 template<typename props>
 class Spi
 		: public SpiBase
-		, public DmaStrategy<props>::type
+		, public detail::DmaStrategy<props>::type
 {
 public:
 	static const SpiNum   NUMBER    = props::NUMBER;
@@ -442,9 +447,9 @@ private:
 	static const typename TxDmaStream::ChannelSelection CH_SEL_SPIx_TX = Traits::CH_SEL_SPIx_TX;
 #endif
 
-	using DmaStrategy<props>::type::waitDmaDone;
-	using DmaStrategy<props>::type::initDmaInterrupt;
-	using DmaStrategy<props>::type::deinitDmaInterrupt;
+	using detail::DmaStrategy<props>::type::waitDmaDone;
+	using detail::DmaStrategy<props>::type::initDmaInterrupt;
+	using detail::DmaStrategy<props>::type::deinitDmaInterrupt;
 
 	enum
 	{
