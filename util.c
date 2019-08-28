@@ -169,18 +169,27 @@ void pad(char * s, int width, char padder)
 	memset(s, padder, width);
 }
 
+static int isDigit(char ch)
+{
+	return (ch <= '9' && ch >= '0');
+}
+
 double small_atof(const char * s)
 {
 	char buf[24];
 	strncpy(buf, s, 23);
 
 	char* ptr = buf;
+
+	// find first digit or "-"
 	while (*ptr)
 	{
-		if (*ptr <= '9' && *ptr >= '0') break;
-		if (*ptr == '-')	break;
+		if (isDigit(*ptr) || *ptr == '-') break;
 		ptr++;
 	}
+	if (!*ptr) // no digits!
+		return 0;
+
 	int negative = *ptr == '-';
 	if (negative) ++ptr;
 
@@ -190,9 +199,11 @@ double small_atof(const char * s)
 
 	*dot++ = 0;
 	double res = small_atoll(dot);
-	int l = strlen(dot);
-	while (l--)
+	while (isDigit(*dot))
+	{
 		res /= 10;
+		++dot;
+	}
 	res += small_atoll(ptr);
 
 	return negative ? -res : res;
