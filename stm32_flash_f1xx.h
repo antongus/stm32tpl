@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -181,7 +182,7 @@ private:
 
 	static bool PageErased(uint32_t addr)
 	{
-		const volatile uint32_t* addr_32 = static_cast<volatile uint32_t*>(addr);
+		const volatile uint32_t* addr_32 = reinterpret_cast<volatile uint32_t*>(addr);
 		for (int i = 0; i < 128; i++)
 			if (*addr_32++ != 0xFFFFFFFF)
 				return false;

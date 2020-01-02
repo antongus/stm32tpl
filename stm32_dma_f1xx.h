@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -77,7 +78,7 @@ typedef struct
 {
 	volatile uint32_t ISR;    // DMA interrupt status register
 	volatile uint32_t IFCR;   // DMA interrupt flag clear register
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	uint32_t unused[40];
 	volatile uint32_t CSELR;  // DMA channel selection register (offset: 0xA8)
 #endif
@@ -134,7 +135,7 @@ template<> struct DmaChannelTraits<DMA1_CH1>
 		DMA_NO = 1,
 		CHANNEL_NO = 1
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -149,7 +150,7 @@ template<> struct DmaChannelTraits<DMA1_CH1>
 
 template<> struct DmaChannelTraits<DMA1_CH2>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel2_3_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel2_IRQn;
@@ -160,7 +161,7 @@ template<> struct DmaChannelTraits<DMA1_CH2>
 		DMA_NO = 1,
 		CHANNEL_NO = 2
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -179,7 +180,7 @@ template<> struct DmaChannelTraits<DMA1_CH2>
 
 template<> struct DmaChannelTraits<DMA1_CH3>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel2_3_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel3_IRQn;
@@ -189,7 +190,7 @@ template<> struct DmaChannelTraits<DMA1_CH3>
 		DMA_NO = 1,
 		CHANNEL_NO = 3
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -206,7 +207,7 @@ template<> struct DmaChannelTraits<DMA1_CH3>
 
 template<> struct DmaChannelTraits<DMA1_CH4>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_IRQn;
@@ -216,7 +217,7 @@ template<> struct DmaChannelTraits<DMA1_CH4>
 		DMA_NO = 1,
 		CHANNEL_NO = 4
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -232,7 +233,7 @@ template<> struct DmaChannelTraits<DMA1_CH4>
 
 template<> struct DmaChannelTraits<DMA1_CH5>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel5_IRQn;
@@ -242,7 +243,7 @@ template<> struct DmaChannelTraits<DMA1_CH5>
 		DMA_NO = 1,
 		CHANNEL_NO = 5
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -259,7 +260,7 @@ template<> struct DmaChannelTraits<DMA1_CH5>
 
 template<> struct DmaChannelTraits<DMA1_CH6>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel6_IRQn;
@@ -269,7 +270,7 @@ template<> struct DmaChannelTraits<DMA1_CH6>
 		DMA_NO = 1,
 		CHANNEL_NO = 6
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -284,7 +285,7 @@ template<> struct DmaChannelTraits<DMA1_CH6>
 
 template<> struct DmaChannelTraits<DMA1_CH7>
 {
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	static const IRQn DMAChannel_IRQn = DMA1_Channel4_5_6_7_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA1_Channel7_IRQn;
@@ -294,7 +295,7 @@ template<> struct DmaChannelTraits<DMA1_CH7>
 		DMA_NO = 1,
 		CHANNEL_NO = 7
 	};
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	enum { CSELR_SHIFT = (CHANNEL_NO-1)*4 };
 	enum class ChannelSelection : uint32_t  // possible CSELR values
 	{
@@ -452,7 +453,7 @@ public:
 		DMA_MASK_TEIF    = DmaIntMask<CHANNEL_NO>::DMA_MASK_TEIF    //<< mask for transfer error interrupt flag
 	};
 
-#if (defined STM32L0XX)
+#if (defined STM32TPL_STM32L0XX)
 	using ChannelSelection = typename ChannelTraits::ChannelSelection;
 	static void SelectChannel(ChannelSelection cs)
 	{

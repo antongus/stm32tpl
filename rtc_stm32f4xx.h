@@ -1,8 +1,8 @@
 /**
-
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2013-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,8 @@ class RtcModule
 public:
 	RtcModule();
 	uint32_t ResetReason() { return resetFlags_; }
-	static time_t ReadTime(void);
+	static time_t ReadTime();
+	static unsigned ReadSubseconds();
 	static bool WriteTime(time_t t);
 	struct BackupDomainProtection
 	{
@@ -123,6 +124,11 @@ private:
 template<bool use_lse>
 RtcModule<use_lse>::RtcModule()
 {
+	static constexpr unsigned quartzFreqHz = use_lse ? 32768 : 39000;
+	static constexpr unsigned asyncPrediv = 0x1F;
+	static constexpr unsigned syncPrediv = quartzFreqHz / (asyncPrediv + 1) - 1;
+
+
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;    // enable PWR clock
 	__DSB();
 	resetFlags_ = RCC->CSR;               // remember reset reason
@@ -131,7 +137,7 @@ RtcModule<use_lse>::RtcModule()
 	if (RTC->BKP0R != magicKey_) // RTC not initialized yet
 	{
 		BackupDomainProtection::Disable();            // disable backup domain write protection
-#if defined (STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if defined (STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX)
 		RCC->CSR |= RCC_CSR_RTCRST;                   // reset RTC and backup registers
 		RCC->CSR &= ~RCC_CSR_RTCRST;
 
@@ -179,8 +185,8 @@ RtcModule<use_lse>::RtcModule()
 		RTC->CR &= ~RTC_CR_FMT;       // 24 hour format
 
 		// prescaler should be set in two separate writes
-		RTC->PRER = 0xFFUL;           // sync prescaler
-		RTC->PRER |= 0x7FUL << 16;    // async prescaler
+		RTC->PRER = syncPrediv;           // sync prescaler
+		RTC->PRER |= asyncPrediv << 16;    // async prescaler
 
 		LeaveInitMode();
 		WriteProtection::Enable();
@@ -250,6 +256,12 @@ time_t RtcModule<use_lse>::ReadTime()
 	tim.tm_year = Bcd2Int(DR.bits.year) + 100;    // year since 1900
 
 	return TimeUtil::mktime(&tim);
+}
+
+template<bool use_lse>
+unsigned RtcModule<use_lse>::ReadSubseconds()
+{
+	return RTC->SSR;
 }
 
 template<bool use_lse>

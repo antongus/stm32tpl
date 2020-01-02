@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -137,7 +138,7 @@ struct TimeUtil
 
 };
 
-#if (defined F2xxF4xx) || (defined STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX)
 #  include "rtc_stm32f4xx.h"
 #else
 #  include "rtc_stm32f1xx.h"

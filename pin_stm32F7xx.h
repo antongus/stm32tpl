@@ -23,16 +23,16 @@
  *  THE SOFTWARE.
  *
  *
- *  file         : pin_stm32F4xx.h
- *  description  : GPIO pin manipulation class template for STM32F4xx.
+ *  file         : pin_stm32F7xx.h
+ *  description  : GPIO pin manipulation class template for STM32F7xx.
  *                 Inspired by AVR macros from Askold Volkov
  *
  * USAGE:
  *
  *   I. Declare typedef for pin:
- * typedef Pin<'A', 5, 'H', PIN_SPEED_50MHZ> PA5;    // PA5, active level = high, pin speed = 50MHZ
- * typedef Pin<'A', 6> PA6;               // PA6, default active level ('H'), default pin speed (PIN_SPEED_100MHZ)
- * typedef Pin<'B', 12, 'L'> PB12;        // PB12, active level = low, default pin speed (PIN_SPEED_100MHZ)
+ * typedef Pin<'A', 5, 'H', PIN_SPEED_HIGH> PA5;    // PA5, active level = high, pin speed = 50MHZ
+ * typedef Pin<'A', 6> PA6;               // PA6, default active level ('H'), default pin speed (PIN_SPEED_VERYHIGH)
+ * typedef Pin<'B', 12, 'L'> PB12;        // PB12, active level = low, default pin speed (PIN_SPEED_VERYHIGH)
  *
  *   II. Set pin mode:
  * PA5::Mode(OUTPUT);                     // configure PA5 as output (push-pull, 50MHz)
@@ -67,8 +67,8 @@
  * Note : using objects instead of types can (in some cases) increase memory consumption.
  */
 
-#ifndef STM32TPL_PIN_STM32F4XX_H_INCLUDED
-#define STM32TPL_PIN_STM32F4XX_H_INCLUDED
+#ifndef STM32TPL_PIN_STM32F7XX_H_INCLUDED
+#define STM32TPL_PIN_STM32F7XX_H_INCLUDED
 
 #include <cstdint>
 #include <cstddef>
@@ -105,7 +105,9 @@ enum
 	pGPIOF_BASE      = 0x40021400UL,
 	pGPIOG_BASE      = 0x40021800UL,
 	pGPIOH_BASE      = 0x40021C00UL,
-	pGPIOI_BASE      = 0x40022000UL
+	pGPIOI_BASE      = 0x40022000UL,
+	pGPIOJ_BASE      = 0x40022400UL,
+	pGPIOK_BASE      = 0x40022800UL,
 };
 
 }
@@ -165,10 +167,10 @@ enum PullUpMode
  */
 enum PinSpeed
 {
-	PIN_SPEED_2MHZ = 0,
-	PIN_SPEED_25MHZ = 1,
-	PIN_SPEED_50MHZ = 2,
-	PIN_SPEED_100MHZ = 3,
+	PIN_SPEED_LOW = 0,
+	PIN_SPEED_MEDIUM = 1,
+	PIN_SPEED_HIGH = 2,
+	PIN_SPEED_VERYHIGH = 3,
 	PIN_SPEED_MASK = 3,
 };
 
@@ -184,63 +186,17 @@ enum PinOutputType
 /**
  * PinAltFunction enumeration. Defines all possible arguments for Alternate() function.
  */
-#ifdef STM32TPL_PIN_STM32L1XX
 enum PinAltFunction
 {
-	ALT_FUNC_RTC_50Hz  = 0x00,          ///< RTC_50Hz Alternate Function mapping
-	ALT_FUNC_MCO       = 0x00,          ///< MCO (MCO1 and MCO2) Alternate Function mapping
-	ALT_FUNC_RTC_AF1   = 0x00,          ///< RTC_AF1 Alternate Function mapping
-	ALT_FUNC_WKUP      = 0x00,          ///< Wakeup (WKUP1, WKUP2 and WKUP3) Alternate Function mapping
-	ALT_FUNC_SWJ       = 0x00,          ///< SWJ (SWD and JTAG) Alternate Function mapping
-	ALT_FUNC_TRACE     = 0x00,          ///< TRACE Alternate Function mapping
+	ALT_FUNC_RTC_50Hz  = 0x00,          //!< RTC_50Hz Alternate Function mapping
+	ALT_FUNC_MCO       = 0x00,          //!< MCO (MCO1 and MCO2) Alternate Function mapping
+	ALT_FUNC_SWJ       = 0x00,          //!< SWJ (SWD and JTAG) Alternate Function mapping
+	ALT_FUNC_TRACE     = 0x00,          //!< TRACE Alternate Function mapping
 
-	ALT_FUNC_TIM2      = 0x01,          ///< TIM2 Alternate Function mapping
-
-	ALT_FUNC_TIM3      = 0x02,          ///< TIM3 Alternate Function mapping
-	ALT_FUNC_TIM4      = 0x02,          ///< TIM4 Alternate Function mapping
-	ALT_FUNC_TIM5      = 0x02,          ///< TIM5 Alternate Function mapping
-
-	ALT_FUNC_TIM9      = 0x03,          ///< TIM9 Alternate Function mapping
-	ALT_FUNC_TIM10     = 0x03,          ///< TIM10 Alternate Function mapping
-	ALT_FUNC_TIM11     = 0x03,          ///< TIM11 Alternate Function mapping
-
-	ALT_FUNC_I2C1      = 0x04,          ///< I2C1 Alternate Function mapping
-	ALT_FUNC_I2C2      = 0x04,          ///< I2C2 Alternate Function mapping
-
-	ALT_FUNC_SPI1      = 0x05,          ///< SPI1 Alternate Function mapping
-	ALT_FUNC_SPI2      = 0x05,          ///< SPI2/I2S2 Alternate Function mapping
-
-	ALT_FUNC_SPI3      = 0x06,          ///< SPI3/I2S3 Alternate Function mapping
-
-	ALT_FUNC_USART1    = 0x07,          ///< USART1 Alternate Function mapping
-	ALT_FUNC_USART2    = 0x07,          ///< USART2 Alternate Function mapping
-	ALT_FUNC_USART3    = 0x07,          ///< USART3 Alternate Function mapping
-
-	ALT_FUNC_UART4     = 0x08,          ///< UART4 Alternate Function mapping
-	ALT_FUNC_UART5     = 0x08,          ///< UART5 Alternate Function mapping
-
-	ALT_FUNC_USB       = 0x0A,          ///< USB Full speed device Alternate Function mapping
-
-	ALT_FUNC_LCD       = 0x0B,          ///< LCD Alternate Function mapping
-
-	ALT_FUNC_FSMC      = 0x0C,          ///< FSMC Alternate Function mapping
-	ALT_FUNC_SDIO      = 0x0C,          ///< SDIO Alternate Function mapping
-
-	ALT_FUNC_RI        = 0x0E,          ///< RI Alternate Function mapping
-
-	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
-};
-#else
-enum PinAltFunction
-{
-	ALT_FUNC_RTC_50Hz  = 0x00,          ///< RTC_50Hz Alternate Function mapping
-	ALT_FUNC_MCO       = 0x00,          ///< MCO (MCO1 and MCO2) Alternate Function mapping
-	ALT_FUNC_TAMPER    = 0x00,          ///< TAMPER (TAMPER_1 and TAMPER_2) Alternate Function mapping
-	ALT_FUNC_SWJ       = 0x00,          ///< SWJ (SWD and JTAG) Alternate Function mapping
-	ALT_FUNC_TRACE     = 0x00,          ///< TRACE Alternate Function mapping
-
-	ALT_FUNC_TIM1      = 0x01,          ///< TIM1 Alternate Function mapping
-	ALT_FUNC_TIM2      = 0x01,          ///< TIM2 Alternate Function mapping
+	ALT_FUNC_TIM1      = 0x01,          //!< TIM1 Alternate Function mapping
+	ALT_FUNC_TIM2      = 0x01,          //!< TIM2 Alternate Function mapping
+	ALT_FUNC_AF1_UART5 = 0x01,          //!< UART5 Alternate Function mapping
+	ALT_FUNC_AF1_I2C4  = 0x01,          ///< I2C4 Alternate Function mapping
 
 	ALT_FUNC_TIM3      = 0x02,          ///< TIM3 Alternate Function mapping
 	ALT_FUNC_TIM4      = 0x02,          ///< TIM4 Alternate Function mapping
@@ -250,10 +206,15 @@ enum PinAltFunction
 	ALT_FUNC_TIM9      = 0x03,          ///< TIM9 Alternate Function mapping
 	ALT_FUNC_TIM10     = 0x03,          ///< TIM10 Alternate Function mapping
 	ALT_FUNC_TIM11     = 0x03,          ///< TIM11 Alternate Function mapping
+	ALT_FUNC_LPTIM1    = 0x03,          ///< LPTIM1 Alternate Function mapping
+	ALT_FUNC_AF3_CEC   = 0x03,          ///< CEC Alternate Function mapping
+	ALT_FUNC_DFSDM1    = 0x03,          ///< DFSDM1 Alternate Function mapping
 
 	ALT_FUNC_I2C1      = 0x04,          ///< I2C1 Alternate Function mapping
 	ALT_FUNC_I2C2      = 0x04,          ///< I2C2 Alternate Function mapping
 	ALT_FUNC_I2C3      = 0x04,          ///< I2C3 Alternate Function mapping
+	ALT_FUNC_I2C4      = 0x04,          ///< I2C4 Alternate Function mapping
+	ALT_FUNC_AF4_CEC   = 0x04,          ///< CEC Alternate Function mapping
 
 	ALT_FUNC_SPI1      = 0x05,          ///< SPI1 Alternate Function mapping
 	ALT_FUNC_SPI2      = 0x05,          ///< SPI2/I2S2 Alternate Function mapping
@@ -266,7 +227,7 @@ enum PinAltFunction
 	ALT_FUNC_I2S3ext   = 0x07,          ///< I2S3ext Alternate Function mapping
 
 	ALT_FUNC_UART4     = 0x08,          ///< UART4 Alternate Function mapping
-	ALT_FUNC_UART5     = 0x08,          ///< UART5 Alternate Function mapping
+	ALT_FUNC_AF8_UART5 = 0x08,          ///< UART5 Alternate Function mapping
 	ALT_FUNC_USART6    = 0x08,          ///< USART6 Alternate Function mapping
 
 	ALT_FUNC_CAN1      = 0x09,          ///< CAN1 Alternate Function mapping
@@ -275,21 +236,19 @@ enum PinAltFunction
 	ALT_FUNC_TIM13     = 0x09,          ///< TIM13 Alternate Function mapping
 	ALT_FUNC_TIM14     = 0x09,          ///< TIM14 Alternate Function mapping
 
-	ALT_FUNC_OTG_FS    = 0x0A,          ///< OTG_FS with internal transceiver
-	ALT_FUNC_OTG_HS    = 0x0A,          ///< OTG_HS with external transceiver
-	ALT_FUNC_OTG_HS_ULPI = 0x0A,        ///< OTG_HS with external transceiver
-	ALT_FUNC_OTG_HS_FS = 0x0C,          ///< OTG HS configured in FS (with internal transceiver)
+	ALT_FUNC_OTG_FS    = 0x0A,          ///< OTG_FS Alternate Function mapping
+	ALT_FUNC_OTG_HS    = 0x0A,          ///< OTG_HS Alternate Function mapping
 
 	ALT_FUNC_ETH       = 0x0B,          ///< ETHERNET Alternate Function mapping
 
 	ALT_FUNC_FSMC      = 0x0C,          ///< FSMC Alternate Function mapping
+	ALT_FUNC_OTG_HS_FS = 0x0C,          ///< OTG HS configured in FS, Alternate Function mapping
 	ALT_FUNC_SDIO      = 0x0C,          ///< SDIO Alternate Function mapping
 
 	ALT_FUNC_DCMI      = 0x0D,          ///< DCMI Alternate Function mapping
 
 	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
 };
-#endif
 
 
 template<char port> struct port_gpio_t;
@@ -343,84 +302,26 @@ template<
 	char port,
 	int pin_no,
 	char activestate = 'H',
-	PinSpeed speed = PIN_SPEED_100MHZ
+	PinSpeed speed = PIN_SPEED_VERYHIGH
 	> struct Pin;
 
 template<char port, int pin_no, char activestate, PinSpeed speed>
 struct Pin
 {
-	static const uint32_t pin = pin_no;
-	static const uint32_t shift = pin;
-	static const uint32_t shift_x2 = pin * 2;
-	static const uint32_t shift_x4 = (pin % 8) * 4;
-	static const uint32_t mask = 1UL << shift;
-	static const uint32_t clearmask = 1UL << (shift + 16);
-	static const uint32_t mask_x2 = 3UL << shift_x2;
-	static const uint32_t mask_x4 = 0xFUL << shift_x4;
+	static constexpr uint32_t pin = pin_no;
+	static constexpr uint32_t shift = pin;
+	static constexpr uint32_t shift_x2 = pin * 2;
+	static constexpr uint32_t shift_x4 = (pin % 8) * 4;
+	static constexpr uint32_t mask = 1UL << shift;
+	static constexpr uint32_t clearmask = 1UL << (shift + 16);
+	static constexpr uint32_t mask_x2 = 3UL << shift_x2;
+	static constexpr uint32_t mask_x4 = 0xFUL << shift_x4;
 	enum { GPIOx_BASE = port_gpio_t<port>::GPIOx_BASE };
-
-	template <uint32_t addr> struct BitBandOneBit {
-		enum { BB_ADDR  = pPERIPH_BB_BASE + (GPIOx_BASE + addr - pPERIPH_BASE) * 32 + pin * 4 };
-	};
-
-	template <uint32_t addr> struct BitBandTwoBit {
-		enum { BB_ADDR  = pPERIPH_BB_BASE + (GPIOx_BASE + addr - pPERIPH_BASE) * 32 + pin * 2 * 4 };
-	};
-
-	enum
-	{
-		MODER_BB_ADDR    = BitBandTwoBit<offsetof(GPIOxTypeDef, MODER)>::BB_ADDR,
-		OTYPER_BB_ADDR   = BitBandOneBit<offsetof(GPIOxTypeDef, OTYPER)>::BB_ADDR,
-		OSPEEDR_BB_ADDR  = BitBandTwoBit<offsetof(GPIOxTypeDef, OSPEEDR)>::BB_ADDR,
-		PUPDR_BB_ADDR    = BitBandTwoBit<offsetof(GPIOxTypeDef, PUPDR)>::BB_ADDR,
-		IDR_BB_ADDR      = BitBandOneBit<offsetof(GPIOxTypeDef, IDR)>::BB_ADDR,
-		ODR_BB_ADDR      = BitBandOneBit<offsetof(GPIOxTypeDef, ODR)>::BB_ADDR,
-
-		GPIO_BB_ADDR     = MODER_BB_ADDR
-	};
-
-	/*
-	 * Here all bit-band addresses are joined into the one structure.
-	 * This makes GCC compiler generate much more optimal code.
-	 */
-	typedef struct
-	{
-		volatile uint32_t MODER_BIT0;   // MODER bits
-		volatile uint32_t MODER_BIT1;
-		uint32_t reserved1[(OTYPER_BB_ADDR - MODER_BB_ADDR)/4 - 2];     // skip remaining bits
-
-		volatile uint32_t OTYPER_BIT0;  // OTYPER bit 0
-		uint32_t reserved2[(OSPEEDR_BB_ADDR - OTYPER_BB_ADDR)/4 - 1];
-
-		volatile uint32_t OSPEEDR_BIT0; // OSPEEDR bits
-		volatile uint32_t OSPEEDR_BIT1;
-		uint32_t reserved3[30];
-
-		volatile uint32_t PUPDR_BIT0;   // PUPDR bits
-		volatile uint32_t PUPDR_BIT1;
-		uint32_t reserved4[(IDR_BB_ADDR - PUPDR_BB_ADDR)/4 - 2];
-
-		volatile uint32_t IDR_BIT0;     // IDR bit 0
-		uint32_t reserved5[31];
-
-		volatile uint32_t ODR_BIT0;     // ODR bit 0
-		uint32_t reserved6[31];
-
-		volatile uint32_t BSRR_SET;     // BSRR bits
-		uint32_t reserved7[15];
-		volatile uint32_t BSRR_CLR;
-	} GPIOxBbBits;
-
 
 	static struct
 	{
 		GPIOxTypeDef* operator-> () { return (GPIOxTypeDef*)GPIOx_BASE; }
 	}GPIOx;
-
-	static struct
-	{
-		GPIOxBbBits* operator-> () { return (GPIOxBbBits*)GPIO_BB_ADDR; }
-	}BBBits;
 
 	INLINE static void On(bool set_on=true)
 	{
@@ -430,7 +331,7 @@ struct Pin
 	INLINE static void Off() { On(false); }
 	INLINE static void Cpl()
 	{
-		BBBits->ODR_BIT0 = ~BBBits->ODR_BIT0;
+		On(!Signalled());
 	}
 
 	INLINE static void Mode(PinConfig cfg)
@@ -550,8 +451,7 @@ struct Pin
 	 */
 	INLINE static void SetPullUp(PullUpMode mode)
 	{
-		BBBits->PUPDR_BIT0 = mode & 1;
-		BBBits->PUPDR_BIT1 = bool(mode & 2);
+		GPIOx->PUPDR = (GPIOx->PUPDR & ~(PUPDR_MASK << shift_x2)) | (mode << shift_x2);
 	}
 	INLINE static void PullUp()   { SetPullUp(PUPDR_PULLUP); }
 	INLINE static void PullDown() { SetPullUp(PUPDR_PULLDOWN); }
@@ -559,17 +459,19 @@ struct Pin
 
 	INLINE static void SetSpeed(PinSpeed s)
 	{
-		BBBits->OSPEEDR_BIT0 = s & 1;
-		BBBits->OSPEEDR_BIT1 = bool(s & 2);
+		GPIOx->OSPEEDR = (GPIOx->OSPEEDR & ~mask_x2) | (s << shift_x2);
 	}
 
 	INLINE static void SetMode(PinMode mode)
 	{
-		BBBits->MODER_BIT0 = mode & 1;
-		BBBits->MODER_BIT1 = bool(mode & 2);
+		GPIOx->MODER = (GPIOx->MODER & ~mask_x2) | (mode << shift_x2);
 	}
 
-	INLINE static void SetOutputType(PinOutputType val) { BBBits->OTYPER_BIT0 = val; }
+	INLINE static void SetOutputType(PinOutputType val)
+	{
+		GPIOx->OTYPER = (GPIOx->OTYPER & ~mask) | (val << shift);
+	}
+
 	INLINE static void SetPushPull() { SetOutputType(PUSH_PULL); }
 	INLINE static void SetOpenDrain() { SetOutputType(OPEN_DRAIN);}
 
@@ -580,17 +482,16 @@ struct Pin
 
 	INLINE static int Latched()
 	{
-		int ret = BBBits->ODR_BIT0;
+		int ret = GPIOx->ODR & mask;
 		return activestate == 'L' ? !ret : ret;
 	}
 
 	INLINE static int Signalled()
 	{
-		int ret = BBBits->IDR_BIT0;
+		int ret = GPIOx->IDR & mask;
 		return activestate == 'L' ? !ret : ret;
 	}
 
 };
 
-
-#endif // STM32TPL_PIN_STM32F4XX_H_INCLUDED
+#endif // STM32TPL_PIN_STM32F7XX_H_INCLUDED

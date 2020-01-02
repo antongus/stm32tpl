@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2015 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -228,12 +229,12 @@ template<> struct port_gpio_t<'D'>
 #ifdef STM32TPL_PIN_STM32F0XX
 template<> struct port_gpio_t<'E'>
 {
-	enum { GPIOx_BASE = pGPIOD_BASE };
+	enum { GPIOx_BASE = pGPIOE_BASE };
 };
 
 template<> struct port_gpio_t<'F'>
 {
-	enum { GPIOx_BASE = pGPIOD_BASE };
+	enum { GPIOx_BASE = pGPIOF_BASE };
 };
 
 #else

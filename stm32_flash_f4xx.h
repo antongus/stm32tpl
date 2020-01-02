@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -100,6 +101,9 @@ public:
 
 	static void Read(uint32_t addr, void* buf, uint32_t count);
 	static bool Write(uint32_t addr, const void* buf, uint32_t count);
+
+	static bool IsReadOutProtected();
+	static bool ReadOutProtect();
 private:
 	enum
 	{
@@ -111,6 +115,13 @@ private:
 	enum { MASS_ERASE_TIMEOUT = props::MASS_ERASE_TIMEOUT };
 	static const ProgramWordWidth pSize = props::pSize;
 
+	IORegister<FLASH_BASE + 0x14 + 1, uint8_t> optCrByte0;
+	static IORegister<FLASH_BASE + 0x14 + 1, uint8_t> rdpByte;
+	enum {
+		rdpLevelNone = 0xAA,
+		rdpLevelOne = 1,
+		rdpLevelTwo = 0x55,
+	};
 
 	static bool Pgerr()      { return FLASH->SR & (FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR); }
 	static bool Wrprterr()   { return FLASH->SR & FLASH_SR_WRPERR; }
@@ -132,6 +143,41 @@ void FlashController<props>::Wait()
 {
 	while (Busy()) ;
 	__DSB();
+}
+
+template<class props>
+bool FlashController<props>::IsReadOutProtected()
+{
+	if (rdpByte == rdpLevelNone)
+		return false;
+	return true;
+}
+
+template<class props>
+bool FlashController<props>::ReadOutProtect()
+{
+	Unlock();
+	Options::Unlock();
+
+	FLASH->SR = 0
+			| FLASH_SR_EOP
+			| FLASH_SR_PGAERR
+			| FLASH_SR_PGPERR
+			| FLASH_SR_PGSERR
+			| FLASH_SR_WRPERR // clear errors, if any
+			;
+
+
+	if (!IsReadOutProtected())
+	{
+		rdpByte = rdpLevelOne;
+//		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)
+//		{
+//			/* Generate System Reset to load the new option byte values */
+//			FLASH_OB_Launch();
+//		}
+	}
+	return true;
 }
 
 template<class props>

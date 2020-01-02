@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2010-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -109,7 +110,7 @@ private:
 template<class props>
 Uart<props>::Uart()
 {
-#if (defined STM32F1XX)
+#if (defined STM32TPL_STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
 		AFIO->MAPR |= Driver::USARTx_REMAP;
 	else if (remap == REMAP_PARTIAL)
@@ -133,7 +134,7 @@ Uart<props>::Uart()
 
 	Driver::Enable();             // Enable USART
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
 	NVIC_SetPriority(Driver::USARTx_IRQn, UART_INTERRUPT_SUBPRIO);
 #else
 	NVIC_SetPriority(Driver::USARTx_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), UART_INTERRUPT_PRIOGROUP, UART_INTERRUPT_SUBPRIO));

@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 20011-2015 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -99,7 +100,7 @@ public:
 			middle_ += coeff_ * ((double)value - middle_);
             result_ += coeff_ * (middle_ - result_);
 		}
-		res_ = result_;
+		res_ = result_ + 0.5;
 		return res_;
 	}
 	T Get() { return res_; }
@@ -154,6 +155,74 @@ T MedianFilter<T, size>::Put(T value)
 	return result_;
 }
 
+/**
+ * Median filter with adjustable window size (in range 3...size)
+ */
+template<typename T, size_t maximumSize>
+class AdjustableMedianFilter
+{
+public:
+	AdjustableMedianFilter() {}
+
+	T Put(T value);
+	T Get() { return result; }
+	operator T() { return Get(); }
+	void Reset() { first = true; }
+	size_t GetWindowSize() const { return windowSize; }
+	void SetWindowSize(size_t newSize) {
+		if (newSize < minSize)
+			newSize = minSize;
+		else if (newSize > maxSize)
+			newSize = maxSize;
+		if (newSize != windowSize)
+		{
+			windowSize = newSize;
+			Reset();
+		}
+	}
+
+	static constexpr size_t minSize { 3 };
+	static constexpr size_t maxSize { maximumSize };
+
+	static_assert(minSize <= maxSize, "size should be >= 3");
+private:
+    using BufType = std::array<T, maxSize>;
+    bool first { true };
+    size_t windowSize { maxSize };
+	T result;
+	BufType history;
+	BufType sortBuffer;
+	size_t pos { 0 };
+};
+
+template<typename T, size_t size>
+T AdjustableMedianFilter<T, size>::Put(T value)
+{
+	if (first)  // first measure
+	{
+		std::fill_n(std::begin(history), windowSize, value);
+		first = false;
+		result = value;
+		pos = 0;
+	}
+	else
+	{
+		if (++pos >= windowSize)
+			pos = 0;
+		history[pos] = value;
+		auto const head = std::begin(history);
+		std::rotate_copy(head, head + 1, head + windowSize, std::begin(sortBuffer));
+
+		auto const halfWindow = windowSize / 2;
+		std::nth_element(std::begin(sortBuffer), std::begin(sortBuffer) + halfWindow, std::begin(sortBuffer) + windowSize);
+		result = sortBuffer[halfWindow];
+	}
+	return result;
+}
+
+/**
+ * Dummy filter. Does nothing.
+ */
 template<typename T>
 class DummyFilter
 {
@@ -162,7 +231,7 @@ public:
 	DummyFilter(double) {}
 	T Put(T value) { return value; };
 	void Reset() { }
-private:
+
 };
 
 

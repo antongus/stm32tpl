@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2010-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -169,18 +170,27 @@ void pad(char * s, int width, char padder)
 	memset(s, padder, width);
 }
 
+static int isDigit(char ch)
+{
+	return (ch <= '9' && ch >= '0');
+}
+
 double small_atof(const char * s)
 {
 	char buf[24];
-	strncpy(buf, s, 24);
+	strncpy(buf, s, 23);
 
 	char* ptr = buf;
+
+	// find first digit or "-"
 	while (*ptr)
 	{
-		if (*ptr <= '9' && *ptr >= '0') break;
-		if (*ptr == '-')	break;
+		if (isDigit(*ptr) || *ptr == '-') break;
 		ptr++;
 	}
+	if (!*ptr) // no digits!
+		return 0;
+
 	int negative = *ptr == '-';
 	if (negative) ++ptr;
 
@@ -190,9 +200,11 @@ double small_atof(const char * s)
 
 	*dot++ = 0;
 	double res = small_atoll(dot);
-	int l = strlen(dot);
-	while (l--)
+	while (isDigit(*dot))
+	{
 		res /= 10;
+		++dot;
+	}
 	res += small_atoll(ptr);
 
 	return negative ? -res : res;

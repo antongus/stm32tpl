@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2015 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +57,7 @@ public:
 		__asm__ volatile ("nop");
 	}
 	static void Add(uint32_t w) { CRC->DR = w; }
-#if defined STM32TPL_STM32F0XX
+#if defined STM32TPL_STM32F0XX || defined STM32TPL_STM32L0XX
 	static void AddByte(uint8_t byte)
 	{
 		// access to DR by byte
@@ -64,7 +65,7 @@ public:
 	}
 #endif
 
-#if defined STM32TPL_STM32F0XX
+#if defined STM32TPL_STM32F0XX || defined STM32TPL_STM32L0XX
 	// STM32F0xx CRC module supports byte-wide operations
 	// and hardware bit order reverse on input and output.
 	// Therefore it is possible generate standard Ethernet

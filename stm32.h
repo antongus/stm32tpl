@@ -1,7 +1,8 @@
 /**
  *  stm32tpl --  STM32 C++ Template Peripheral Library
+ *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2010-2014 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,19 +36,23 @@
 #include "ioregister.h"
 #include "cortex-m3-regs.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wregister"
+#endif
 
 #if defined STM32F2XX
 #  include "CMSIS/stm32f2xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif defined STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  define STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
-#  define F2xxF4xx
+#  define STM32TPL_F2xxF4xx
 #elif (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || (defined STM32L061xx) || (defined STM32L062xx) || (defined STM32L063xx)
-#  define STM32L0XX
+#  define STM32TPL_STM32L0XX
 #  include "CMSIS/stm32l0xx.h"
 #elif (defined STM32L100xB) || (defined STM32L100xBA) || (defined STM32L100xC) || \
     (defined STM32L151xB) || (defined STM32L151xBA) || (defined STM32L151xC) || (defined STM32L151xCA) || (defined STM32L151xD) || (defined STM32L151xDX) || (defined STM32L151xE) || \
@@ -62,12 +67,12 @@
 #  define STM32TPL_STM32F0XX
 #  include "CMSIS/stm32f0xx.h"
 #else
-#  define STM32F1XX
+#  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
 #endif
 
 
-#if (defined STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
 typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -267,7 +272,7 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F2XX> chip;
 #elif (defined STM32F4XX)
 	typedef ChipInfo<stm32F4XX> chip;
-#elif (defined STM32L0XX)
+#elif (defined STM32TPL_STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
 	typedef ChipInfo<stm32L1XX> chip;
@@ -277,5 +282,8 @@ template<ChipType chipType> struct ChipInfo;
 #	error Chip type (STM32FXXX_XX) must be defined.
 #endif
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif // STM32TPL_STM32_H_INCLUDED
