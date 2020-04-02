@@ -92,11 +92,27 @@ typedef struct
   volatile uint32_t AFR[2];   ///!< GPIO alternate function registers
 } GPIOxTypeDef;
 
+#if (defined STM32TPL_PIN_STM32H7XXX)
+
 enum
 {
-	pPERIPH_BASE     = 0x40000000UL,
-	pPERIPH_BB_BASE  = 0x42000000UL,
+	pGPIOA_BASE      = 0x58020000UL,
+	pGPIOB_BASE      = 0x58020400UL,
+	pGPIOC_BASE      = 0x58020800UL,
+	pGPIOD_BASE      = 0x58020C00UL,
+	pGPIOE_BASE      = 0x58021000UL,
+	pGPIOF_BASE      = 0x58021400UL,
+	pGPIOG_BASE      = 0x58021800UL,
+	pGPIOH_BASE      = 0x58021C00UL,
+	pGPIOI_BASE      = 0x58022000UL,
+	pGPIOJ_BASE      = 0x58022400UL,
+	pGPIOK_BASE      = 0x58022800UL,
+};
 
+#else
+
+enum
+{
 	pGPIOA_BASE      = 0x40020000UL,
 	pGPIOB_BASE      = 0x40020400UL,
 	pGPIOC_BASE      = 0x40020800UL,
@@ -109,6 +125,8 @@ enum
 	pGPIOJ_BASE      = 0x40022400UL,
 	pGPIOK_BASE      = 0x40022800UL,
 };
+
+#endif
 
 }
 

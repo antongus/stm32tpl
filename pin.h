@@ -54,6 +54,12 @@
 || (defined STM32F769xx) || (defined STM32F777xx) || (defined STM32F779xx) || (defined STM32F722xx) || (defined STM32F723xx) \
 || (defined STM32F732xx) || (defined STM32F733xx)
 #  include "pin_stm32F7xx.h"
+#elif (defined STM32H742XX) || (defined STM32H743XX) || (defined STM32H745XX) || (defined STM32H747XX)
+|| (defined STM32H750XX) || (defined STM32H753XX) || (defined STM32H755XX) || (defined STM32H757XX)
+|| (defined STM32H7A3XX) || (defined STM32H7A3XXQ) || (defined STM32H7B0XX) || (defined STM32H7B0XXQ)
+|| (defined STM32H7B3XX) || (defined STM32H7B3XXQ)
+#  define STM32TPL_PIN_STM32H7XXX
+#  include "pin_stm32F7xx.h"
 #else
 #  include "pin_stm32F1xx.h"
 #endif
