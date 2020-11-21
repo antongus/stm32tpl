@@ -66,13 +66,18 @@
     (defined STM32F072xB) || (defined STM32F078xx) || (defined STM32F091xC) || (defined STM32F098xx)
 #  define STM32TPL_STM32F0XX
 #  include "CMSIS/stm32f0xx.h"
+#elif (defined STM32F756xx) || (defined STM32F746xx) || (defined STM32F745xx) || (defined STM32F765xx) || (defined STM32F767xx) \
+|| (defined STM32F769xx) || (defined STM32F777xx) || (defined STM32F779xx) || (defined STM32F722xx) || (defined STM32F723xx) \
+|| (defined STM32F732xx) || (defined STM32F733xx)
+#  define STM32TPL_STM32F7XX
+#  include "CMSIS/stm32f7xx.h"
 #else
 #  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
 #endif
 
 
-#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F7XX)
 typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -90,6 +95,7 @@ enum ChipType
 	stm32F10X_HD_VL,   ///< High density Value Line devices
 	stm32F2XX,         ///< stm32F2xx chips
 	stm32F4XX,         ///< stm32F4xx chips
+	stm32F7XX,         ///< stm32F7xx chips
 	stm32L0XX,         ///< stm32L0xx chips
 	stm32F0XX,         ///< stm32F0xx chips
 	stm32L1XX,         ///< stm32L1xx chips
@@ -193,6 +199,16 @@ struct ChipCaps<stm32F4XX>
 };
 
 template<>
+struct ChipCaps<stm32F7XX>
+{
+	static const uint32_t MAX_FREQ = 216000000;
+	static const uint32_t APB1_FREQ = MAX_FREQ/4;
+	static const uint32_t APB2_FREQ = MAX_FREQ/2;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
+};
+
+template<>
 struct ChipCaps<stm32L0XX>
 {
 	static const uint32_t MAX_FREQ  = 32000000;
@@ -272,6 +288,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F2XX> chip;
 #elif (defined STM32F4XX)
 	typedef ChipInfo<stm32F4XX> chip;
+#elif (defined STM32TPL_STM32F7XX)
+	typedef ChipInfo<stm32F7XX> chip;
 #elif (defined STM32TPL_STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
