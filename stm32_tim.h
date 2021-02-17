@@ -259,6 +259,13 @@ template<> struct TimerTraits<TIM_8>
 	static const uint32_t ccModulesCount = 4;
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
+#if !defined STM32TPL_F2xxF4xx
+	static const IRQn TIMx_IRQn = TIM8_UP_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM8_UP_TIM13_IRQn;
+#endif
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM8EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM8EN; }
 };
 #endif
 
