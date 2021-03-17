@@ -100,7 +100,11 @@ public:
 	int len() const { return m_len; }
 	bool isValid() const
 	{
-		return m_len >= 2 && STM32TPL::Crc16Ccitt::Calc(m_data, m_len) == 0;
+		if (m_len < 2)
+			return false;
+		STM32TPL::Crc16Ccitt crc;
+		crc.Add(m_data, m_len);
+		return crc.Valid();
 	}
 	uint8_t* data() { return m_data; }
 
