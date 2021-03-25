@@ -44,6 +44,91 @@
 #include "crc16_ccitt.h"
 #include "textbuf.h"
 
+struct HexCodec
+{
+	/**
+	 * Encode buffer to hex-string wit CRC16.
+	 * @param data - pointer to data to encode
+	 * @param dataSize - data length
+	 * @param hex - pointer to buffer for encoded string. should be at least dataSize + 9 bytes!
+	 */
+	__attribute__((__noinline__))
+	static void encode(uint8_t* data, size_t dataSize, uint8_t* hex)
+	{
+		STM32TPL::Crc16Ccitt crc {0xFFFF};
+		auto putNibble = [&](char c){
+			*hex++ = hexChar(c);
+			*hex = 0;  // always zero-terminate output
+		};
+		for (size_t i = 0u; i < dataSize; ++i)
+		{
+			auto b = data[i];
+			crc.Add(b);
+			putNibble(b >> 4);
+			putNibble(b);
+		}
+		auto w = crc.Result();
+		putNibble(w >> 12);
+		putNibble(w >> 8);
+		putNibble(w >> 4);
+		putNibble(w);
+	}
+
+	/**
+	 * decode Hex-encoded string with CRC16
+	 * @param hex - pointer to hex-encoded string
+	 * @param buf - pointer to buffer for decoded data
+	 * @param bufSize size of buffer
+	 * @param decodedLength - length of decoded data
+	 * @return true if decoded without errors and CRC is OK
+	 */
+	__attribute__((__noinline__))
+	static bool decode(char const* hex, uint8_t* buf, size_t bufSize, size_t& decodedLength)
+	{
+		decodedLength = 0;
+		for (size_t pos = 0u; decodedLength < bufSize; pos += 2)
+		{
+			if (!isHexChar(hex[pos]) || !isHexChar(hex[pos+1]))
+				break;
+			buf[decodedLength++] = decodeByte(hex, pos);
+		}
+		if (decodedLength < 2) // no CRC
+			return false;
+		return isCrcOk(buf, decodedLength);
+	}
+
+	static bool isHexChar(char ch) { return ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')); }
+
+	static char hexChar(unsigned ch)
+	{
+		static constexpr char hexChars[] = "0123456789ABCDEF";
+		return hexChars[ch & 0x0F];
+	}
+
+	static bool isCrcOk(const uint8_t* buf, size_t len) __attribute__((__noinline__))
+	{
+		STM32TPL::Crc16Ccitt crc;
+		crc.Add(buf, len);
+		return crc.Valid();
+	}
+
+	static uint8_t decodeByte(char const* buf, size_t pos)
+	{
+		uint8_t bhi = buf[pos];
+		uint8_t blo = buf[pos+1];
+
+		if (bhi > '9')
+			bhi += 9;
+
+		bhi <<= 4;
+
+		if (blo > '9')
+			blo += 9;
+
+		return bhi | (blo & 0x0F);
+	}
+};
+
 template<size_t bufSize>
 class HexEncoder : public TextBuffer<bufSize>
 {
@@ -79,15 +164,14 @@ private:
 	STM32TPL::Crc16Ccitt m_crc {0xFFFF};
 };
 
-
+/// hex decoder with buffer
 template<size_t maxSize>
-class HexDecoder
+class HexDecoder : public HexCodec
 {
 public:
 	HexDecoder() = default;
 
-	__attribute__((__noinline__))
-	void decode(char const* buf)
+	void decode(char const* buf) __attribute__((__noinline__))
 	{
 		m_len = 0;
 		for (size_t pos = 0; m_len < maxSize; pos += 2)
@@ -102,31 +186,12 @@ public:
 	{
 		if (m_len < 2)
 			return false;
-		STM32TPL::Crc16Ccitt crc;
-		crc.Add(m_data, m_len);
-		return crc.Valid();
+		return isCrcOk(m_data, m_len);
 	}
 	uint8_t* data() { return m_data; }
 
 private:
 	size_t m_len {0};
 	uint8_t m_data[maxSize];
-
-	static bool isHexChar(char ch) { return ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')); }
-	static uint8_t decodeByte(char const* buf, size_t pos)
-	{
-		uint8_t bhi = buf[pos];
-		uint8_t blo = buf[pos+1];
-
-		if (bhi > '9')
-			bhi += 9;
-
-		bhi <<= 4;
-
-		if (blo > '9')
-			blo += 9;
-
-		return bhi | (blo & 0x0F);
-	}
 };
 
