@@ -42,7 +42,6 @@
 
 #include <cstdint>
 #include "crc16_ccitt.h"
-#include "textbuf.h"
 
 struct HexCodec
 {
@@ -85,16 +84,25 @@ struct HexCodec
 	__attribute__((__noinline__))
 	static bool decode(char const* hex, uint8_t* buf, size_t bufSize, size_t& decodedLength)
 	{
+		STM32TPL::Crc16Ccitt crc {0xFFFF};
 		decodedLength = 0;
-		for (size_t pos = 0u; decodedLength < bufSize; pos += 2)
+		size_t pos = 0u;
+		for (; decodedLength < bufSize; ++decodedLength, pos += 2)
 		{
 			if (!isHexChar(hex[pos]) || !isHexChar(hex[pos+1]))
-				break;
-			buf[decodedLength++] = decodeByte(hex, pos);
+				return false;
+			auto b = decodeByte(hex, pos);
+			crc.Add(b);
+			buf[decodedLength] = b;
 		}
-		if (decodedLength < 2) // no CRC
+		if (!isHexChar(hex[pos]) || !isHexChar(hex[pos+1]))
 			return false;
-		return isCrcOk(buf, decodedLength);
+		crc.Add(decodeByte(hex, pos));
+		pos += 2;
+		if (!isHexChar(hex[pos]) || !isHexChar(hex[pos+1]))
+			return false;
+		crc.Add(decodeByte(hex, pos));
+		return crc.Valid();
 	}
 
 	static bool isHexChar(char ch) { return ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')); }
@@ -107,7 +115,7 @@ struct HexCodec
 
 	static bool isCrcOk(const uint8_t* buf, size_t len) __attribute__((__noinline__))
 	{
-		STM32TPL::Crc16Ccitt crc;
+		STM32TPL::Crc16Ccitt crc {0xFFFF};
 		crc.Add(buf, len);
 		return crc.Valid();
 	}
@@ -130,38 +138,51 @@ struct HexCodec
 };
 
 template<size_t bufSize>
-class HexEncoder : public TextBuffer<bufSize>
+class HexEncoder: public HexCodec
 {
 public:
 	HexEncoder() = default;
 
+	static_assert (bufSize > 0, "buf size should be > 0");
+
 	uint16_t crc() const { return m_crc.Result(); }
-	__attribute__((__noinline__))
-	void putByte(uint8_t b)
+
+	void putNibble(uint8_t b)  __attribute__((__noinline__))
+	{
+		if (m_pos < bufSize - 1)
+		{
+			m_buf[m_pos++] = hexChar(b);
+			m_buf[m_pos] = 0;   // always zero-terminate output
+		}
+	};
+
+	void putByte(uint8_t b) __attribute__((__noinline__))
 	{
 		m_crc.Add(b);
-		this->PutChar(this->HexChar(b >> 4));
-		this->PutChar(this->HexChar(b & 0x0F));
+		putNibble(b >> 4);
+		putNibble(b);
 	};
-	__attribute__((__noinline__))
-	void putWord(uint16_t w)
+
+	void putWord(uint16_t w) __attribute__((__noinline__))
 	{
 		putByte(w >> 8);
 		putByte(w);
 	}
-	__attribute__((__noinline__))
-	void putDword(uint32_t w)
+
+	void putDword(uint32_t w) __attribute__((__noinline__))
 	{
 		putWord(w >> 16);
 		putWord(w);
 	}
 	void reset()
 	{
-		TextBuffer<bufSize>::Reset();
+		m_pos = 0;
 		m_crc.Reset();
 	}
 private:
 	STM32TPL::Crc16Ccitt m_crc {0xFFFF};
+	char m_buf[bufSize];
+	size_t m_pos {0};
 };
 
 /// hex decoder with buffer
