@@ -57,15 +57,15 @@ private:
 		while (!(RTC->CRL & RTC_CRL_RTOFF)) ;
 	}
 
-	inline time_t ReadCounter(void)
+	inline uint32_t ReadCounter(void)
 	{
 		return  ((uint32_t)RTC->CNTH << 16) | (uint32_t)RTC->CNTL;
 	}
 
 public:
 	RtcModule(void);
-	time_t ReadTime();
-	bool WriteTime(time_t t);
+	uint32_t ReadTime();
+	bool WriteTime(uint32_t t);
 	uint32_t ResetReason() { return resetFlags_; }
 	uint8_t GetCorrection();
 	void SetCorrection(uint8_t value);
@@ -143,7 +143,7 @@ RtcModule<use_lse>::RtcModule()
 }
 
 template<bool use_lse>
-bool RtcModule<use_lse>::WriteTime(time_t value)
+bool RtcModule<use_lse>::WriteTime(uint32_t value)
 {
 //	WaitReady();
 	PWR->CR |= PWR_CR_DBP;
@@ -157,12 +157,12 @@ bool RtcModule<use_lse>::WriteTime(time_t value)
 }
 
 template<bool use_lse>
-time_t RtcModule<use_lse>::ReadTime()
+uint32_t RtcModule<use_lse>::ReadTime()
 {
-	time_t ret = ReadCounter();
+	uint32_t ret = ReadCounter();
 	for (;;)
 	{
-		time_t ret1 = ReadCounter();
+		uint32_t ret1 = ReadCounter();
 		if (ret1 == ret)
 			return ret;
 		ret = ret1;

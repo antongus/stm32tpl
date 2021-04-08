@@ -52,7 +52,7 @@ struct TimeUtil
 	    if (t->tm_year<0) t->tm_year=0;
 	}
 
-	static struct tm *localtime(time_t t, struct tm * stm) __attribute__((noinline))
+	static struct tm *localtime(uint32_t t, struct tm * stm) __attribute__((noinline))
 	{
 		stm->tm_sec = t % 60;
 		t /= 60;
@@ -63,7 +63,7 @@ struct TimeUtil
 		stm->tm_wday = (t + 4) % 7;
 
 		uint32_t year = 1970;
-		time_t days = 0;
+		uint32_t days = 0;
 
 		while((days += (IsLeapYear(year) ? 366 : 365)) <= t)
 			year++;
@@ -96,7 +96,7 @@ struct TimeUtil
 		return stm;
 	}
 
-	static time_t mktime(struct tm *t)   __attribute__((noinline))
+	static uint32_t mktime(struct tm *t)   __attribute__((noinline))
 	{
 		int year, month, i;
 		uint32_t seconds;
@@ -125,7 +125,7 @@ struct TimeUtil
 		return seconds;
 	}
 
-	time_t date(time_t t)
+	uint32_t date(uint32_t t)
 	{
 		struct tm stm;
 		localtime(t, &stm);

@@ -89,9 +89,9 @@ class RtcModule
 public:
 	RtcModule();
 	uint32_t ResetReason() { return resetFlags_; }
-	static time_t ReadTime();
+	static uint32_t ReadTime();
 	static unsigned ReadSubseconds();
-	static bool WriteTime(time_t t);
+	static bool WriteTime(uint32_t t);
 	struct BackupDomainProtection
 	{
 		static void Disable() { PWR->CR |= PWR_CR_DBP; }
@@ -238,7 +238,7 @@ constexpr uint8_t RtcModule<use_lse>::Int2Bcd(uint8_t value)
 }
 
 template<bool use_lse>
-time_t RtcModule<use_lse>::ReadTime()
+uint32_t RtcModule<use_lse>::ReadTime()
 {
 	struct tm tim;
 	RTC_TR_Struct TR;
@@ -265,7 +265,7 @@ unsigned RtcModule<use_lse>::ReadSubseconds()
 }
 
 template<bool use_lse>
-bool RtcModule<use_lse>::WriteTime(time_t t)
+bool RtcModule<use_lse>::WriteTime(uint32_t t)
 {
 	BackupDomainProtection::Disable();        // disable backup domain write protection
 
