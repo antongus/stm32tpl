@@ -44,6 +44,13 @@
 #if defined STM32F2XX
 #  include "CMSIS/stm32f2xx.h"
 #  define STM32TPL_F2xxF4xx
+#elif (defined STM32F301x8) || (defined STM32F302x8) || (defined STM32F318xx) || \
+    (defined STM32F302xC) || (defined STM32F303xC) || (defined STM32F358xx) || \
+    (defined STM32F303x8) || (defined STM32F334x8) || (defined STM32F328xx) || \
+    (defined STM32F302xE) || (defined STM32F303xE) || (defined STM32F398xx) || \
+    (defined STM32F373xC) || (defined STM32F378xx)
+#  include "CMSIS/stm32f3xx.h"
+#  define STM32TPL_STM32F3XX
 #elif defined STM32F4XX
 #  include "CMSIS/stm32f4xx.h"
 #  define STM32TPL_F2xxF4xx
@@ -77,8 +84,12 @@
 #endif
 
 
-#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F7XX)
-typedef IRQn_Type IRQn;    // in STM32L0xx headers IRQn type was renamed to IRQn_Type.
+#if (defined STM32TPL_STM32L0XX) \
+ || (defined STM32TPL_STM32L1XX) \
+ || (defined STM32TPL_STM32F3XX) \
+ || (defined STM32TPL_STM32F0XX) \
+ || (defined STM32TPL_STM32F7XX)
+typedef IRQn_Type IRQn;    // in some headers IRQn type was renamed to IRQn_Type.
 #endif
 
 /**
@@ -94,6 +105,7 @@ enum ChipType
 	stm32F10X_MD_VL,   ///< Medium density Value Line devices
 	stm32F10X_HD_VL,   ///< High density Value Line devices
 	stm32F2XX,         ///< stm32F2xx chips
+	stm32F3XX,         ///< stm32F3xx chips
 	stm32F4XX,         ///< stm32F4xx chips
 	stm32F7XX,         ///< stm32F7xx chips
 	stm32L0XX,         ///< stm32L0xx chips
@@ -186,6 +198,16 @@ struct ChipCaps<stm32F2XX>
 	static const uint32_t APB2_FREQ = 60000000;
 	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
+};
+
+template<>
+struct ChipCaps<stm32F3XX>
+{
+	static const uint32_t MAX_FREQ = 72000000;
+	static const uint32_t APB1_FREQ = 36000000;
+	static const uint32_t APB2_FREQ = 72000000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7AC;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7CC;
 };
 
 template<>
@@ -286,6 +308,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F10X_MD_VL> chip;
 #elif (defined STM32F2XX)
 	typedef ChipInfo<stm32F2XX> chip;
+#elif (defined STM32F3)
+	typedef ChipInfo<stm32F3XX> chip;
 #elif (defined STM32F4XX)
 	typedef ChipInfo<stm32F4XX> chip;
 #elif (defined STM32TPL_STM32F7XX)
