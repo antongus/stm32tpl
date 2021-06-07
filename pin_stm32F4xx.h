@@ -350,6 +350,7 @@ template<char port, int pin_no, char activestate, PinSpeed speed>
 struct Pin
 {
 	static const uint32_t pin = pin_no;
+	static const int port_no = port-'A';
 	static const uint32_t shift = pin;
 	static const uint32_t shift_x2 = pin * 2;
 	static const uint32_t shift_x4 = (pin % 8) * 4;

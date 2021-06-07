@@ -200,6 +200,8 @@ enum PinAltFunction
 	ALT_FUNC_5         = 5,
 	ALT_FUNC_6         = 6,
 	ALT_FUNC_7         = 7,
+	ALT_FUNC_8         = 8,
+	ALT_FUNC_9         = 9,
 };
 
 

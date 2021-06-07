@@ -50,6 +50,13 @@
     (defined STM32F072xB) || (defined STM32F078xx) || (defined STM32F091xC) || (defined STM32F098xx)
 #  define STM32TPL_PIN_STM32F0XX
 #  include "pin_stm32L0xx.h"
+#elif (defined STM32F301x8) || (defined STM32F302x8) || (defined STM32F318xx) || \
+    (defined STM32F302xC) || (defined STM32F303xC) || (defined STM32F358xx) || \
+    (defined STM32F303x8) || (defined STM32F334x8) || (defined STM32F328xx) || \
+    (defined STM32F302xE) || (defined STM32F303xE) || (defined STM32F398xx) || \
+    (defined STM32F373xC) || (defined STM32F378xx)
+#  define STM32TPL_PIN_STM32F0XX
+#  include "pin_stm32L0xx.h"
 #elif (defined STM32F756xx) || (defined STM32F746xx) || (defined STM32F745xx) || (defined STM32F765xx) || (defined STM32F767xx) \
 || (defined STM32F769xx) || (defined STM32F777xx) || (defined STM32F779xx) || (defined STM32F722xx) || (defined STM32F723xx) \
 || (defined STM32F732xx) || (defined STM32F733xx)
