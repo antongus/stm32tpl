@@ -34,6 +34,7 @@
 #define STM32_TIM_H_INCLUDED
 
 #include "stm32.h"
+#include <cstddef>
 
 namespace STM32
 {
