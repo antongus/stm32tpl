@@ -342,7 +342,7 @@ template<> struct DmaChannelTraits<DMA2_CH3>
 
 template<> struct DmaChannelTraits<DMA2_CH4>
 {
-#if (defined STM32F10X_CL) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32F10X_CL) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F3XX)
 	static const IRQn DMAChannel_IRQn = DMA2_Channel4_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA2_Channel4_5_IRQn;
@@ -356,7 +356,7 @@ template<> struct DmaChannelTraits<DMA2_CH4>
 
 template<> struct DmaChannelTraits<DMA2_CH5>
 {
-#if (defined STM32F10X_CL) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32F10X_CL) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F3XX)
 	static const IRQn DMAChannel_IRQn = DMA2_Channel5_IRQn;
 #else
 	static const IRQn DMAChannel_IRQn = DMA2_Channel4_5_IRQn;
