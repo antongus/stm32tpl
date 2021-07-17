@@ -270,6 +270,51 @@ template<> struct TimerTraits<TIM_8>
 };
 #endif
 
+#if defined(RCC_APB1ENR_TIM12EN)
+template<> struct TimerTraits<TIM_12>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM12_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 2;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM12_IRQn;
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM12EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM12EN; }
+};
+#endif
+
+#if defined(RCC_APB1ENR_TIM13EN)
+template<> struct TimerTraits<TIM_13>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM13_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 1;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM13_IRQn;
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM13EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM13EN; }
+};
+#endif
+
+#if defined(RCC_APB1ENR_TIM14EN)
+template<> struct TimerTraits<TIM_14>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM14_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 1;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM14_IRQn;
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM14EN; }
+};
+#endif
+
 
 #if defined(RCC_APB2ENR_TIM21EN)
 template<> struct TimerTraits<TIM_21>
