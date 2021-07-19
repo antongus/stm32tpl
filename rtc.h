@@ -138,7 +138,7 @@ struct TimeUtil
 
 };
 
-#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F3XX)
 #  include "rtc_stm32f4xx.h"
 #else
 #  include "rtc_stm32f1xx.h"
