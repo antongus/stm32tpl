@@ -112,8 +112,19 @@ template<> struct UartPinSet<UART_1>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
+
+#if (defined STM32TPL_STM32F3XX)
+template<> struct UartPinSet<UART_1, REMAP_PARTIAL>
+{
+	typedef Pin<'C', 4> PinTX;
+	typedef Pin<'C', 5> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
+};
+#endif
 
 template<> struct UartPinSet<UART_1, REMAP_FULL>
 {
@@ -125,6 +136,8 @@ template<> struct UartPinSet<UART_1, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
 
@@ -138,12 +151,23 @@ template<> struct UartPinSet<UART_2>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
 
+#if (defined STM32TPL_STM32F3XX)
+template<> struct UartPinSet<UART_2, REMAP_PARTIAL>
+{
+	typedef Pin<'D', 5> PinTX;
+	typedef Pin<'D', 6> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
+};
+#endif
+
 template<> struct UartPinSet<UART_2, REMAP_FULL>
 {
-#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F3XX)
 	typedef Pin<'A', 14> PinTX;
 	typedef Pin<'A', 15> PinRX;
 #else
@@ -156,6 +180,8 @@ template<> struct UartPinSet<UART_2, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
 
@@ -168,6 +194,8 @@ template<> struct UartPinSet<UART_3>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_4;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
 
@@ -179,6 +207,8 @@ template<> struct UartPinSet<UART_3, REMAP_PARTIAL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_1;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
 
@@ -199,9 +229,11 @@ template<> struct UartPinSet<UART_3, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_USART3;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
-#endif
+#endif  // #if (UART_COUNT > 2)
 
 #if (UART_COUNT > 3)
 template<> struct UartPinSet<UART_4>
@@ -212,6 +244,8 @@ template<> struct UartPinSet<UART_4>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART4;
 #elif (defined STM32TPL_STM32F0XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_5;
 #endif
 };
 
@@ -233,6 +267,8 @@ template<> struct UartPinSet<UART_5>
 	typedef Pin<'D', 2> PinRX;
 #if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_UART5;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_5;
 #endif
 };
 #endif
@@ -500,7 +536,7 @@ struct DummyDE
 /**
  * USART peripheral registers for STM32TPL_STM32L0XX chips.
  */
-#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F3XX)
 struct USARTx_TypeDef
 {
 	volatile uint32_t CR1;
@@ -619,7 +655,7 @@ public:
 	INLINE static Baudrate GetBaudrate(uint32_t busFreq = BUS_FREQ)
 		{ return static_cast<unsigned long long>(busFreq) * BUS_FREQ_MUL / USARTx->BRR; }
 
-#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX)
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F3XX)
 	INLINE static uint32_t Status()                 { return USARTx->ISR; }
 	INLINE static void ClearStatus(uint32_t flags)  { USARTx->ICR = flags; }
 	INLINE static uint32_t ReadData()               { return USARTx->RDR; }
