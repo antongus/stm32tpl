@@ -166,6 +166,8 @@ template<> struct SpiPins<SPI_1>
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_5;
 #endif
 };
 
@@ -178,34 +180,61 @@ template<> struct SpiPins<SPI_1, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_5;
 #endif
 };
 
 template<> struct SpiPins<SPI_1, REMAP_2>
 {
+#if (defined STM32TPL_STM32F3XX)
+	typedef Pin<'C', 7> PinSCK;
+	typedef Pin<'C', 8> PinMISO;
+	typedef Pin<'C', 9> PinMOSI;
+#else
 	typedef Pin<'E', 13> PinSCK;
 	typedef Pin<'E', 14> PinMISO;
 	typedef Pin<'E', 15> PinMOSI;
+#endif
 #if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI1;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_5;
 #endif
 };
 
 #if (defined RCC_APB1ENR_SPI2EN)
 template<> struct SpiPins<SPI_2>
 {
+#if (defined STM32TPL_STM32F3XX)
+	typedef Pin<'B', 10> PinSCK;
+#else
 	typedef Pin<'B', 13> PinSCK;
+#endif
 	typedef Pin<'B', 14> PinMISO;
 	typedef Pin<'B', 15> PinMOSI;
 #if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI2;
 #elif (defined STM32TPL_STM32L0XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_0;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_5;
 #endif
 };
+
+#if (defined STM32TPL_STM32F3XX)
+template<> struct SpiPins<SPI_2, REMAP_FULL>
+{
+	typedef Pin<'A', 8> PinSCK;
+	typedef Pin<'A', 9> PinMISO;
+	typedef Pin<'A', 10> PinMOSI;
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_5;
+};
 #endif
+
+#endif  // #if (defined RCC_APB1ENR_SPI2EN)
 
 #if (defined RCC_APB1ENR_SPI3EN)
 template<> struct SpiPins<SPI_3>
@@ -215,6 +244,8 @@ template<> struct SpiPins<SPI_3>
 	typedef Pin<'B', 5> PinMOSI;
 #if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_6;
 #endif
 };
 
@@ -225,9 +256,22 @@ template<> struct SpiPins<SPI_3, REMAP_FULL>
 	typedef Pin<'C', 12> PinMOSI;
 #if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX)
 	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_SPI3;
+#elif (defined STM32TPL_STM32F3XX)
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_6;
 #endif
 };
+
+#if (defined STM32TPL_STM32F3XX)
+template<> struct SpiPins<SPI_3, REMAP_2>
+{
+	typedef Pin<'A', 1> PinSCK;
+	typedef Pin<'A', 2> PinMISO;
+	typedef Pin<'A', 3> PinMOSI;
+	static const PinAltFunction ALT_FUNC_SPIx = ALT_FUNC_6;
+};
 #endif
+
+#endif // #if (defined RCC_APB1ENR_SPI3EN)
 
 namespace
 {
@@ -412,7 +456,7 @@ struct SampleSpiProps
 /**
 *  SPI template class.
 */
-template<typename props>
+template<typename props, typename pins = SpiPins<props::NUMBER, props::REMAP>>
 class Spi
 		: public SpiBase
 		, public detail::DmaStrategy<props>::type
@@ -427,7 +471,6 @@ private:
 	static const bool     UseInterrupt     = props::UseInterrupt;
 
 	typedef SpiTraits<NUMBER> Traits;
-	typedef SpiPins<NUMBER, REMAP> pins;
 	typedef typename pins::PinSCK SCK;
 	typedef typename pins::PinMISO MISO;
 	typedef typename pins::PinMOSI MOSI;
@@ -476,8 +519,8 @@ public:
 	void BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt) override;
 };
 
-template<typename props>
-void Spi<props>::HwInit()
+template<typename props, typename pins>
+void Spi<props, pins>::HwInit()
 {
 #if (defined STM32TPL_STM32F1XX)
 	if (REMAP)  // remap module if needed
@@ -509,8 +552,8 @@ void Spi<props>::HwInit()
 	initDmaInterrupt();
 }
 
-template<typename props>
-void Spi<props>::HwDeinit()
+template<typename props, typename pins>
+void Spi<props, pins>::HwDeinit()
 {
 	RxDmaStream::DisableClocks();
 	TxDmaStream::DisableClocks();
@@ -531,8 +574,8 @@ void Spi<props>::HwDeinit()
 	MISO::Mode(INPUT);
 }
 
-template<typename props>
-void Spi<props>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
+template<typename props, typename pins>
+void Spi<props, pins>::BufRw(uint8_t * rxBuf, uint8_t const* txBuf, size_t cnt)
 {
 	bool const tx = txBuf != nullptr;
 	bool const rx = rxBuf != nullptr;
