@@ -123,9 +123,10 @@ public:
 	 */
 	uint8_t Rw(uint8_t out = 0xFF)
 	{
-		SPIx->DR = out;
+		auto ptr = reinterpret_cast<volatile uint8_t*>(&SPIx->DR);
+		*ptr = out;
 		while (!(SPIx->SR & SPI_SR_RXNE)) ;
-		return SPIx->DR;
+		return *ptr;
 	}
 
 	void Lock()                   { mutex_.lock(); }
@@ -546,7 +547,11 @@ void Spi<props, pins>::HwInit()
 
 	// configure SPI
 	SPIx->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD;
+#if (defined SPI_CR2_FRXTH)
+	SPIx->CR2 = SPI_CR2_FRXTH;
+#else
 	SPIx->CR2 = 0;
+#endif
 	SPIx->CR1 = SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_SPE | InitialDivisor | InitialCPHA | InitialCPOL;
 
 	initDmaInterrupt();
