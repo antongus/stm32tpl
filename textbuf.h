@@ -63,7 +63,7 @@ public:
 	virtual int Keypressed() { return false; }
 	virtual int TxEmpty() { return true; }
 	int Len() const { return len_; }
-	void Reset() { len_ = 0; }
+	void Reset() { len_ = 0; buf_[0] = 0; }
 	operator char*() { return buf_; }
 private:
 	char buf_[SIZE];
