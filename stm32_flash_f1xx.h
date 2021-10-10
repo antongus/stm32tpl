@@ -107,6 +107,12 @@ template<> struct Stm32FlashProps<stm32F0XX>
 	enum { PAGE_SIZE = 2048 };
 };
 
+template<> struct Stm32FlashProps<stm32F3XX>
+{
+	enum { PAGE_COUNT = 128 };
+	enum { PAGE_SIZE = 2048 };
+};
+
 
 } // anon namespace
 
@@ -175,7 +181,11 @@ private:
 
 
 	static bool Pgerr()      { return FLASH->SR & FLASH_SR_PGERR; }
+#if (defined STM32TPL_STM32F3XX)
+	static bool Wrprterr()   { return FLASH->SR & FLASH_SR_WRPERR; }
+#else
 	static bool Wrprterr()   { return FLASH->SR & FLASH_SR_WRPRTERR; }
+#endif
 	static bool Busy()       { return FLASH->SR & FLASH_SR_BSY; }
 
 	static void Delay();
@@ -272,7 +282,11 @@ WriteResult Stm32Flash<props>::Write16(uint32_t addr, uint32_t data)
 		Wrprterr() ? wrWriteProtected :
 		wrOk;
 
-	FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR; // clear errors, if any
+#if (defined STM32TPL_STM32F3XX)  // clear errors, if any
+	FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPERR;
+#else
+	FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGERR | FLASH_SR_WRPRTERR;
+#endif
 	FLASH->CR = 0;
 	return ret;
 }
