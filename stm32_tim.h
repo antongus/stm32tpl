@@ -121,6 +121,9 @@ enum TimerNum
 #if defined(RCC_APB2ENR_TIM17EN)
 	TIM_17,
 #endif
+#if defined(RCC_APB2ENR_TIM19EN)
+	TIM_19,
+#endif
 #if defined(RCC_APB2ENR_TIM21EN)
 	TIM_21,
 #endif
@@ -317,6 +320,21 @@ template<> struct TimerTraits<TIM_14>
 };
 #endif
 
+
+#if defined(RCC_APB2ENR_TIM19EN)
+template<> struct TimerTraits<TIM_19>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM19_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 4;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM19_IRQn;
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM19EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM19EN; }
+};
+#endif
 
 #if defined(RCC_APB2ENR_TIM21EN)
 template<> struct TimerTraits<TIM_21>
