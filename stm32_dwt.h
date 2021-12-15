@@ -34,55 +34,13 @@
 
 #include "stm32.h"
 
-namespace
-{
-
-struct DWT_Type
-{
-	uint32_t CONTROL;    // Control Register
-	uint32_t CYCCNT;     // Cycle Count Register
-	uint32_t CPICNT;     // CPI Count Register
-	uint32_t EXCCNT;     // Exception Overhead Count Register
-	uint32_t SLEEPCNT;   // Sleep Count Register
-	uint32_t LSUCNT;     // LSU Count Register
-	uint32_t FOLDCNT;    // Folded-instruction Count Register
-	uint32_t PCSR;       // Program Counter Sample Register (R/O)
-	uint32_t COMP0;      // Comparator Register0
-	uint32_t MASK0;      // Mask Register0
-	uint32_t FUNCTION0;  // Function Register0
-	uint32_t COMP_1;     // Comparator Register1
-	uint32_t MASK1;      // Mask Register1
-	uint32_t FUNCTION1;  // Function Register1
-	uint32_t COMP_2;     // Comparator Register2
-	uint32_t MASK2;      // Mask Register2
-	uint32_t FUNCTION2;  // Function Register2
-	uint32_t COMP3;      // Comparator Register3
-	uint32_t MASK3;      // Mask Register3
-	uint32_t FUNCTION3;  // Function Register3
-	uint32_t PID4;       // Peripheral identification registers
-	uint32_t PID5;       //
-	uint32_t PID6;       //
-	uint32_t PID7;       //
-	uint32_t PID0;       //
-	uint32_t PID1;       //
-	uint32_t PID2;       //
-	uint32_t PID3;       //
-	uint32_t CID0;       // Component identification registers
-	uint32_t CID1;       //
-	uint32_t CID2;       //
-	uint32_t CID3;       //
-};
-
-
-}
-
 struct DWT_t
 {
 	DWT_t()
 	{
 		CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 		DWT_->CYCCNT = 0;     // reset the counter
-		DWT_->CONTROL |= 1;   // enable the counter
+		DWT_->CTRL |= 1;   // enable the counter
 	}
 	static IOStruct<0xE0001000, DWT_Type> DWT_;
 	static struct
@@ -95,6 +53,6 @@ struct DWT_t
 	}cycles;
 };
 
-extern DWT_t DWT;
+extern DWT_t dwt;
 
 #endif // STM32TPL_STM32_DWT_H_INCLUDED
