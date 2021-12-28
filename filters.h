@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <array>
 #include <algorithm>
+#include <type_traits>
 
 template<typename T = uint32_t>
 class ExponentialFilter
@@ -94,13 +95,17 @@ public:
 		{
 			first_ = false;
 			result_ = value;
+			middle_ = value;
 		}
 		else
 		{
 			middle_ += coeff_ * ((double)value - middle_);
             result_ += coeff_ * (middle_ - result_);
 		}
-		res_ = result_ + 0.5;
+		if constexpr(std::is_integral_v<T>)
+			res_ = result_ + 0.5;
+		else
+			res_ = result_;
 		return res_;
 	}
 	T Get() { return res_; }
