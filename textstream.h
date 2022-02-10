@@ -64,7 +64,7 @@ public:
 		}
 	}
 
-	static char* Itoa(int value, char* s, int base) __attribute__((__noinline__))
+	static char* Itoa(int64_t value, char* s, int base) __attribute__((__noinline__))
 	{
 		if (base < 2 || base > 16)
 		{
