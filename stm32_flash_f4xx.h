@@ -33,7 +33,9 @@
 #define STM32TPL_STM32_FLASH_F4XX_H_INCLUDED
 
 #include "stm32.h"
+#include "scmRTOS.h"
 #include <type_traits>
+#include <cstring>
 
 namespace STM32
 {
