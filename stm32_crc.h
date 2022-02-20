@@ -47,8 +47,13 @@ public:
 	}
 	~CrcCalculator() { DisableClocks(); }
 
+#if defined STM32F4XX
+	static void EnableClocks()  { RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN; __DSB(); }
+	static void DisableClocks() { RCC->AHB1ENR &= ~RCC_AHB1ENR_CRCEN; }
+#else
 	static void EnableClocks()  { RCC->AHBENR |= RCC_AHBENR_CRCEN; __DSB(); }
 	static void DisableClocks() { RCC->AHBENR &= ~RCC_AHBENR_CRCEN; }
+#endif
 	static void Reset()
 	{
 		CRC->CR = CRC_CR_RESET;
