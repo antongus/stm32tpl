@@ -534,6 +534,20 @@ struct DummyDE
 };
 
 /**
+ * Combined DE+RE pin.
+ * Used as DE pin when DE and RE pins are separated.
+ */
+template <typename DePin, typename RePin>
+struct CombinedDeRe
+{
+	INLINE static void On() { DePin::On(); RePin::On(); }
+	INLINE static void Off() { DePin::Off(); RePin::Off(); }
+	INLINE static void Cpl() { DePin::Cpl(); RePin::Cpl(); }
+	INLINE static void Mode(direction dir) { DePin::Mode(dir); RePin::Mode(dir); }
+	INLINE static int Latched() { return DePin::Latched(); }
+};
+
+/**
  * USART peripheral registers for STM32TPL_STM32L0XX chips.
  */
 #if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F3XX)
