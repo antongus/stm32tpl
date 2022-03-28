@@ -52,7 +52,7 @@ struct HexCodec
 	 * @param hex - pointer to buffer for encoded string. should be at least dataSize + 9 bytes!
 	 */
 	__attribute__((__noinline__))
-	static void encode(uint8_t* data, size_t dataSize, uint8_t* hex)
+	static void encode(uint8_t const* data, size_t dataSize, uint8_t* hex)
 	{
 		STM32TPL::Crc16Ccitt crc {0xFFFF};
 		auto putNibble = [&](char c){
