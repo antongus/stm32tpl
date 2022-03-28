@@ -170,7 +170,7 @@ template<> struct TimerTraits<TIM_1>
 #if defined (RCC_APB1ENR_TIM2EN)
 template<> struct TimerTraits<TIM_2>
 {
-#if defined STM32TPL_F2xxF4xx
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX)
 	using CounterType = uint32_t;
 #else
 	using CounterType = uint16_t;
@@ -219,7 +219,7 @@ template<> struct TimerTraits<TIM_4>
 #if defined(RCC_APB1ENR_TIM5EN)
 template<> struct TimerTraits<TIM_5>
 {
-#if defined STM32TPL_F2xxF4xx
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX)
 	using CounterType = uint32_t;
 #else
 	using CounterType = uint16_t;
