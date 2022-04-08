@@ -50,7 +50,7 @@ public:
         first_ = true;
     }
 
-	void Put(T value)
+	T Put(T value)
 	{
 		raw_ = value;
 		if (first_)
@@ -62,6 +62,7 @@ public:
 		{
             result_ += coeff_ * ((double)value - result_);
 		}
+		return result_;
 	}
 	T Get() { return result_; }
 	T Raw() { return raw_; }
