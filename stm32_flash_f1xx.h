@@ -155,8 +155,10 @@ public:
 
 	static bool ErasePage(uint32_t addr);
 	static bool MassErase();
-#ifndef STM32TPL_STM32F0XX
+#if defined(FLASH_OBR_RDPRT)
 	static bool IsReadOutProtected() { return FLASH->OBR & FLASH_OBR_RDPRT; }
+#elif defined(FLASH_OBR_LEVEL1_PROT)
+	static bool IsReadOutProtected() { return FLASH->OBR & (FLASH_OBR_LEVEL1_PROT | FLASH_OBR_LEVEL2_PROT); }
 #endif
 	static bool ReadOutProtect();
 
@@ -355,15 +357,14 @@ bool Stm32Flash<props>::ReadOutProtect()
 	FLASH->CR |= FLASH_CR_OPTER;
 	FLASH->CR |= FLASH_CR_STRT;
 	bool ret = Wait(PAGE_ERASE_TIMEOUT);
-	FLASH->CR &= FLASH_CR_OPTER;
+	FLASH->CR &= ~FLASH_CR_OPTER;
 	if (ret)
 	{
 		// program options byte
-		FLASH->CR &= FLASH_CR_OPTER;
 		FLASH->CR |= FLASH_CR_OPTPG;
 		OB->RDP = 0x00;
 		ret = Wait(PAGE_ERASE_TIMEOUT);
-		FLASH->CR &= FLASH_CR_OPTPG;
+		FLASH->CR &= ~FLASH_CR_OPTPG;
 		Options::Lock();
 		Lock();
 	}
