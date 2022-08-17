@@ -72,14 +72,14 @@ public:
 			return s;
 		}
 
-		int sign = value;
+		auto sign = value < 0;
 		char* ptr = s;
 
 		do {
 			*ptr++ = HexChar(abs(value % base));
 			value /= base;
 		} while (value);
-		if (sign < 0)
+		if (sign)
 			*ptr++ = '-';
 
 		*ptr-- = '\0';
