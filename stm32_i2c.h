@@ -2,7 +2,7 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2021 Anton B. Gusev
+ *  Copyright (c) 2011-2022 Anton B. Gusev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,11 @@
  *
  *
  *  file         : stm32_i2c.h
- *  description  : Simple i2c implementation
+ *  description  : Simple i2c implementation (no interrupts, no DMA)
  *
  */
 
-#ifndef STM32TPL_STM32_I2C_H_INCLUDED
-#define STM32TPL_STM32_I2C_H_INCLUDED
+#pragma once
 
 #include "stm32.h"
 #include "pin.h"
@@ -50,6 +49,9 @@ enum I2cNum
 #endif
 #if (defined RCC_APB1ENR_I2C2EN)
 	,I2C_2
+#endif
+#if (defined RCC_APB1ENR_I2C3EN)
+	,I2C_3
 #endif
 };
 
@@ -73,6 +75,9 @@ template<> struct I2cTraits<I2C_1>
 		RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C1RST;
 		__DSB();
 	}
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F7XX)
+	static constexpr auto ALT_FUNC_I2Cx = ALT_FUNC_I2C1;
+#endif
 };
 #endif
 
@@ -91,33 +96,78 @@ template<> struct I2cTraits<I2C_2>
 		RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C2RST;
 		__DSB();
 	}
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F7XX)
+	static constexpr auto ALT_FUNC_I2Cx = ALT_FUNC_I2C2;
+#endif
+};
+#endif
+
+#if defined (RCC_APB1ENR_I2C3EN)
+template<> struct I2cTraits<I2C_3>
+{
+	using SCL = Pin<'H', 7>;
+	using SDA = Pin<'H', 8>;
+	static constexpr uint32_t I2Cx_BASE {I2C3_BASE};
+
+	static void enableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_I2C3EN; __DSB(); }
+	static void disableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_I2C3EN; }
+	static void reset()
+	{
+		RCC->APB1RSTR |= RCC_APB1RSTR_I2C3RST;
+		RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C3RST;
+		__DSB();
+	}
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32L1XX) || (defined STM32TPL_STM32F7XX)
+	static constexpr auto ALT_FUNC_I2Cx = ALT_FUNC_I2C3;
+#endif
 };
 #endif
 
 } // namespace detail
 
 
-template <I2cNum num>
+template <I2cNum num,
+	typename PinSCL = typename detail::I2cTraits<num>::SCL,   // allow arbitrary pins for SCL/SDA
+	typename PinSDA = typename detail::I2cTraits<num>::SDA
+	>
 class SimpleI2c
 {
 public:
 	using Traits = detail::I2cTraits<num>;
-	using SCL = typename Traits::SCL;
-	using SDA = typename Traits::SDA;
+	using SCL = PinSCL;
+	using SDA = PinSDA;
 
 	static IOStruct<Traits::I2Cx_BASE, I2C_TypeDef> I2Cx;
 
 	static void init()
 	{
 		Traits::enableClocks();
-
-	    SCL::Mode(ALT_OUTPUT_OD);
-	    SDA::Mode(ALT_OUTPUT_OD);
+		initPins();
 
 	    I2Cx->CR1 = 0;
 	    I2Cx->CR2 = 0x24;  // 0b100100 = 36 MHz
 	    I2Cx->CCR = 180;   // 100 KHz
 	    I2Cx->CR1 = I2C_CR1_PE;
+	}
+
+	static void initPins()
+	{
+#if (!defined STM32TPL_STM32F1XX)
+		SCL::Alternate(Traits::ALT_FUNC_I2Cx);
+		SDA::Alternate(Traits::ALT_FUNC_I2Cx);
+#endif
+	    SCL::Mode(ALT_OUTPUT_OD);
+	    SDA::Mode(ALT_OUTPUT_OD);
+	}
+
+	static void deinitPins()
+	{
+#if (!defined STM32TPL_STM32F1XX)
+		SCL::Alternate((PinAltFunction)0);
+		SDA::Alternate((PinAltFunction)0);
+#endif
+		SCL::Mode(OUTPUT_OD);
+		SDA::Mode(OUTPUT_OD);
 	}
 
 	static void reset()
@@ -129,8 +179,7 @@ public:
 		Traits::reset();
 
 	    // configure pins as outputs (disconnect it from i2c peripheral)
-		SCL::Mode(OUTPUT_OD_2MHZ);
-		SDA::Mode(OUTPUT_OD_2MHZ);
+		deinitPins();
 		SCL::On();
 		SDA::On();
 
@@ -145,6 +194,7 @@ public:
 			SCL::On();
 		}
 		softStop();
+		initPins();
 	}
 
 	static void reset2()
@@ -156,12 +206,12 @@ public:
 		Traits::reset();
 
 	    // configure pins as outputs (disconnect it from i2c peripheral)
-		SCL::Mode(OUTPUT_OD_2MHZ);
-		SDA::Mode(OUTPUT_OD_2MHZ);
+		deinitPins();
 		SCL::On();
 		SDA::Off();
 
 		OS::sleep(60); // hold SDA low for more than 50ms to reset I2C bus
+		initPins();
 	}
 
 	static bool read(uint8_t device, uint8_t addr, void *data, size_t count)
@@ -273,11 +323,5 @@ private:
 	}
 };
 
-//using softI2c1 = <Pin<'B', 6>, Pin<'B', 7>, 1>;
-//typedef Pin<'B', 6> SCL;
-//typedef Pin<'B', 7> SDA;
-
 } // namespace I2C
 } // namespace STM32
-
-#endif // STM32TPL_STM32_I2C_H_INCLUDED
