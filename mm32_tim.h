@@ -107,9 +107,6 @@ enum class TimerType
 	Basic,
 };
 
-namespace
-{
-
 struct TIMx_TypeDef
 {
 	volatile uint32_t CR1;     //!< control register 1,              Offset: 0x00
@@ -138,6 +135,9 @@ struct TIMx_TypeDef
 };
 
 
+namespace
+{
+
 template<TimerNum num> struct TimerTraits;
 
 #if defined (RCC_APB2ENR_TIM1EN)
@@ -161,7 +161,7 @@ template<> struct TimerTraits<TIM_1>
 #if defined (RCC_APB1ENR_TIM2EN)
 template<> struct TimerTraits<TIM_2>
 {
-	using CounterType = uint16_t;
+	using CounterType = uint32_t;
 	static constexpr auto TIMx_BASE         {TIM2_BASE};
 	static constexpr auto timerType         {TimerType::General};
 	static constexpr auto ccModulesCount    {4};
@@ -308,6 +308,7 @@ struct Timer
 	template <int num>
 	struct CCModule
 	{
+		using TimerType = Timer;
 		/**
 		 * CCMR register flags
 		 */
