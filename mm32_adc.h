@@ -144,7 +144,10 @@ struct Adc
 	static void start() { ADCx->ADCR |= ADC_ADCR_ADST; }
 
 	static void setSequence(uint32_t mask) { ADCx->ADCHS = mask; }
-	static void setSampleTime(uint32_t value) { ADCx->ADSTA = value; }
+	static void setSampleTime(uint32_t value)
+	{
+		ADCx->ADCFG = (ADCx->ADCFG & ~ADC_ADCFG_SAMCTL) | (value & ADC_ADCFG_SAMCTL);
+	}
 	static void setPrescaler(uint32_t value)
 	{
 		value = (value & 0b1110) << (ADC_ADCFG_ADCPRE_POS - 1) | (value & 0b1  << ADC_ADCFG_ADCPRE_POS2);
