@@ -124,14 +124,6 @@ enum PinAltFunction
 	ALT_FUNC_5         = 5,
 	ALT_FUNC_6         = 6,
 	ALT_FUNC_7         = 7,
-	ALT_FUNC_8         = 8,
-	ALT_FUNC_9         = 9,
-	ALT_FUNC_10        = 10,
-	ALT_FUNC_11        = 11,
-	ALT_FUNC_12        = 12,
-	ALT_FUNC_13        = 13,
-	ALT_FUNC_14        = 14,
-	ALT_FUNC_15        = 15,
 };
 
 template<char port> struct port_gpio_t;
