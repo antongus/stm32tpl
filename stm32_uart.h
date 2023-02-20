@@ -47,7 +47,7 @@ namespace UART
  */
 struct SampleUartProps
 {
-	static const UartNum uartNum = UART_1;
+	static const UartNum uartNum = UartNum{};
 	static const Remap remap = REMAP_NONE;
 	enum
 	{
@@ -64,7 +64,7 @@ struct SampleUartProps
 /**
 *  UART main template.
 */
-template<typename props = SampleUartProps>
+template<typename props = SampleUartProps, typename Pins = UartPins<props::uartNum, props::remap>>
 class Uart
 	: public TextStream
 	, public UartDriver<props::uartNum>
@@ -103,12 +103,11 @@ private:
 	OS::channel<char, TX_BUF_SIZE, uint32_t> txChannel_;
 	OS::TEventFlag txDone_;
 
-	using Pins = UartPins<props::uartNum, props::remap>;
 	using DE = typename props::PinDE;
 };
 
-template<class props>
-Uart<props>::Uart()
+template<class props, typename Pins>
+Uart<props, Pins>::Uart()
 {
 #if (defined STM32TPL_STM32F1XX)
 	if (remap == REMAP_FULL)        // remap pins if needed
@@ -142,15 +141,15 @@ Uart<props>::Uart()
 	NVIC_EnableIRQ(Driver::USARTx_IRQn);
 }
 
-template<class props>
-void Uart<props>::PutChar(char ch)
+template<class props, typename Pins>
+void Uart<props, Pins>::PutChar(char ch)
 {
 	txChannel_.push(ch);
 	Driver::TxInterrupt::Enable();
 }
 
-template<class props>
-int Uart<props>::GetChar(int timeout)
+template<class props, typename Pins>
+int Uart<props, Pins>::GetChar(int timeout)
 {
 	char ch = 0;
 	if (rxChannel_.pop(ch, timeout))
@@ -158,16 +157,16 @@ int Uart<props>::GetChar(int timeout)
 	return -1;
 }
 
-template<class props>
-void Uart<props>::SendBuffer(const void* buf, size_t size)
+template<class props, typename Pins>
+void Uart<props, Pins>::SendBuffer(const void* buf, size_t size)
 {
 	const char* ptr = reinterpret_cast<const char*>(buf);
 	txChannel_.write(ptr, size);
 	Driver::TxInterrupt::Enable();
 }
 
-template<typename props>
-bool Uart<props>::ReceiveBuffer(void* buf, size_t count, int timeout)
+template<class props, typename Pins>
+bool Uart<props, Pins>::ReceiveBuffer(void* buf, size_t count, int timeout)
 {
 	char* ptr = reinterpret_cast<char*>(buf);
 	while (count)
@@ -181,8 +180,8 @@ bool Uart<props>::ReceiveBuffer(void* buf, size_t count, int timeout)
 	return true;
 }
 
-template<class props>
-void Uart<props>::UartIrqHandler()
+template<class props, typename Pins>
+void Uart<props, Pins>::UartIrqHandler()
 {
 	auto status = Driver::Status();
 	auto data = Driver::ReadData();
