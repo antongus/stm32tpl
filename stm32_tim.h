@@ -352,14 +352,14 @@ template<> struct TimerTraits<TIM_19>
 template<> struct TimerTraits<TIM_21>
 {
 	using CounterType = uint16_t;
-	static const uint32_t TIMx_BASE = TIM6_BASE;
+	static const uint32_t TIMx_BASE = TIM21_BASE;
 	static const TimerType timerType = Basic;
 	static const uint32_t ccModulesCount = 0;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
-	static const IRQn TIMx_IRQn = TIM6_IRQn;
-	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM6EN; }
-	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM6EN; }
+	static const IRQn TIMx_IRQn = TIM21_IRQn;
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM21EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM21EN; }
 };
 #endif
 
