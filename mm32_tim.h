@@ -296,6 +296,7 @@ struct Timer
 	{
 		static void enable()    { TIMx->DIER |= TIM_DIER_UIE; }
 		static void disable()   { TIMx->DIER &= ~TIM_DIER_UIE; }
+		static bool enabled()   { return TIMx->DIER & TIM_DIER_UIE; }
 		static bool triggered() { return TIMx->SR & TIM_SR_UIF; }
 		static void clear()     { TIMx->SR = ~TIM_SR_UIF; }
 	};
