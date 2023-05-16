@@ -2,7 +2,7 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2023 Anton B. Gusev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,21 @@
  *
  *  file         : stm32_flash.h
  *  description  : stm32 flash class
- *  created on   : 28.04.2011
- *
  */
 
-#ifndef STM32TPL_STM32_FLASH_H_INCLUDED
-#define STM32TPL_STM32_FLASH_H_INCLUDED
+#pragma once
 
 #if (defined STM32F2XX) || (defined STM32F4XX) || (defined STM32F40_41xxx) || (defined STM32F427_437xx) || (defined STM32F429_439xx) || (defined STM32F401xx)
 #  include "stm32_flash_f4xx.h"
+#elif (defined STM32L010x4) || (defined STM32L010x6) || (defined STM32L010x8) || (defined STM32L010xB) || \
+    (defined STM32L011xx) || (defined STM32L021xx) || \
+    (defined STM32L031xx) || (defined STM32L041xx) || \
+    (defined STM32L051xx) || (defined STM32L052xx) || (defined STM32L053xx) || \
+    (defined STM32L062xx) || (defined STM32L063xx) || \
+    (defined STM32L071xx) || (defined STM32L072xx) || (defined STM32L073xx) || \
+    (defined STM32L081xx) || (defined STM32L082xx) || (defined STM32L083xx)
+#  include "stm32_flash_l0xx.h"
 #else
 #  include "stm32_flash_f1xx.h"
 #endif
 
-#endif // STM32TPL_STM32_FLASH_H_INCLUDED
