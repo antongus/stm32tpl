@@ -55,19 +55,19 @@ public:
 		: m_coeff(coeff)
 	{}
 
-    void setCoeff(AccumType coeff)
-    {
-        m_coeff = coeff;
-        reset();
-    }
+	void setCoeff(AccumType coeff)
+	{
+		m_coeff = coeff;
+		reset();
+	}
 
-    ValueType put(ValueType value)
+	ValueType put(ValueType value)
 	{
 		m_raw = value;
 		if (m_first)
 		{
 			m_first = false;
-			m_result = value;
+			m_result = value * scale;
 		}
 		else
 		{
@@ -85,3 +85,45 @@ private:
 	AccumType m_coeff;
 	AccumType m_result;
 };
+
+template<typename ValueType = uint32_t, typename AccumType = uint32_t, AccumType scale = 1024>
+class ExponentialFilterInt2
+{
+public:
+	ExponentialFilterInt2(uint32_t coeff = 256)
+		: m_coeff(coeff)
+	{}
+
+	void setCoeff(AccumType coeff)
+	{
+		m_coeff = coeff;
+		reset();
+	}
+
+	ValueType put(ValueType value)
+	{
+		m_raw = value;
+		if (m_first)
+		{
+			m_first = false;
+			m_middle = m_result = value * scale;
+		}
+		else
+		{
+			m_middle = m_middle - m_middle * m_coeff / scale + m_raw * m_coeff;
+			m_result = m_result - m_result * m_coeff / scale + m_middle * m_coeff / scale + m_coeff/2;
+		}
+		return m_result / scale;
+	}
+	ValueType get() { return m_result/scale; }
+	ValueType raw() { return m_raw; }
+	void reset() { m_first = true; }
+private:
+	bool m_first {true};
+	ValueType m_raw;
+	AccumType m_coeff;
+	AccumType m_middle;
+	AccumType m_result;
+};
+
+
