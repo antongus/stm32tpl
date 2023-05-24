@@ -84,6 +84,22 @@ typedef struct
 } FLASH_TypeDef;
 
 /** 
+  * @brief Option Bytes Registers
+  */
+typedef struct
+{
+	volatile uint16_t RDP;          //!< FLASH option byte Read protection
+	volatile uint16_t USER;         //!< FLASH option byte user options
+	volatile uint16_t DATA0;        //!< User data byte 0 (stored in FLASH_OBR[23:16])
+	volatile uint16_t DATA1;        //!< User data byte 1 (stored in FLASH_OBR[31:24])
+	volatile uint16_t WRP0;         //!< FLASH option byte write protection 0
+	volatile uint16_t WRP1;         //!< FLASH option byte write protection 1
+	volatile uint16_t WRP2;         //!< FLASH option byte write protection 2
+	volatile uint16_t WRP3;         //!< FLASH option byte write protection 3
+} OB_TypeDef;
+
+
+/**
   * @brief Reset and Clock Control
   */
 typedef struct
@@ -247,7 +263,7 @@ typedef struct
 #define FLASH_SR_EOP_Pos                  (5U)                                 
 #define FLASH_SR_EOP_Msk                  (0x1U << FLASH_SR_EOP_Pos)           /*!< 0x00000020 */
 #define FLASH_SR_EOP                      FLASH_SR_EOP_Msk                     /*!< End of operation */
-#define  FLASH_SR_WRPERR                     FLASH_SR_WRPRTERR             /*!< Legacy of Write Protection Error */
+#define FLASH_SR_WRPERR                     FLASH_SR_WRPRTERR             /*!< Legacy of Write Protection Error */
 
 /*******************  Bit definition for FLASH_CR register  *******************/
 #define FLASH_CR_PG_Pos                   (0U)                                 
