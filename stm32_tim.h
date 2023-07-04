@@ -354,9 +354,9 @@ template<> struct TimerTraits<TIM_21>
 	using CounterType = uint16_t;
 	static const uint32_t TIMx_BASE = TIM21_BASE;
 	static const TimerType timerType = Basic;
-	static const uint32_t ccModulesCount = 0;
+	static const uint32_t ccModulesCount = 2;
 	static const bool dmaCapable = false;
-	static const bool canRunDown = false;
+	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM21_IRQn;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM21EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM21EN; }
