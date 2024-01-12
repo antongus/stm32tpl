@@ -2,7 +2,7 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2024 Anton B. Gusev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,7 @@
  *
  */
 
-#ifndef STM32TPL_STAT_H_INCLUDED
-#define STM32TPL_STAT_H_INCLUDED
+#pragma once
 
 #include <stdint.h>
 #include <limits.h>
@@ -64,5 +63,3 @@ private:
 };
 
 } // namespace STM32TPL
-
-#endif // STM32TPL_STAT_H_INCLUDED

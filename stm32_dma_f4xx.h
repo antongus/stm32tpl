@@ -2,8 +2,8 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
- *
+*  Copyright (c) 2011-2024 Anton B. Gusev
+  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
@@ -29,8 +29,7 @@
  *
  */
 
-#ifndef STM32TPL_STM32_DMA_F4XX_H_INCLUDED
-#define STM32TPL_STM32_DMA_F4XX_H_INCLUDED
+#pragma once
 
 #include "stm32.h"
 #include <stddef.h>
@@ -455,5 +454,3 @@ typedef DmaStream<DMA2_CH7> Dma2Channel7;
 }  // namespace DMA
 
 }  // namespace STM32
-
-#endif // STM32TPL_STM32_DMA_F4XX_H_INCLUDED
