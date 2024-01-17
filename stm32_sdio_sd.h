@@ -23,7 +23,7 @@
  *  THE SOFTWARE.
  *
  *  file         : stm32_sdio_sd.h
- *  description  : STM32 SDIO-connected SD card
+ *  description  : STM32 SDIO-connected SD card (4-bit mode only)
  */
 
 #pragma once
@@ -691,8 +691,8 @@ void SdioSdCard<Props>::report()
 
 	trace ("\r\n {}card detected", isSDHC() ? "SDHC " : "");
 	// CID data:
-	trace ("\r\n Manufacturer : {:x}", m_cid.manufacturerId);
-	trace ("\r\n OEM_ID       : {:x}", m_cid.oemId);
+	trace ("\r\n Manufacturer : {:02x}", m_cid.manufacturerId);
+	trace ("\r\n OEM_ID       : {:04x}", m_cid.oemId);
 	trace ("\r\n Product Name : {}", m_cid.productName);
 	trace ("\r\n OEM_ID       : {:x}", m_cid.serial);
 
@@ -776,8 +776,6 @@ bool SdioSdCard<Props>::init()
 			return false;
 		}
 	}
-
-	report();
 
 	m_state = CardState::Ready;
 	return true;
