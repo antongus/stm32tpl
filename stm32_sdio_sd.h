@@ -267,9 +267,9 @@ struct SampleSdioSdCardProps
 
 	static constexpr auto commandTimeout {20'000'000u}; //!< counter for command completion loop (~2 sec)
 
-	static void init() {}      //!< custom initialization steps (power pin initial state, etc)
 	static void powerOn(){}    //!< power on sd card
 	static void powerOff() {}  //!< power off sd card
+	static bool isPowerOn() { return true; } //!< report power state
 
 	static constexpr auto debugTrace {true};
 
@@ -284,6 +284,7 @@ class SdioSdCard
 {
 public:
 	static bool init();
+	static void cyclePower();
 	static void report();
 	static CardState getState() { return m_state; };
 	static SdioError readBuffer(void *buf, uint32_t sector, uint32_t count);
@@ -301,6 +302,7 @@ public:
 	// Interrupt handlers
 	static INLINE void sdioInterruptHandler();
 	static INLINE void dmaInterruptHandler();
+
 private:
 	using DmaStream = DMA::Dma2Channel3;
 	//using DmaStream = DMA::Dma2Stream6;  -- alternate stream
@@ -308,6 +310,7 @@ private:
 	static constexpr auto SDIO_DMA_CHANNEL {DMA::DMA_CR_CHSEL_CH4};
 
 	static inline CardState m_state {CardState::NoCard};
+
 	static inline uint32_t m_cardFlags {0};
 	static inline OS::TMutex m_mutex;
 	static inline OS::TEventFlag m_dmaFlag;
@@ -705,14 +708,22 @@ void SdioSdCard<Props>::report()
 }
 
 template<class Props>
+void SdioSdCard<Props>::cyclePower()
+{
+	if (Props::isPowerOn())
+	{
+		Props::powerOff();
+	}
+	Props::powerOn();
+}
+
+template<class Props>
 bool SdioSdCard<Props>::init()
 {
-	// cycle sd card power
-	Props::init();
-	Props::powerOff();
-	OS::sleep(50);
-	Props::powerOn();
-	OS::sleep(10);
+	if (!Props::isPowerOn())
+	{
+		Props::powerOn();
+	}
 
 	// reset SDIO
 	RCC->APB2RSTR |= RCC_APB2RSTR_SDIORST; __DSB();
