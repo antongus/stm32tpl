@@ -482,9 +482,21 @@ SdioError SdioSdCard<Props>::identifyCard()
 {
 	m_cardFlags = 0;
 
-	// issue CMD0 GO_IDLE_STATE command (software reset)
-	if (auto err = command(CMD0_GO_IDLE_STATE); failed(err))
+	auto goIdle = [&](auto attempts) {
+		auto err {SdioError::None};
+		for (auto i = 0; i < attempts; ++i)
+		{
+			if (err = command(CMD0_GO_IDLE_STATE); success(err))
+				break;
+		}
 		return err;
+	};
+
+	// issue CMD0 GO_IDLE_STATE command (software reset)
+	if (auto err = goIdle(20); failed(err))
+	{
+		return err;
+	}
 
 	// try to verify operating conditions (voltage) with new (v 2.0) CMD8 command.
 	 // 0x100 (3.3v) + AA (pattern)
