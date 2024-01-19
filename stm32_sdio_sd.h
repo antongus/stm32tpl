@@ -224,11 +224,11 @@ struct Pins
 		CMD::Alternate(ALT_FUNC_SDIO);
 		CK::Alternate(ALT_FUNC_SDIO);
 
-		D0::Mode(ALT_OUTPUT_PULLUP);
-		D1::Mode(ALT_OUTPUT_PULLUP);
-		D2::Mode(ALT_OUTPUT_PULLUP);
-		D3::Mode(ALT_OUTPUT_PULLUP);
-		CMD::Mode(ALT_OUTPUT_PULLUP);
+		D0::Mode(ALT_OUTPUT);
+		D1::Mode(ALT_OUTPUT);
+		D2::Mode(ALT_OUTPUT);
+		D3::Mode(ALT_OUTPUT);
+		CMD::Mode(ALT_OUTPUT);
 		CK::Mode(ALT_OUTPUT);
 	}
 };
