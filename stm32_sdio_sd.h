@@ -732,24 +732,20 @@ void SdioSdCard<Props>::cyclePower()
 template<class Props>
 bool SdioSdCard<Props>::init()
 {
+	Pins::init();
+
 	if (!Props::isPowerOn())
 	{
 		Props::powerOn();
 	}
 
+	// try to fully deinit all periph
+	DmaStream::DisableClocks();
+	RCC->APB2ENR &= ~RCC_APB2ENR_SDIOEN; __DSB();
+
 	// reset SDIO
 	RCC->APB2RSTR |= RCC_APB2RSTR_SDIORST; __DSB();
 	RCC->APB2RSTR &= ~RCC_APB2RSTR_SDIORST; __DSB();
-
-	Pins::init();
-
-	RCC->APB2ENR |= RCC_APB2ENR_SDIOEN; __DSB();
-	DmaStream::EnableClocks();
-
-	// initialize SDIO hardware
-	setSdioDivisor(SDIO_DIVISOR_400KHZ);
-	SDIO->CLKCR |= SDIO_CLKCR_CLKEN;   // enable clock
-	SDIO->POWER = SDIO_POWER_PWRCTRL;  // power on
 
 	// Enable SDIO IRQ
 	NVIC_SetPriority(SDIO_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),
@@ -760,6 +756,19 @@ bool SdioSdCard<Props>::init()
 	NVIC_SetPriority(DMA_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),
 			Props::dmaInterruptPrioGroup, Props::dmaInterruptSubprio));
 	NVIC_EnableIRQ(DMA_IRQn);
+
+	// enable SDIO clocks
+	RCC->APB2ENR |= RCC_APB2ENR_SDIOEN; __DSB();
+	DmaStream::EnableClocks();
+
+	// initialize SDIO hardware
+	setSdioDivisor(SDIO_DIVISOR_400KHZ);
+
+	for (auto i = 0; i < 10; ++i)      // waste 3 SDIOCLK(48 MHz) periods plus 2 * PCLK2 periods
+		__asm__ __volatile__ ("nop");  // before next write to CLKCR
+
+	SDIO->POWER = SDIO_POWER_PWRCTRL;  // power on
+	SDIO->CLKCR |= SDIO_CLKCR_CLKEN;   // enable clock
 
 	m_state = CardState::Error;
 
