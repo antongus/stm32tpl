@@ -39,10 +39,10 @@ namespace STM32
 namespace SD
 {
 
-static constexpr auto SDIO_BUS_FREQ        {48'000'000UL};
+static constexpr auto SDIO_BUS_FREQ        {48'000'000u};
 // SDIO_CK frequency = SDIO_BUS_FREQ / [DIVISOR + 2].
-static constexpr auto SDIO_DIVISOR_400KHZ  {SDIO_BUS_FREQ / 400'000 - 2};
-static constexpr auto SDIO_DIVISOR_25MHZ   {0};
+static constexpr auto SDIO_DIVISOR_400KHZ  {SDIO_BUS_FREQ / 400'000u - 2};
+static constexpr auto SDIO_DIVISOR_25MHZ   {0u};
 
 
 enum class SdioBusWidth : uint32_t
@@ -265,7 +265,8 @@ struct SampleSdioSdCardProps
 	static constexpr auto dmaInterruptPrioGroup {2};
 	static constexpr auto dmaInterruptSubprio {2};
 
-	static constexpr auto commandTimeout {20'000'000u}; //!< counter for command completion loop (~2 sec)
+	static constexpr auto hiSpeedDivisor {SDIO_DIVISOR_25MHZ}; //!< divisor for high speed (increase when communication errors occurs)
+	static constexpr auto commandTimeout {20'000'000u};        //!< counter for command completion loop (~2 sec)
 
 	static void powerOn(){}    //!< power on sd card
 	static void powerOff() {}  //!< power off sd card
@@ -784,7 +785,7 @@ bool SdioSdCard<Props>::init()
 		trace("\r\nSD: initializeCard() error: {}", desc(err));
 		return false;
 	}
-	setSdioDivisor(SDIO_DIVISOR_25MHZ);
+	setSdioDivisor(Props::hiSpeedDivisor);
 
 	// try to select card
 	if (auto err = selectDeselectCard(); failed(err))
