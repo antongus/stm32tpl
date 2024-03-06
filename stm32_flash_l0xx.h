@@ -270,22 +270,42 @@ void FlashController<Props>::Eeprom::read(uint32_t addr, void* buf, uint32_t cou
 template<class Props>
 bool FlashController<Props>::Eeprom::write(uint32_t addr, void const* data, uint32_t dataSize)
 {
-	auto eeprom {reinterpret_cast<volatile uint8_t*>(addr)};
-	auto bytes {reinterpret_cast<const uint8_t*>(data)};
 	auto ret {true};
 
 	if (isLocked())
 		unlock();
 	FLASH->PECR |= FLASH_PECR_DATA;
-	for (auto i = 0u; i < dataSize; ++i)
+
+	// if address and size is 4-byte aligned - use word access (32-bit)
+	if ((addr & 0b11) == 0 && (dataSize & 0b11) == 0)
 	{
-		*eeprom++ = *bytes++;
-		if (!checkEop())
+		auto eeprom {reinterpret_cast<volatile uint32_t*>(addr)};
+		auto words {reinterpret_cast<const uint32_t*>(data)};
+		for (auto i = 0u; i < dataSize/4; ++i)
 		{
-			ret = false;
-			break;
+			*eeprom++ = *words++;
+			if (!checkEop())
+			{
+				ret = false;
+				break;
+			}
 		}
 	}
+	else
+	{
+		auto eeprom {reinterpret_cast<volatile uint8_t*>(addr)};
+		auto bytes {reinterpret_cast<const uint8_t*>(data)};
+		for (auto i = 0u; i < dataSize; ++i)
+		{
+			*eeprom++ = *bytes++;
+			if (!checkEop())
+			{
+				ret = false;
+				break;
+			}
+		}
+	}
+
 	FLASH->PECR &= ~FLASH_PECR_DATA;
 	clearSr();
 	lock();
