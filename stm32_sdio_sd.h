@@ -288,8 +288,8 @@ public:
 	static void cyclePower();
 	static void report();
 	static CardState getState() { return m_state; };
-	static SdioError readBuffer(void *buf, uint32_t sector, uint32_t count);
-	static SdioError writeBuffer(const void *buf, uint32_t sector, uint32_t count);
+	static SdioError readBuffer(void *buf, uint32_t sector, uint32_t sectorCount);
+	static SdioError writeBuffer(const void *buf, uint32_t sector, uint32_t sectorCount);
 
 	static uint32_t  getSectorCount() { return m_csd.getSectorCount(); }
 	static uint32_t  getBlockSize()   { return m_csd.getBlockLen(); }
@@ -892,7 +892,7 @@ SdioError SdioSdCard<Props>::waitReady()
 }
 
 template<class Props>
-SdioError SdioSdCard<Props>::readBuffer(void *buf, uint32_t sector, uint32_t count)
+SdioError SdioSdCard<Props>::readBuffer(void *buf, uint32_t sector, uint32_t sectorCount)
 {
 	// Disable data path
 	disableDataTransfer();
@@ -909,13 +909,13 @@ SdioError SdioSdCard<Props>::readBuffer(void *buf, uint32_t sector, uint32_t cou
 		sector *= 512;
 
 	// Enable data path
-	enableDataTransfer(DATA_TRANSFER_READ, 512 * count, DATA_BLOCK_512B);
+	enableDataTransfer(DATA_TRANSFER_READ, 512 * sectorCount, DATA_BLOCK_512B);
 	// enable SDIO interrupts
 	enableSdioInterrupts();
 	// start DMA
 	startDMA(buf, DmaDirection::Receive);
 	// send read command
-	if (count == 1)
+	if (sectorCount == 1)
 	{
 		if (auto err = command(CMD17_READ_SINGLE_BLOCK | CMD_SHORT_RESPONSE, sector); failed(err))
 			return err;
@@ -926,7 +926,7 @@ SdioError SdioSdCard<Props>::readBuffer(void *buf, uint32_t sector, uint32_t cou
 			return err;
 	}
 
-	auto ret = m_dmaFlag.wait(500 + count * 100);
+	auto ret = m_dmaFlag.wait(500 + sectorCount * 100);
 	stopDMA();
 	if (!ret)
 		return SdioError::DmaTimeout;
@@ -938,14 +938,14 @@ SdioError SdioSdCard<Props>::readBuffer(void *buf, uint32_t sector, uint32_t cou
 	if (m_sdioResult != srOk)
 		return SdioError::DmaTransfer;
 
-	if (count > 1)
+	if (sectorCount > 1)
 		stopTransmission();
 
 	return SdioError::None;
 }
 
 template<class Props>
-SdioError SdioSdCard<Props>::writeBuffer(const void *buf, uint32_t sector, uint32_t count)
+SdioError SdioSdCard<Props>::writeBuffer(const void *buf, uint32_t sector, uint32_t sectorCount)
 {
 	// wait for card ready
 	if (auto err = waitReady(); failed(err))
@@ -959,7 +959,7 @@ SdioError SdioSdCard<Props>::writeBuffer(const void *buf, uint32_t sector, uint3
 		sector *= 512;
 
 	// send write command
-	if (count == 1)
+	if (sectorCount == 1)
 	{
 		if (auto err = command(CMD24_WRITE_SINGLE_BLOCK | CMD_SHORT_RESPONSE, sector); failed(err))
 			return err;
@@ -970,12 +970,12 @@ SdioError SdioSdCard<Props>::writeBuffer(const void *buf, uint32_t sector, uint3
 			return err;
 	}
 	// Enable data path
-	enableDataTransfer(DATA_TRANSFER_WRITE, 512 * count, DATA_BLOCK_512B);
+	enableDataTransfer(DATA_TRANSFER_WRITE, 512 * sectorCount, DATA_BLOCK_512B);
 	// enable SDIO interrupts
 	enableSdioInterrupts();
 	// start DMA
 	startDMA(const_cast<void *>(buf), DmaDirection::Transmit);
-	auto ret = m_dmaFlag.wait(500 + count * 100);
+	auto ret = m_dmaFlag.wait(500 + sectorCount * 100);
 	stopDMA();
 	if (!ret)
 		return SdioError::DmaTimeout;
@@ -987,7 +987,7 @@ SdioError SdioSdCard<Props>::writeBuffer(const void *buf, uint32_t sector, uint3
 	if (m_sdioResult != srOk)
 		return SdioError::DmaTransfer;
 
-	if (count > 1)
+	if (sectorCount > 1)
 		stopTransmission();
 
 	return SdioError::None;
