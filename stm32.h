@@ -84,6 +84,10 @@
 || (defined STM32F732xx) || (defined STM32F733xx)
 #  define STM32TPL_STM32F7XX
 #  include "CMSIS/stm32f7xx.h"
+#elif (defined STM32H742xx) || (defined STM32H743xx) || (defined STM32H745xx) || (defined STM32H747xx) \
+|| (defined STM32H750xx) || (defined STM32H753xx) || (defined STM32H755xx) || (defined STM32H757xx)
+#  define STM32TPL_STM32H7XX
+#  include "stm32h7xx.h"
 #else
 #  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
@@ -94,7 +98,8 @@
  || (defined STM32TPL_STM32L1XX) \
  || (defined STM32TPL_STM32F3XX) \
  || (defined STM32TPL_STM32F0XX) \
- || (defined STM32TPL_STM32F7XX)
+ || (defined STM32TPL_STM32F7XX) \
+ || (defined STM32TPL_STM32H7XX)
 typedef IRQn_Type IRQn;    // in some headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -114,6 +119,7 @@ enum ChipType
 	stm32F3XX,         ///< stm32F3xx chips
 	stm32F4XX,         ///< stm32F4xx chips
 	stm32F7XX,         ///< stm32F7xx chips
+	stm32H7XX,         ///< stm32H7xx chips
 	stm32L0XX,         ///< stm32L0xx chips
 	stm32F0XX,         ///< stm32F0xx chips
 	stm32L1XX,         ///< stm32L1xx chips
@@ -237,6 +243,16 @@ struct ChipCaps<stm32F7XX>
 };
 
 template<>
+struct ChipCaps<stm32H7XX>
+{
+	static const uint32_t MAX_FREQ = 400000000;
+	static const uint32_t APB1_FREQ = MAX_FREQ/4;
+	static const uint32_t APB2_FREQ = MAX_FREQ/2;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7A10;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF7A22;
+};
+
+template<>
 struct ChipCaps<stm32L0XX>
 {
 	static const uint32_t MAX_FREQ  = 32000000;
@@ -320,6 +336,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F4XX> chip;
 #elif (defined STM32TPL_STM32F7XX)
 	typedef ChipInfo<stm32F7XX> chip;
+#elif (defined STM32TPL_STM32H7XX)
+	typedef ChipInfo<stm32H7XX> chip;
 #elif (defined STM32TPL_STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
