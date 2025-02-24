@@ -39,6 +39,9 @@
     (defined STM32L071xx) || (defined STM32L072xx) || (defined STM32L073xx) || \
     (defined STM32L081xx) || (defined STM32L082xx) || (defined STM32L083xx)
 #  include "stm32_flash_l0xx.h"
+#elif (defined STM32H742xx) || (defined STM32H743xx) || (defined STM32H745xx) || (defined STM32H747xx) \
+|| (defined STM32H750xx) || (defined STM32H753xx) || (defined STM32H755xx) || (defined STM32H757xx)
+#  include "stm32_flash_h7xx.h"
 #else
 #  include "stm32_flash_f1xx.h"
 #endif
