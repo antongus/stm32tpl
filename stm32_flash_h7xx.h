@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef STM32TPL_STM32_FLASH_F4XX_H_INCLUDED
-#define STM32TPL_STM32_FLASH_F4XX_H_INCLUDED
+#ifndef STM32TPL_STM32_FLASH_H7XX_H_INCLUDED
+#define STM32TPL_STM32_FLASH_H7XX_H_INCLUDED
 
 #include "stm32.h"
 #if __has_include("scmRTOS.h")
@@ -50,10 +50,10 @@ namespace STM32
  */
 enum ProgramWordWidth : uint32_t
 {
-	pw8bit   = (0UL << 8),   //!< 8bit  (VCC >= 1.8V)
-	pw16bit  = (1UL << 8),   //!< 16bit (VCC >= 2.1V)
-	pw32bit  = (2UL << 8),   //!< 32bit (VCC >= 2.7V)
-	pw64bit  = (3UL << 8),   //!< 64bit (VCC >= 2.7V + VPP present)
+	pw8bit   = (0UL << FLASH_CR_PSIZE_Pos),   //!< 8bit
+	pw16bit  = (1UL << FLASH_CR_PSIZE_Pos),   //!< 16bit
+	pw32bit  = (2UL << FLASH_CR_PSIZE_Pos),   //!< 32bit
+	pw64bit  = (3UL << FLASH_CR_PSIZE_Pos),   //!< 64bit
 };
 
 
@@ -62,9 +62,10 @@ enum ProgramWordWidth : uint32_t
  */
 struct FlashDefaultProps
 {
+	static constexpr auto bankNum  {1};             //!< bank number: 1/2
 	static const ProgramWordWidth pSize = pw32bit;
-	enum { PAGE_ERASE_TIMEOUT = 0xFFFF };
-	enum { MASS_ERASE_TIMEOUT = 0xFFFFFF };
+	static constexpr auto PAGE_ERASE_TIMEOUT {0xFFFFu};
+	static constexpr auto MASS_ERASE_TIMEOUT {0xFFFFFFu};
 };
 
 
@@ -78,7 +79,8 @@ template <class props>
 class FlashController
 {
 public:
-	enum { START_ADDRESS = 0x08000000UL };
+	static constexpr auto bankNum  {props::bankNum == 1 ? 1 : 2};             //!< bank number: 1/2
+	static constexpr auto START_ADDRESS { bankNum == 1 ? 0x08000000UL : 0x08100000UL };
 
 	/**
 	 * Options structure
@@ -96,20 +98,25 @@ public:
 	};
 
 	/// Check if FLASH->CR1 locked
-	static bool Locked()   { return FLASH->CR1 & FLASH_CR_LOCK; }
+	static bool isLocked() { return CRx() & FLASH_CR_LOCK; }
 	/// Lock access to FLASH->CR1
-	static void Lock()     { FLASH->CR1 |= FLASH_CR_LOCK; }
+	static void lock()   { CRx() |= FLASH_CR_LOCK; }
 	/// unlock writes to FLASH->CR1 register
-	static void Unlock()   { FLASH->KEYR1 = KEY1; FLASH->KEYR1 = KEY2; }
+	static void unlock()
+	{
+		auto& keyr = bankNum == 1 ? FLASH->KEYR1 : FLASH->KEYR2;
+		keyr = KEY1;
+		keyr = KEY2;
+	}
 
-	static bool EraseSector(uint32_t sector);
-	static bool BankErase();
+	static bool eraseSector(uint32_t sector);
+	static bool eraseBank();
 
-	static void Read(uint32_t addr, void* buf, uint32_t count);
-	static bool Write(uint32_t addr, const void* buf, uint32_t count);
+	static void read(uint32_t addr, void* buf, uint32_t count);
+	static bool write(uint32_t addr, const void* buf, uint32_t count);
 
-	static bool IsReadOutProtected();
-	static bool ReadOutProtect();
+	static bool isReadOutProtected();
+	static bool readOutProtect();
 private:
 	enum
 	{
@@ -129,30 +136,36 @@ private:
 		rdpLevelTwo = 0x55,
 	};
 
-	static bool Pgerr()      { return FLASH->SR1 & (FLASH_SR_OPERR | FLASH_SR_PGSERR); }
-	static bool Wrprterr()   { return FLASH->SR1 & FLASH_SR_WRPERR; }
-	static bool Busy()       { return FLASH->SR1 & FLASH_SR_BSY; }
-	static void Start()      { FLASH->CR1 |= FLASH_CR_START; }
+	/// CR1/CR2 depending on selected bank
+	static inline auto& CRx() { return bankNum == 1 ? FLASH->CR1 : FLASH->CR2; }
+	/// SR1/SR2 depending on selected bank
+	static inline auto& SRx() { return bankNum == 1 ? FLASH->SR1 : FLASH->SR2; }
 
-	static void Delay();
-	static void Wait();
-	static bool Wait(uint32_t timeout);
+	static bool isPgerr()     { return SRx() & (FLASH_SR_OPERR | FLASH_SR_PGSERR); }
+	static bool isWrprterr()  { return SRx() & FLASH_SR_WRPERR; }
+	static bool isBusy()      { return SRx() & FLASH_SR_QW; }
+	static bool isQw()        { return SRx() & FLASH_SR_QW; }
+	static void start()       { CRx() |= FLASH_CR_START; }
+
+	static void delay();
+	static void wait();
+	static bool wait(uint32_t timeout);
 
 	template <typename T>
-	static bool Write(uint32_t addr, T data);
+	static bool write(uint32_t addr, T data);
 };
 
 typedef FlashController<> Flash;
 
 template<class props>
-void FlashController<props>::Wait()
+void FlashController<props>::wait()
 {
-	while (Busy()) ;
+	while (isBusy()) ;
 	__DSB();
 }
 
 template<class props>
-bool FlashController<props>::IsReadOutProtected()
+bool FlashController<props>::isReadOutProtected()
 {
 	if (rdpByte == rdpLevelNone)
 		return false;
@@ -160,23 +173,23 @@ bool FlashController<props>::IsReadOutProtected()
 }
 
 template<class props>
-bool FlashController<props>::ReadOutProtect()
+bool FlashController<props>::readOutProtect()
 {
-	Unlock();
+	unlock();
 	Options::Unlock();
 
-	FLASH->SR1 = 0
-			| FLASH_SR_EOP
-			| FLASH_SR_OPERR
-			| FLASH_SR_PGSERR
-			| FLASH_SR_WRPERR // clear errors, if any
-			;
+	SRx() = 0
+		| FLASH_SR_EOP
+		| FLASH_SR_OPERR
+		| FLASH_SR_PGSERR
+		| FLASH_SR_WRPERR // clear errors, if any
+		;
 
 
-	if (!IsReadOutProtected())
+	if (!isReadOutProtected())
 	{
 		rdpByte = rdpLevelOne;
-//		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)
+//		if (FLASH_OB_RDPConfig(OB_RDP_Level_1) == FLASH_COMPLETE)  // TODO
 //		{
 //			/* Generate System Reset to load the new option byte values */
 //			FLASH_OB_Launch();
@@ -186,28 +199,28 @@ bool FlashController<props>::ReadOutProtect()
 }
 
 template<class props>
-bool FlashController<props>::Wait(uint32_t timeout)
+bool FlashController<props>::wait(uint32_t timeout)
 {
-	while (Busy())
+	while (isBusy())
 	{
 		if (!--timeout)
 			return false;
-		Delay();
+		delay();
 	}
 	__DSB();
 	return true;
 }
 
 template<class props>
-void FlashController<props>::Delay()
+void FlashController<props>::delay()
 {
 	for (volatile int i = 0; i < 0xFF; i++) ;
 }
 
 template<class props>
-void FlashController<props>::Read(uint32_t addr, void* buf, uint32_t count)
+void FlashController<props>::read(uint32_t addr, void* buf, uint32_t count)
 {
-	const uint8_t* src = reinterpret_cast<const uint8_t*>(addr);
+	auto src = reinterpret_cast<const uint8_t*>(addr);
 	memcpy(buf, src, count);
 }
 
@@ -220,7 +233,7 @@ void FlashController<props>::Read(uint32_t addr, void* buf, uint32_t count)
  */
 template<class props>
 template <typename T>
-bool FlashController<props>::Write(uint32_t addr, T data)
+bool FlashController<props>::write(uint32_t addr, T data)
 {
 	static_assert(std::is_integral<T>::value, "Only integral types allowed");
 
@@ -228,20 +241,26 @@ bool FlashController<props>::Write(uint32_t addr, T data)
 
 	CritSect cs;
 
-	Wait();
-	FLASH->CR1 = pSize | FLASH_CR_PG;
-	*ptr = data;
-	Wait();
+	wait();
+	CRx() = pSize | FLASH_CR_PG;
+    __ISB();
+    __DSB();
 
-	bool ret = !(Pgerr() || Wrprterr());
+    *ptr = data;
+	for(auto i = 0; i < 1000; ++i)
+		if (isQw()) break;
+	while(isQw()) {}
+//	wait();
 
-	FLASH->SR1 = 0
-			| FLASH_SR_EOP
-			| FLASH_SR_OPERR
-			| FLASH_SR_PGSERR
-			| FLASH_SR_WRPERR // clear errors, if any
-			;
-	FLASH->CR1 = 0;
+	bool ret = !(isPgerr() || isWrprterr());
+
+	SRx() = 0
+		| FLASH_SR_EOP
+		| FLASH_SR_OPERR
+		| FLASH_SR_PGSERR
+		| FLASH_SR_WRPERR // clear errors, if any
+		;
+	CRx() &= ~FLASH_CR_PG;
 	return ret;
 }
 
@@ -253,12 +272,12 @@ bool FlashController<props>::Write(uint32_t addr, T data)
  * @return true on success, false otherwise
  */
 template<class props>
-bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t count)
+bool FlashController<props>::write(uint32_t addr, const void* buf, uint32_t count)
 {
-	if (Locked())
-		Unlock();
+	if (isLocked())
+		unlock();
 
-	if (Locked())
+	if (isLocked())
 		return false;
 
 	const uint8_t* src = reinterpret_cast<const uint8_t*>(buf);
@@ -272,7 +291,7 @@ bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t coun
 	case pw8bit:   // byte access - simplest case.
 		while (src < end)
 		{
-			if (!Write(addr++, *src++))
+			if (!write(addr++, *src++))
 			{
 				ret = false;
 				break;
@@ -304,7 +323,7 @@ bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t coun
 			}
 
 			// write modified half-word data back
-			if (!Write(alignedAddr, data))
+			if (!write(alignedAddr, data))
 			{
 				ret = false;
 				break;
@@ -339,7 +358,7 @@ bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t coun
 			}
 
 			// write modified data back
-			if (!Write(alignedAddr, data))
+			if (!write(alignedAddr, data))
 			{
 				ret = false;
 				break;
@@ -349,7 +368,7 @@ bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t coun
 		}
 		break;
 	}
-	Lock();
+	lock();
 	return ret;
 }
 
@@ -359,24 +378,24 @@ bool FlashController<props>::Write(uint32_t addr, const void* buf, uint32_t coun
  * @return true on success, false otherwise
  */
 template<class props>
-bool FlashController<props>::EraseSector(uint32_t sector)
+bool FlashController<props>::eraseSector(uint32_t sector)
 {
-	if (sector > 11)
+	if (sector > 7)
 		return false;
 
-	if (Locked())
-		Unlock();
+	if (isLocked())  // unlock only if locked!
+		unlock();
 
 	CritSect cs;
-	Wait();
-	FLASH->CR1 = 0
-			| pSize          // select parallelism
+	wait();
+	CRx() = 0
+			| pSize
 			| FLASH_CR_SER   // Sector erase
-			| (sector << 3)  // set sector
+			| (sector << FLASH_CR_SNB_Pos)  // set sector
 			;
-	Start();
-	bool ret = Wait(PAGE_ERASE_TIMEOUT);
-	Lock();
+	start();
+	bool ret = wait(PAGE_ERASE_TIMEOUT);
+	lock();
 	return ret;
 }
 
@@ -385,17 +404,17 @@ bool FlashController<props>::EraseSector(uint32_t sector)
  * @return true on success, false otherwise
  */
 template<class props>
-bool FlashController<props>::BankErase()
+bool FlashController<props>::eraseBank()
 {
 	CritSect cs;
-	Wait();
-	FLASH->CR1 = pSize | FLASH_CR_BER;
-	Start();
-	bool ret = Wait(MASS_ERASE_TIMEOUT);
-	Lock();
+	wait();
+	CRx() = pSize | FLASH_CR_BER;
+	start();
+	bool ret = wait(MASS_ERASE_TIMEOUT);
+	lock();
 	return ret;
 }
 
 } // namespace STM32
 
-#endif // STM32TPL_STM32_FLASH_F4XX_H_INCLUDED
+#endif // STM32TPL_STM32_FLASH_H7XX_H_INCLUDED
