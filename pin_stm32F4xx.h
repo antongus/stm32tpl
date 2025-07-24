@@ -228,7 +228,24 @@ enum PinAltFunction
 
 	ALT_FUNC_RI        = 0x0E,          ///< RI Alternate Function mapping
 
-	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
+	ALT_FUNC_EVENTOUT  = 0x0F,          ///< EVENTOUT Alternate Function mapping
+
+	ALT_FUNC_0         = 0,
+	ALT_FUNC_1         = 1,
+	ALT_FUNC_2         = 2,
+	ALT_FUNC_3         = 3,
+	ALT_FUNC_4         = 4,
+	ALT_FUNC_5         = 5,
+	ALT_FUNC_6         = 6,
+	ALT_FUNC_7         = 7,
+	ALT_FUNC_8         = 8,
+	ALT_FUNC_9         = 9,
+	ALT_FUNC_10        = 10,
+	ALT_FUNC_11        = 11,
+	ALT_FUNC_12        = 12,
+	ALT_FUNC_13        = 13,
+	ALT_FUNC_14        = 14,
+	ALT_FUNC_15        = 15,
 };
 #else
 enum PinAltFunction
@@ -287,7 +304,24 @@ enum PinAltFunction
 
 	ALT_FUNC_DCMI      = 0x0D,          ///< DCMI Alternate Function mapping
 
-	ALT_FUNC_EVENTOUT  = 0x0F           ///< EVENTOUT Alternate Function mapping
+	ALT_FUNC_EVENTOUT  = 0x0F,          ///< EVENTOUT Alternate Function mapping
+
+	ALT_FUNC_0         = 0,
+	ALT_FUNC_1         = 1,
+	ALT_FUNC_2         = 2,
+	ALT_FUNC_3         = 3,
+	ALT_FUNC_4         = 4,
+	ALT_FUNC_5         = 5,
+	ALT_FUNC_6         = 6,
+	ALT_FUNC_7         = 7,
+	ALT_FUNC_8         = 8,
+	ALT_FUNC_9         = 9,
+	ALT_FUNC_10        = 10,
+	ALT_FUNC_11        = 11,
+	ALT_FUNC_12        = 12,
+	ALT_FUNC_13        = 13,
+	ALT_FUNC_14        = 14,
+	ALT_FUNC_15        = 15,
 };
 #endif
 
