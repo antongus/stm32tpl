@@ -41,7 +41,7 @@ extern "C" {
 char HexChar(char ch);
 void strreverse(char* begin, char* end);
 char *str_upr(char *s);
-char* itoa(int value, char* s, int base);
+char* small_itoa(int value, char* s, int base);
 long small_atoi(char * s);
 long long small_atoll(char * s);
 double small_atof(const char * s);

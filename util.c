@@ -60,7 +60,7 @@ void strreverse(char* begin, char* end)
 	}
 }
 
-char* itoa(int value, char* s, int base)
+char* small_itoa(int value, char* s, int base)
 {
 	if (base < 2 || base > 16)
 	{
