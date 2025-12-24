@@ -333,6 +333,26 @@ template<> struct TimerTraits<TIM_14>
 #endif
 
 
+#if defined(RCC_APB2ENR_TIM15EN)
+template<> struct TimerTraits<TIM_15>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM15_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 2;
+	static const bool dmaCapable = true;
+	static const bool canRunDown = false;
+#if defined STM32TPL_STM32F1XX
+	static const IRQn TIMx_IRQn = TIM1_BRK_TIM15_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM15_IRQn;
+#endif
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM15EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM15EN; }
+};
+#endif
+
+
 #if defined(RCC_APB2ENR_TIM19EN)
 template<> struct TimerTraits<TIM_19>
 {
