@@ -327,6 +327,12 @@ template<> struct UartPinSet<UART_7, REMAP_PARTIAL>
 	typedef Pin<'F', 6> PinRX;
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 };
+template<> struct UartPinSet<UART_7, REMAP_PARTIAL2>
+{
+	typedef Pin<'A', 15> PinTX;
+	typedef Pin<'A', 8> PinRX;
+	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_11;
+};
 template<> struct UartPinSet<UART_7, REMAP_FULL>
 {
 	typedef Pin<'E', 8> PinTX;
