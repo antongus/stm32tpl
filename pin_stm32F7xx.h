@@ -342,6 +342,11 @@ template<> struct port_gpio_t<'J'>
 	enum { GPIOx_BASE = pGPIOJ_BASE };
 };
 
+template<> struct port_gpio_t<'K'>
+{
+	enum { GPIOx_BASE = pGPIOK_BASE };
+};
+
 template<
 	char port,
 	int pin_no,
