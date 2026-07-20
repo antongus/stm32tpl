@@ -501,6 +501,22 @@ template<> struct UartTraits<UART_4>
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART4EN; __DSB(); }
 	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART4RST; }
 };
+#elif (defined STM32TPL_STM32L0XX)
+template<> struct UartTraits<UART_4>
+{
+	static const IRQn USARTx_IRQn  = USART4_5_IRQn;
+	enum
+	{
+		USARTx_BASE               = USART4_BASE,
+		USARTx_REMAP              = 0,
+		USARTx_REMAP_PARTIAL      = 0,
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
+	};
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART4EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART4EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART4RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART4RST; }
+};
 #else
 template<> struct UartTraits<UART_4>
 {
@@ -521,6 +537,23 @@ template<> struct UartTraits<UART_4>
 #endif
 
 #if (defined RCC_APB1ENR_UART5EN) || (defined RCC_APB1ENR_USART5EN)
+#if (defined STM32TPL_STM32L0XX)
+template<> struct UartTraits<UART_5>
+{
+	static const IRQn USARTx_IRQn  = USART4_5_IRQn;
+	enum
+	{
+		USARTx_BASE               = USART5_BASE,
+		USARTx_REMAP              = 0,
+		USARTx_REMAP_PARTIAL      = 0,
+		BUS_FREQ                  = chip::APB1_FREQ,
+		BUS_FREQ_MUL              = 1,
+	};
+	INLINE static void EnableClocks()  { RCC->APB1ENR |= RCC_APB1ENR_USART5EN;  __DSB(); }
+	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_USART5EN; __DSB(); }
+	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_USART5RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_USART5RST; }
+};
+#else
 template<> struct UartTraits<UART_5>
 {
 	static const IRQn USARTx_IRQn  = UART5_IRQn;
@@ -536,6 +569,7 @@ template<> struct UartTraits<UART_5>
 	INLINE static void DisableClocks() { RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; __DSB(); }
 	INLINE static void Reset()         { RCC->APB1RSTR |= RCC_APB1RSTR_UART5RST; RCC->APB1RSTR &= ~RCC_APB1RSTR_UART5RST; }
 };
+#endif
 #endif
 
 #if (defined RCC_APB2ENR_USART6EN)
