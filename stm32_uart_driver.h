@@ -231,7 +231,7 @@ template<> struct UartPinSet<UART_3, REMAP_FULL>
 	static const PinAltFunction ALT_FUNC_USARTx = ALT_FUNC_7;
 #endif
 };
-#endif  // #if (UART_COUNT > 2)
+#endif  // USART3
 
 #if (defined RCC_APB1ENR_UART4EN) || (defined RCC_APB1ENR_USART4EN) || (defined RCC_APB1LENR_UART4EN)
 template<> struct UartPinSet<UART_4>

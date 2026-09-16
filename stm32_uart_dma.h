@@ -106,7 +106,7 @@ template<> struct UartDmaTraits<UART_2>
 /**
 *  DMA Traits for UART3.
 */
-#if (UART_COUNT > 2)
+#if (defined RCC_APB1ENR_USART3EN) || (defined RCC_APB1LENR_USART3EN)
 template<> struct UartDmaTraits<UART_3>
 {
 #if (defined STM32TPL_F2xxF4xx)
@@ -126,7 +126,7 @@ template<> struct UartDmaTraits<UART_3>
 	typedef DMA::Dma1Channel2 TxDmaStream;
 #endif
 };
-#endif
+#endif // USART3
 } // namespace
 
 
