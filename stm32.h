@@ -88,6 +88,11 @@
 || (defined STM32H750xx) || (defined STM32H753xx) || (defined STM32H755xx) || (defined STM32H757xx)
 #  define STM32TPL_STM32H7XX
 #  include "stm32h7xx.h"
+#elif (defined STM32G411xB) || (defined STM32G411xC) || (defined STM32G414xx) || (defined STM32G431xx) || \\
+    (defined STM32G441xx) || (defined STM32G471xx) || (defined STM32G473xx) || (defined STM32G474xx) || \
+    (defined STM32G483xx) || (defined STM32G484xx) || (defined STM32G491xx) || (defined STM32G4A1xx)
+#  define STM32TPL_STM32G4XX
+#  include "CMSIS/stm32g4xx.h"
 #else
 #  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
@@ -99,7 +104,8 @@
  || (defined STM32TPL_STM32F3XX) \
  || (defined STM32TPL_STM32F0XX) \
  || (defined STM32TPL_STM32F7XX) \
- || (defined STM32TPL_STM32H7XX)
+ || (defined STM32TPL_STM32H7XX) \
+ || (defined STM32TPL_STM32G4XX)
 typedef IRQn_Type IRQn;    // in some headers IRQn type was renamed to IRQn_Type.
 #endif
 
@@ -120,6 +126,7 @@ enum ChipType
 	stm32F4XX,         ///< stm32F4xx chips
 	stm32F7XX,         ///< stm32F7xx chips
 	stm32H7XX,         ///< stm32H7xx chips
+	stm32G4XX,         ///< stm32G4xx chips
 	stm32L0XX,         ///< stm32L0xx chips
 	stm32F0XX,         ///< stm32F0xx chips
 	stm32L1XX,         ///< stm32L1xx chips
@@ -253,6 +260,16 @@ struct ChipCaps<stm32H7XX>
 };
 
 template<>
+struct ChipCaps<stm32G4XX>
+{
+	static const uint32_t MAX_FREQ = 170000000;
+	static const uint32_t APB1_FREQ = 170000000;
+	static const uint32_t APB2_FREQ = 170000000;
+	static const uint32_t DEVICE_ID_ADDR = 0xE0042000;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF75E0;
+};
+
+template<>
 struct ChipCaps<stm32L0XX>
 {
 	static const uint32_t MAX_FREQ  = 32000000;
@@ -338,6 +355,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F7XX> chip;
 #elif (defined STM32TPL_STM32H7XX)
 	typedef ChipInfo<stm32H7XX> chip;
+#elif (defined STM32TPL_STM32G4XX)
+	typedef ChipInfo<stm32G4XX> chip;
 #elif (defined STM32TPL_STM32L0XX)
 	typedef ChipInfo<stm32L0XX> chip;
 #elif (defined STM32TPL_STM32L1XX)
