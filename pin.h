@@ -2,7 +2,7 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2026 Anton B. Gusev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@
     (defined STM32F303x8) || (defined STM32F334x8) || (defined STM32F328xx) || \
     (defined STM32F302xE) || (defined STM32F303xE) || (defined STM32F398xx) || \
     (defined STM32F373xC) || (defined STM32F378xx)
-#  define STM32TPL_PIN_STM32F0XX
+#  define STM32TPL_PIN_STM32F3XX
 #  include "pin_stm32L0xx.h"
 #elif (defined STM32F756xx) || (defined STM32F746xx) || (defined STM32F745xx) || (defined STM32F765xx) || (defined STM32F767xx) \
 || (defined STM32F769xx) || (defined STM32F777xx) || (defined STM32F779xx) || (defined STM32F722xx) || (defined STM32F723xx) \
@@ -71,8 +71,16 @@
 || (defined STM32H750xx) || (defined STM32H753xx) || (defined STM32H755xx) || (defined STM32H757xx)
 #  define STM32TPL_PIN_STM32H7XXX
 #  include "pin_stm32F7xx.h"
-#else
+#elif (defined STM32G411xB) || (defined STM32G411xC) || (defined STM32G414xx) || (defined STM32G431xx) || \
+    (defined STM32G441xx) || (defined STM32G471xx) || (defined STM32G473xx) || (defined STM32G474xx) || \
+    (defined STM32G483xx) || (defined STM32G484xx) || (defined STM32G491xx) || (defined STM32G4A1xx)
+#  define STM32TPL_PIN_STM32G4XX
+#  include "pin_stm32L0xx.h"
+#elif (defined STM32F10X_CL) || (defined STM32F10X_HD) || (defined STM32F10X_HD_VL) || (defined STM32F10X_LD) \
+|| (defined STM32F10X_LD) || (defined STM32F10X_LD_VL) || (defined STM32F10X_MD) || (defined STM32F10X_MD_VL) || (defined STM32F10X_XL)
 #  include "pin_stm32F1xx.h"
+#else
+#  error "Unknown chip!"
 #endif
 
 /**

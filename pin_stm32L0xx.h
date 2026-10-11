@@ -2,7 +2,7 @@
  *  stm32tpl --  STM32 C++ Template Peripheral Library
  *  Visit https://github.com/antongus/stm32tpl for new versions
  *
- *  Copyright (c) 2011-2020 Anton B. Gusev aka AHTOXA
+ *  Copyright (c) 2011-2026 Anton B. Gusev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -92,7 +92,8 @@ typedef struct
   volatile uint32_t AFR[2];   ///!< GPIO alternate function registers
 } GPIOxTypeDef;
 
-#ifdef STM32TPL_PIN_STM32F0XX
+#if defined(STM32TPL_PIN_STM32F0XX) || defined(STM32TPL_PIN_STM32F3XX) || defined(STM32TPL_PIN_STM32G4XX)
+// STM32F0/F3/G4 GPIOs share the same base address region
 enum
 {
 	pGPIOA_BASE      = 0x48000000UL,
@@ -101,6 +102,7 @@ enum
 	pGPIOD_BASE      = 0x48000C00UL,
 	pGPIOE_BASE      = 0x48001000UL,
 	pGPIOF_BASE      = 0x48001400UL,
+	pGPIOG_BASE      = 0x48001800UL,
 };
 #else // by default STM32L00x assumed
 enum
@@ -234,7 +236,7 @@ template<> struct port_gpio_t<'D'>
 	enum { GPIOx_BASE = pGPIOD_BASE };
 };
 
-#ifdef STM32TPL_PIN_STM32F0XX
+#if defined(STM32TPL_PIN_STM32F0XX) || defined(STM32TPL_PIN_STM32F3XX) || defined(STM32TPL_PIN_STM32G4XX)
 template<> struct port_gpio_t<'E'>
 {
 	enum { GPIOx_BASE = pGPIOE_BASE };
@@ -243,6 +245,11 @@ template<> struct port_gpio_t<'E'>
 template<> struct port_gpio_t<'F'>
 {
 	enum { GPIOx_BASE = pGPIOF_BASE };
+};
+
+template<> struct port_gpio_t<'G'>
+{
+	enum { GPIOx_BASE = pGPIOG_BASE };
 };
 
 #else
