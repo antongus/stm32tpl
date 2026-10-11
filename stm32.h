@@ -88,14 +88,17 @@
 || (defined STM32H750xx) || (defined STM32H753xx) || (defined STM32H755xx) || (defined STM32H757xx)
 #  define STM32TPL_STM32H7XX
 #  include "stm32h7xx.h"
-#elif (defined STM32G411xB) || (defined STM32G411xC) || (defined STM32G414xx) || (defined STM32G431xx) || \\
+#elif (defined STM32G411xB) || (defined STM32G411xC) || (defined STM32G414xx) || (defined STM32G431xx) || \
     (defined STM32G441xx) || (defined STM32G471xx) || (defined STM32G473xx) || (defined STM32G474xx) || \
     (defined STM32G483xx) || (defined STM32G484xx) || (defined STM32G491xx) || (defined STM32G4A1xx)
 #  define STM32TPL_STM32G4XX
 #  include "CMSIS/stm32g4xx.h"
-#else
+#elif (defined STM32F10X_CL) || (defined STM32F10X_HD) || (defined STM32F10X_LD) \
+|| (defined STM32F10X_LD_VL) || (defined STM32F10X_MD) || (defined STM32F10X_MD_VL) || (defined STM32F10X_XL)
 #  define STM32TPL_STM32F1XX
 #  include "CMSIS/stm32f10x.h"
+#else
+#  error "Unknown chip!"
 #endif
 
 
@@ -117,6 +120,7 @@ enum ChipType
 	stm32F10X_LD,      ///< Low density devices
 	stm32F10X_MD,      ///< Medium density devices
 	stm32F10X_HD,      ///< High density devices
+	stm32F10X_XL,      ///< XL-density devices
 	stm32F10X_CL,      ///< Connectivity line devices
 	stm32F10X_LD_VL,   ///< Low density Value Line devices
 	stm32F10X_MD_VL,   ///< Medium density Value Line devices
@@ -161,6 +165,16 @@ struct ChipCaps<stm32F10X_MD>
 
 template<>
 struct ChipCaps<stm32F10X_HD>
+{
+	static const uint32_t MAX_FREQ = 72000000;
+	static const uint32_t APB1_FREQ = 36000000;
+	static const uint32_t APB2_FREQ = 72000000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFFF7E8;
+	static const uint32_t FLASH_SIZE_ADDR = 0x1FFFF7E0;
+};
+
+template<>
+struct ChipCaps<stm32F10X_XL>
 {
 	static const uint32_t MAX_FREQ = 72000000;
 	static const uint32_t APB1_FREQ = 36000000;
@@ -339,6 +353,8 @@ template<ChipType chipType> struct ChipInfo;
 	typedef ChipInfo<stm32F10X_MD> chip;
 #elif (defined STM32F10X_HD)
 	typedef ChipInfo<stm32F10X_HD> chip;
+#elif (defined STM32F10X_XL)
+	typedef ChipInfo<stm32F10X_XL> chip;
 #elif (defined STM32F10X_CL)
 	typedef ChipInfo<stm32F10X_CL> chip;
 #elif (defined STM32F10X_LD_VL)
