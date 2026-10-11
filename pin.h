@@ -76,8 +76,8 @@
     (defined STM32G483xx) || (defined STM32G484xx) || (defined STM32G491xx) || (defined STM32G4A1xx)
 #  define STM32TPL_PIN_STM32G4XX
 #  include "pin_stm32L0xx.h"
-#elif (defined STM32F10X_CL) || (defined STM32F10X_HD) || (defined STM32F10X_HD_VL) || (defined STM32F10X_LD) \
-|| (defined STM32F10X_LD) || (defined STM32F10X_LD_VL) || (defined STM32F10X_MD) || (defined STM32F10X_MD_VL) || (defined STM32F10X_XL)
+#elif (defined STM32F10X_CL) || (defined STM32F10X_HD) || (defined STM32F10X_LD) \
+|| (defined STM32F10X_LD_VL) || (defined STM32F10X_MD) || (defined STM32F10X_MD_VL) || (defined STM32F10X_XL)
 #  include "pin_stm32F1xx.h"
 #else
 #  error "Unknown chip!"
