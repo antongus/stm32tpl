@@ -58,6 +58,7 @@ STM32F40_41xxx  :   x   x*      x       x   x       x       -       -
 STM32F427_437xx :   x   x*      x       x   x       x       -       -
 STM32F429_439xx :   x   x*      x       x   x       x       -       -
 STM32F401xx     :
+STM32G4XX       :   x   T2-4    T6-7    x   -       -       x       x(T20)
 STM32L0xx       :   -   T2      T6      -   -       -       -       x
 ---------------------------------------------------------------------
   * - TIM2 & TIM5 are 32 bit timers
@@ -73,22 +74,22 @@ enum TimerNum
 #if defined (RCC_APB2ENR_TIM1EN)
 	TIM_1,
 #endif
-#if defined (RCC_APB1ENR_TIM2EN)
+#if defined (RCC_APB1ENR_TIM2EN) || defined (RCC_APB1ENR1_TIM2EN)
 	TIM_2,
 #endif
-#if defined (RCC_APB1ENR_TIM3EN)
+#if defined (RCC_APB1ENR_TIM3EN) || defined (RCC_APB1ENR1_TIM3EN)
 	TIM_3,
 #endif
-#if defined (RCC_APB1ENR_TIM4EN)
+#if defined (RCC_APB1ENR_TIM4EN) || defined (RCC_APB1ENR1_TIM4EN)
 	TIM_4,
 #endif
-#if defined(RCC_APB1ENR_TIM5EN)
+#if defined(RCC_APB1ENR_TIM5EN) || defined (RCC_APB1ENR1_TIM5EN)
 	TIM_5,
 #endif
-#if defined(RCC_APB1ENR_TIM6EN)
+#if defined(RCC_APB1ENR_TIM6EN) || defined (RCC_APB1ENR1_TIM6EN)
 	TIM_6,
 #endif
-#if defined(RCC_APB1ENR_TIM7EN)
+#if defined(RCC_APB1ENR_TIM7EN) || defined (RCC_APB1ENR1_TIM7EN)
 	TIM_7,
 #endif
 #if defined(RCC_APB2ENR_TIM8EN)
@@ -120,6 +121,9 @@ enum TimerNum
 #endif
 #if defined(RCC_APB2ENR_TIM17EN)
 	TIM_17,
+#endif
+#if defined(RCC_APB2ENR_TIM20EN)
+	TIM_20,
 #endif
 #if defined(RCC_APB2ENR_TIM19EN)
 	TIM_19,
@@ -155,7 +159,7 @@ template<> struct TimerTraits<TIM_1>
 	static const bool canRunDown = true;
 #if defined STM32TPL_STM32F0XX
 	static const IRQn TIMx_IRQn = TIM1_BRK_UP_TRG_COM_IRQn;
-#elif defined STM32TPL_STM32F3XX
+#elif defined STM32TPL_STM32F3XX || defined STM32TPL_STM32G4XX
 	static const IRQn TIMx_IRQn = TIM1_UP_TIM16_IRQn;
 #elif !defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM1_UP_IRQn;
@@ -167,10 +171,10 @@ template<> struct TimerTraits<TIM_1>
 };
 #endif
 
-#if defined (RCC_APB1ENR_TIM2EN)
+#if defined (RCC_APB1ENR_TIM2EN) || defined (RCC_APB1ENR1_TIM2EN)
 template<> struct TimerTraits<TIM_2>
 {
-#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX) || (defined STM32TPL_STM32G4XX)
 	using CounterType = uint32_t;
 #else
 	using CounterType = uint16_t;
@@ -181,12 +185,17 @@ template<> struct TimerTraits<TIM_2>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM2_IRQn;
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM2EN; }
+#else
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM2EN; }
+#endif
 };
 #endif
 
-#if defined (RCC_APB1ENR_TIM3EN)
+#if defined (RCC_APB1ENR_TIM3EN) || defined (RCC_APB1ENR1_TIM3EN)
 template<> struct TimerTraits<TIM_3>
 {
 	using CounterType = uint16_t;
@@ -196,12 +205,17 @@ template<> struct TimerTraits<TIM_3>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM3_IRQn;
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM3EN; }
+#else
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM3EN; }
+#endif
 };
 #endif
 
-#if defined (RCC_APB1ENR_TIM4EN)
+#if defined (RCC_APB1ENR_TIM4EN) || defined (RCC_APB1ENR1_TIM4EN)
 template<> struct TimerTraits<TIM_4>
 {
 	using CounterType = uint16_t;
@@ -211,15 +225,20 @@ template<> struct TimerTraits<TIM_4>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM4_IRQn;
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM4EN; }
+#else
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM4EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM4EN; }
+#endif
 };
 #endif
 
-#if defined(RCC_APB1ENR_TIM5EN)
+#if defined(RCC_APB1ENR_TIM5EN) || defined(RCC_APB1ENR1_TIM5EN)
 template<> struct TimerTraits<TIM_5>
 {
-#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX)
+#if (defined STM32TPL_F2xxF4xx) || (defined STM32TPL_STM32F3XX) || (defined STM32TPL_STM32G4XX)
 	using CounterType = uint32_t;
 #else
 	using CounterType = uint16_t;
@@ -230,13 +249,18 @@ template<> struct TimerTraits<TIM_5>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM5_IRQn;
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM5EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM5EN; }
+#else
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM5EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM5EN; }
+#endif
 };
 #endif
 
 
-#if defined(RCC_APB1ENR_TIM6EN)
+#if defined(RCC_APB1ENR_TIM6EN) || defined(RCC_APB1ENR1_TIM6EN)
 template<> struct TimerTraits<TIM_6>
 {
 	using CounterType = uint16_t;
@@ -250,8 +274,33 @@ template<> struct TimerTraits<TIM_6>
 #else
 	static const IRQn TIMx_IRQn = TIM6_DAC_IRQn;
 #endif
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM6EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM6EN; }
+#else
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM6EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM6EN; }
+#endif
+};
+#endif
+
+#if defined(RCC_APB1ENR_TIM7EN) || defined(RCC_APB1ENR1_TIM7EN)
+template<> struct TimerTraits<TIM_7>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM7_BASE;
+	static const TimerType timerType = Basic;
+	static const uint32_t ccModulesCount = 0;
+	static const bool dmaCapable = false;
+	static const bool canRunDown = false;
+	static const IRQn TIMx_IRQn = TIM7_IRQn;
+#if defined STM32TPL_STM32G4XX
+	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM7EN; }
+	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM7EN; }
+#else
+	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM7EN; }
+	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM7EN; }
+#endif
 };
 #endif
 
@@ -272,6 +321,21 @@ template<> struct TimerTraits<TIM_8>
 #endif
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM8EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM8EN; }
+};
+#endif
+
+#if defined(RCC_APB2ENR_TIM20EN)  // STM32G4XX
+template<> struct TimerTraits<TIM_20>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM20_BASE;
+	static const TimerType timerType = Advanced;
+	static const uint32_t ccModulesCount = 4;
+	static const bool dmaCapable = true;
+	static const bool canRunDown = true;
+	static const IRQn TIMx_IRQn = TIM20_UP_IRQn;
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM20EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM20EN; }
 };
 #endif
 
@@ -344,6 +408,8 @@ template<> struct TimerTraits<TIM_15>
 	static const bool canRunDown = false;
 #if defined STM32TPL_STM32F1XX
 	static const IRQn TIMx_IRQn = TIM1_BRK_TIM15_IRQn;
+#elif defined STM32TPL_STM32G4XX
+	static const IRQn TIMx_IRQn = TIM1_BRK_TIM15_IRQn;
 #else
 	static const IRQn TIMx_IRQn = TIM15_IRQn;
 #endif
@@ -352,6 +418,43 @@ template<> struct TimerTraits<TIM_15>
 };
 #endif
 
+#if defined(RCC_APB2ENR_TIM16EN)
+template<> struct TimerTraits<TIM_16>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM16_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 1;
+	static const bool dmaCapable = true;
+	static const bool canRunDown = false;
+#if defined STM32TPL_STM32L0XX || defined STM32TPL_STM32F0XX
+	static const IRQn TIMx_IRQn = TIM16_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM1_UP_TIM16_IRQn;
+#endif
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM16EN; }
+};
+#endif
+
+#if defined(RCC_APB2ENR_TIM17EN)
+template<> struct TimerTraits<TIM_17>
+{
+	using CounterType = uint16_t;
+	static const uint32_t TIMx_BASE = TIM17_BASE;
+	static const TimerType timerType = General;
+	static const uint32_t ccModulesCount = 1;
+	static const bool dmaCapable = true;
+	static const bool canRunDown = false;
+#if defined STM32TPL_STM32L0XX || defined STM32TPL_STM32F0XX
+	static const IRQn TIMx_IRQn = TIM17_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM1_TRG_COM_TIM17_IRQn;
+#endif
+	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM17EN; }
+	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM17EN; }
+};
+#endif
 
 #if defined(RCC_APB2ENR_TIM19EN)
 template<> struct TimerTraits<TIM_19>
