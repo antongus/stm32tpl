@@ -143,6 +143,14 @@ enum TimerType
 	General
 };
 
+/*
+	Timer kernel clock at the chip max-speed configuration. APB buses that
+	require a prescaler at max system clock (APBx_FREQ < MAX_FREQ) feed their
+	timers with doubled APB clock; buses running at full speed feed 1:1.
+*/
+static const uint32_t APB1_TIM_FREQ = (chip::APB1_FREQ < chip::MAX_FREQ)? 2 * chip::APB1_FREQ : chip::APB1_FREQ;
+static const uint32_t APB2_TIM_FREQ = (chip::APB2_FREQ < chip::MAX_FREQ)? 2 * chip::APB2_FREQ : chip::APB2_FREQ;
+
 namespace
 {
 
@@ -166,6 +174,7 @@ template<> struct TimerTraits<TIM_1>
 #else
 	static const IRQn TIMx_IRQn = TIM1_UP_TIM10_IRQn;
 #endif
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM1EN; }
 };
@@ -185,6 +194,7 @@ template<> struct TimerTraits<TIM_2>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM2_IRQn;
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM2EN; }
@@ -205,6 +215,7 @@ template<> struct TimerTraits<TIM_3>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM3_IRQn;
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM3EN; }
@@ -225,6 +236,7 @@ template<> struct TimerTraits<TIM_4>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM4_IRQn;
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM4EN; }
@@ -249,6 +261,7 @@ template<> struct TimerTraits<TIM_5>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM5_IRQn;
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM5EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM5EN; }
@@ -274,6 +287,7 @@ template<> struct TimerTraits<TIM_6>
 #else
 	static const IRQn TIMx_IRQn = TIM6_DAC_IRQn;
 #endif
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM6EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM6EN; }
@@ -294,6 +308,7 @@ template<> struct TimerTraits<TIM_7>
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
 	static const IRQn TIMx_IRQn = TIM7_IRQn;
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM7EN; }
 	static void DisableClocks()  { RCC->APB1ENR1 &= ~RCC_APB1ENR1_TIM7EN; }
@@ -319,6 +334,7 @@ template<> struct TimerTraits<TIM_8>
 #else
 	static const IRQn TIMx_IRQn = TIM8_UP_TIM13_IRQn;
 #endif
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM8EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM8EN; }
 };
@@ -334,6 +350,7 @@ template<> struct TimerTraits<TIM_20>
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM20_UP_IRQn;
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM20EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM20EN; }
 };
@@ -353,6 +370,7 @@ template<> struct TimerTraits<TIM_12>
 #else
 	static const IRQn TIMx_IRQn = TIM8_BRK_TIM12_IRQn;
 #endif
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM12EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM12EN; }
 };
@@ -372,6 +390,7 @@ template<> struct TimerTraits<TIM_13>
 #else
 	static const IRQn TIMx_IRQn = TIM8_UP_TIM13_IRQn;
 #endif
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM13EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM13EN; }
 };
@@ -391,6 +410,7 @@ template<> struct TimerTraits<TIM_14>
 #else
 	static const IRQn TIMx_IRQn = TIM8_TRG_COM_TIM14_IRQn;
 #endif
+	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; }
 	static void DisableClocks()  { RCC->APB1ENR &= ~RCC_APB1ENR_TIM14EN; }
 };
@@ -413,6 +433,7 @@ template<> struct TimerTraits<TIM_15>
 #else
 	static const IRQn TIMx_IRQn = TIM15_IRQn;
 #endif
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM15EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM15EN; }
 };
@@ -432,6 +453,7 @@ template<> struct TimerTraits<TIM_16>
 #else
 	static const IRQn TIMx_IRQn = TIM1_UP_TIM16_IRQn;
 #endif
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM16EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM16EN; }
 };
@@ -451,6 +473,7 @@ template<> struct TimerTraits<TIM_17>
 #else
 	static const IRQn TIMx_IRQn = TIM1_TRG_COM_TIM17_IRQn;
 #endif
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM17EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM17EN; }
 };
@@ -466,6 +489,7 @@ template<> struct TimerTraits<TIM_19>
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
 	static const IRQn TIMx_IRQn = TIM19_IRQn;
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM19EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM19EN; }
 };
@@ -481,6 +505,7 @@ template<> struct TimerTraits<TIM_21>
 	static const bool dmaCapable = false;
 	static const bool canRunDown = true;
 	static const IRQn TIMx_IRQn = TIM21_IRQn;
+	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM21EN; }
 	static void DisableClocks()  { RCC->APB2ENR &= ~RCC_APB2ENR_TIM21EN; }
 };
@@ -537,6 +562,7 @@ public:
 	static const uint32_t TIMx_BASE       = Traits::TIMx_BASE;
 	static const IRQn TIMx_IRQn           = Traits::TIMx_IRQn;
 	static const TimerType timerType      = Traits::timerType;
+	static const uint32_t busFrequency    = Traits::busFrequency;
 	static const uint32_t ccModulesCount  = Traits::ccModulesCount;
 	static const bool dmaCapable          = Traits::dmaCapable;
 	static const bool canRunDown          = Traits::canRunDown;
