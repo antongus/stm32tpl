@@ -169,6 +169,10 @@ template<> struct TimerTraits<TIM_1>
 	static const IRQn TIMx_IRQn = TIM1_BRK_UP_TRG_COM_IRQn;
 #elif defined STM32TPL_STM32F3XX || defined STM32TPL_STM32G4XX
 	static const IRQn TIMx_IRQn = TIM1_UP_TIM16_IRQn;
+#elif defined STM32TPL_STM32F7XX || defined STM32F10X_XL
+	static const IRQn TIMx_IRQn = TIM1_UP_TIM10_IRQn;
+#elif defined STM32F10X_LD_VL || defined STM32F10X_MD_VL || defined STM32F10X_HD_VL
+	static const IRQn TIMx_IRQn = TIM1_UP_TIM16_IRQn;
 #elif !defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM1_UP_IRQn;
 #else
@@ -282,7 +286,7 @@ template<> struct TimerTraits<TIM_6>
 	static const uint32_t ccModulesCount = 0;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
-#if (defined STM32F10X_HD) || (defined STM32F10X_XL) || (defined STM32F10X_CL)
+#if (defined STM32F10X_HD) || (defined STM32F10X_XL) || (defined STM32F10X_CL) || defined STM32TPL_STM32L1XX
 	static const IRQn TIMx_IRQn = TIM6_IRQn;
 #else
 	static const IRQn TIMx_IRQn = TIM6_DAC_IRQn;
@@ -307,7 +311,11 @@ template<> struct TimerTraits<TIM_7>
 	static const uint32_t ccModulesCount = 0;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
+#if defined STM32TPL_STM32G4XX
+	static const IRQn TIMx_IRQn = TIM7_DAC_IRQn;
+#else
 	static const IRQn TIMx_IRQn = TIM7_IRQn;
+#endif
 	static const uint32_t busFrequency = APB1_TIM_FREQ;
 #if defined STM32TPL_STM32G4XX
 	static void EnableClocks()   { RCC->APB1ENR1 |= RCC_APB1ENR1_TIM7EN; }
@@ -329,10 +337,10 @@ template<> struct TimerTraits<TIM_8>
 	static const uint32_t ccModulesCount = 4;
 	static const bool dmaCapable = true;
 	static const bool canRunDown = true;
-#if !defined STM32TPL_F2xxF4xx
-	static const IRQn TIMx_IRQn = TIM8_UP_IRQn;
-#else
+#if defined STM32TPL_STM32F7XX || defined STM32F10X_XL || defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM8_UP_TIM13_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM8_UP_IRQn;
 #endif
 	static const uint32_t busFrequency = APB2_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB2ENR |= RCC_APB2ENR_TIM8EN; }
@@ -365,10 +373,10 @@ template<> struct TimerTraits<TIM_12>
 	static const uint32_t ccModulesCount = 2;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
-#if !defined STM32TPL_F2xxF4xx
-	static const IRQn TIMx_IRQn = TIM12_IRQn;
-#else
+#if defined STM32TPL_STM32F7XX || defined STM32F10X_XL || defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM8_BRK_TIM12_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM12_IRQn;
 #endif
 	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM12EN; }
@@ -385,10 +393,10 @@ template<> struct TimerTraits<TIM_13>
 	static const uint32_t ccModulesCount = 1;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
-#if !defined STM32TPL_F2xxF4xx
-	static const IRQn TIMx_IRQn = TIM13_IRQn;
-#else
+#if defined STM32TPL_STM32F7XX || defined STM32F10X_XL || defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM8_UP_TIM13_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM13_IRQn;
 #endif
 	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM13EN; }
@@ -405,10 +413,10 @@ template<> struct TimerTraits<TIM_14>
 	static const uint32_t ccModulesCount = 1;
 	static const bool dmaCapable = false;
 	static const bool canRunDown = false;
-#if !defined STM32TPL_F2xxF4xx
-	static const IRQn TIMx_IRQn = TIM14_IRQn;
-#else
+#if defined STM32TPL_STM32F7XX || defined STM32F10X_XL || defined STM32TPL_F2xxF4xx
 	static const IRQn TIMx_IRQn = TIM8_TRG_COM_TIM14_IRQn;
+#else
+	static const IRQn TIMx_IRQn = TIM14_IRQn;
 #endif
 	static const uint32_t busFrequency = APB1_TIM_FREQ;
 	static void EnableClocks()   { RCC->APB1ENR |= RCC_APB1ENR_TIM14EN; }
