@@ -184,14 +184,26 @@ template<class props, typename Pins>
 void Uart<props, Pins>::UartIrqHandler()
 {
 	auto status = Driver::Status();
-	auto data = Driver::ReadData();
 
-	// RX NOT EMPTY INTERRUPT
 	if (status & USART_FLAG_RXNE)
 	{
+		auto data = Driver::ReadData();
 		if (rxChannel_.get_free_size())
 			rxChannel_.push(data);
 	}
+
+	// RXNEIE enables overrun interrupt too, so ORE must be cleared here
+#if (defined STM32TPL_STM32L0XX) || (defined STM32TPL_STM32F0XX) || (defined STM32TPL_STM32F3XX) || (defined STM32TPL_STM32H7XX) || (defined STM32TPL_STM32G4XX)
+	// These USARTs clear ORE, NE, FE, PE only by writing ICR (reading RDR does not clear them).
+	const uint32_t errors = status & (USART_FLAG_ORE | USART_FLAG_NE | USART_FLAG_FE | USART_FLAG_PE);
+	if (errors)
+		Driver::ClearStatus(errors);
+#else
+	// Other USARTs clear ORE, NE, FE, PE by reading SR followed by reading DR.
+	// ORE is normally set together with RXNE (handled above), DR is read here only if it was not.
+	if ((status & (USART_FLAG_ORE | USART_FLAG_NE | USART_FLAG_FE | USART_FLAG_PE)) && !(status & USART_FLAG_RXNE))
+		Driver::ReadData();
+#endif
 
 	// TX EMPTY INTERRUPT
 	if ((status & USART_FLAG_TXE) && (USARTx->CR1 & USART_CR1_TXEIE))
