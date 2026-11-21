@@ -279,7 +279,7 @@ struct ChipCaps<stm32G4XX>
 	static const uint32_t MAX_FREQ = 170000000;
 	static const uint32_t APB1_FREQ = 170000000;
 	static const uint32_t APB2_FREQ = 170000000;
-	static const uint32_t DEVICE_ID_ADDR = 0xE0042000;
+	static const uint32_t DEVICE_ID_ADDR = 0x1FFF7590UL;
 	static const uint32_t FLASH_SIZE_ADDR = 0x1FFF75E0;
 };
 
